@@ -5,6 +5,11 @@ import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/routes/route_names.dart';
+import '../widgets/custom_text_field.dart';
+import '../widgets/password_text_field.dart';
+import '../widgets/custom_button.dart';
+import '../widgets/auth_header.dart';
+import '../widgets/link_text.dart';
 import '../providers/auth_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -22,7 +27,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   
-  bool _obscurePassword = true;
   bool _agreeToTerms = false;
 
   @override
@@ -115,9 +119,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 vertical: 20,
               ),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 400,
-                ),
+                constraints: const BoxConstraints(maxWidth: 400),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -126,92 +128,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       SizedBox(height: screenHeight * 0.02),
                       
-                      // Logo
-                      Center(
-                        child: Hero(
-                          tag: 'app_logo',
-                          child: Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              gradient: AppColors.primaryGradient,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary.withOpacity(0.3),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.account_balance_wallet_rounded,
-                              size: 40,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
+                      // Header with Logo
+                      const AuthHeader(
+                        title: 'Create Account',
+                        subtitle: 'Sign up to start managing your finances',
                       ),
                       
                       const SizedBox(height: 32),
                       
-                      // Welcome Text
-                      Text(
-                        'Create Account',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      
-                      const SizedBox(height: 8),
-                      
-                      Text(
-                        'Sign up to start managing your finances',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      
-                      const SizedBox(height: 32),
-                      
-                      // First Name - WHITE FILLED BACKGROUND
-                      TextFormField(
+                      // First Name
+                      CustomTextField(
                         controller: _firstNameController,
+                        labelText: 'First Name',
+                        hintText: 'Enter your first name',
+                        prefixIcon: Icons.person_outline,
                         textInputAction: TextInputAction.next,
                         textCapitalization: TextCapitalization.words,
-                        style: const TextStyle(fontSize: 15, color: Colors.black87),
-                        decoration: InputDecoration(
-                          labelText: 'First Name',
-                          labelStyle: const TextStyle(color: Colors.black54),
-                          hintText: 'Enter your first name',
-                          hintStyle: const TextStyle(color: Colors.black38),
-                          prefixIcon: const Icon(Icons.person_outline, size: 20, color: Colors.black54),
-                          filled: true,
-                          fillColor: Colors.grey[50], // Light background for visibility
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.border, width: 1),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.error),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your first name';
@@ -226,40 +158,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 16),
                       
                       // Last Name
-                      TextFormField(
+                      CustomTextField(
                         controller: _lastNameController,
+                        labelText: 'Last Name',
+                        hintText: 'Enter your last name',
+                        prefixIcon: Icons.person_outline,
                         textInputAction: TextInputAction.next,
                         textCapitalization: TextCapitalization.words,
-                        style: const TextStyle(fontSize: 15, color: Colors.black87),
-                        decoration: InputDecoration(
-                          labelText: 'Last Name',
-                          labelStyle: const TextStyle(color: Colors.black54),
-                          hintText: 'Enter your last name',
-                          hintStyle: const TextStyle(color: Colors.black38),
-                          prefixIcon: const Icon(Icons.person_outline, size: 20, color: Colors.black54),
-                          filled: true,
-                          fillColor: Colors.grey[50],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.border, width: 1),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.error),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your last name';
@@ -272,42 +177,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       
                       const SizedBox(height: 16),
-                      
                       // Email
-                      TextFormField(
+                      CustomTextField(
                         controller: _emailController,
+                        labelText: 'Email Address',
+                        hintText: 'Enter your email',
+                        prefixIcon: Icons.email_outlined,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
-                        style: const TextStyle(fontSize: 15, color: Colors.black87),
-                        decoration: InputDecoration(
-                          labelText: 'Email Address',
-                          labelStyle: const TextStyle(color: Colors.black54),
-                          hintText: 'Enter your email',
-                          hintStyle: const TextStyle(color: Colors.black38),
-                          prefixIcon: const Icon(Icons.email_outlined, size: 20, color: Colors.black54),
-                          filled: true,
-                          fillColor: Colors.grey[50],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.border, width: 1),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.error),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your email';
@@ -322,46 +199,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 16),
                       
                       // Phone Number
-                      TextFormField(
+                      CustomTextField(
                         controller: _phoneController,
+                        labelText: 'Phone Number',
+                        hintText: '07XXXXXXXX',
+                        prefixIcon: Icons.phone_outlined,
+                        prefixText: '+254 ',
                         keyboardType: TextInputType.phone,
                         textInputAction: TextInputAction.next,
-                        style: const TextStyle(fontSize: 15, color: Colors.black87),
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(10),
                         ],
-                        decoration: InputDecoration(
-                          labelText: 'Phone Number',
-                          labelStyle: const TextStyle(color: Colors.black54),
-                          hintText: '07XXXXXXXX',
-                          hintStyle: const TextStyle(color: Colors.black38),
-                          prefixIcon: const Icon(Icons.phone_outlined, size: 20, color: Colors.black54),
-                          prefixText: '+254 ',
-                          prefixStyle: const TextStyle(color: Colors.black87, fontSize: 15),
-                          filled: true,
-                          fillColor: Colors.grey[50],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.border, width: 1),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.error),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your phone number';
@@ -379,53 +228,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 16),
                       
                       // Password
-                      TextFormField(
+                      PasswordTextField(
                         controller: _passwordController,
-                        obscureText: _obscurePassword,
                         textInputAction: TextInputAction.done,
                         onFieldSubmitted: (_) => _handleRegister(),
-                        style: const TextStyle(fontSize: 15, color: Colors.black87),
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          labelStyle: const TextStyle(color: Colors.black54),
-                          hintText: 'Enter your password',
-                          hintStyle: const TextStyle(color: Colors.black38),
-                          prefixIcon: const Icon(Icons.lock_outline, size: 20, color: Colors.black54),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                              size: 20,
-                              color: Colors.black54,
-                            ),
-                            onPressed: () {
-                              setState(() => _obscurePassword = !_obscurePassword);
-                            },
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[50],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.border, width: 1),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.error),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter a password';
@@ -505,38 +311,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // Register Button
                       Consumer<AuthProvider>(
                         builder: (context, authProvider, _) {
-                          return SizedBox(
-                            height: 50,
-                            child: ElevatedButton(
-                              onPressed: authProvider.isLoading ? null : _handleRegister,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 2,
-                              ),
-                              child: authProvider.isLoading
-                                  ? const SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Create Account',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            ),
+                          return CustomButton(
+                            text: 'Create Account',
+                            onPressed: _handleRegister,
+                            isLoading: authProvider.isLoading,
                           );
                         },
                       ),
@@ -544,33 +322,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 24),
                       
                       // Login Link
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'Already have an account? ',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () => context.pop(),
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: const Text(
-                              'Login',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                        ],
+                      LinkText(
+                        normalText: 'Already have an account? ',
+                        linkText: 'Login',
+                        onTap: () => context.pop(),
                       ),
                       
                       const SizedBox(height: 20),

@@ -6,11 +6,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:async';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/routes/route_names.dart';
+import '../widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String phoneNumber;
-  final String verificationType; // 'register', 'login', or 'reset_password'
+  final String verificationType;
 
   const OtpVerificationScreen({
     super.key,
@@ -100,7 +101,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         textColor: Colors.white,
       );
       
-      // Navigate to home screen
       context.go(RouteNames.home);
     } else if (mounted) {
       showDialog(
@@ -136,7 +136,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       );
       _startCountdown();
       
-      // Clear all OTP fields
       for (var controller in _otpControllers) {
         controller.clear();
       }
@@ -163,7 +162,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => context.pop(),
         ),
       ),
@@ -177,9 +176,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 vertical: 20,
               ),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 400,
-                ),
+                constraints: const BoxConstraints(maxWidth: 400),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
@@ -244,14 +241,18 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
                             decoration: InputDecoration(
                               counterText: '',
+                              filled: true,
+                              fillColor: Colors.grey[50],
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -273,7 +274,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                 _focusNodes[index - 1].requestFocus();
                               }
                               
-                              // Auto-submit when all fields are filled
                               if (index == 5 && value.isNotEmpty) {
                                 _handleVerifyOtp();
                               }
@@ -288,38 +288,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     // Verify Button
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) {
-                        return SizedBox(
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: authProvider.isLoading ? null : _handleVerifyOtp,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 2,
-                            ),
-                            child: authProvider.isLoading
-                                ? const SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
-                                  )
-                                : const Text(
-                                    'Verify',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                          ),
+                        return CustomButton(
+                          text: 'Verify',
+                          onPressed: _handleVerifyOtp,
+                          isLoading: authProvider.isLoading,
                         );
                       },
                     ),
@@ -330,9 +302,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           "Didn't receive the code? ",
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
                         ),
                         TextButton(
                           onPressed: _canResend ? _handleResendOtp : null,
