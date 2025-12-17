@@ -1,0 +1,114 @@
+name: pesaflow
+description: A modern banking application for seamless financial transactions
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  provider: ^6.1.1
+  flutter_riverpod: ^2.4.9
+
+  # HTTP & API
+  dio: ^5.4.0
+  http: ^1.1.2
+  retrofit: ^4.0.3
+  json_annotation: ^4.8.1
+  pretty_dio_logger: ^1.3.1
+
+  # Local Storage
+  shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # UI & Styling
+  flutter_screenutil: ^5.9.0
+  google_fonts: ^6.1.0
+  flutter_svg: ^2.0.9
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  lottie: ^3.0.0
+  fluttertoast: ^8.2.4
+  another_flushbar: ^1.12.30
+
+  # Navigation
+  go_router: ^13.0.0
+
+  # Forms & Validation
+  flutter_form_builder: ^9.1.1
+  form_builder_validators: ^9.1.0
+
+  # Utilities
+  intl: ^0.18.1
+  equatable: ^2.0.5
+  dartz: ^0.10.1
+  logger: ^2.0.2+1
+  uuid: ^4.3.3
+  get_it: ^7.6.7
+  injectable: ^2.3.2
+
+  # Permissions
+  permission_handler: ^11.1.0
+
+  # Network Info
+  connectivity_plus: ^5.0.2
+
+  # Image Picker
+  image_picker: ^1.0.7
+
+  # Pin Code
+  pinput: ^4.0.0
+
+  # Pull to Refresh
+  pull_to_refresh: ^2.0.0
+
+  # Animations
+  animate_do: ^3.1.2
+  
+  # Icons
+  cupertino_icons: ^1.0.6
+  font_awesome_flutter: ^10.7.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code Generation
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1
+  retrofit_generator: ^8.0.6
+  hive_generator: ^2.0.1
+  injectable_generator: ^2.4.1
+
+  # Testing
+  mockito: ^5.4.4
+  flutter_launcher_icons: ^0.13.1
+
+  # Linting
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/images/icons/
+    - assets/animations/
+
+  # Uncomment and add custom fonts if needed
+  # fonts:
+  #   - family: Poppins
+  #     fonts:
+  #       - asset: assets/fonts/Poppins-Regular.ttf
+  #       - asset: assets/fonts/Poppins-Medium.ttf
+  #         weight: 500
+  #       - asset: assets/fonts/Poppins-SemiBold.ttf
+  #         weight: 600
+  #       - asset: assets/fonts/Poppins-Bold.ttf
+  #         weight: 700
