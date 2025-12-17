@@ -1,0 +1,223 @@
+// lib/features/transactions/presentation/widgets/transaction_list_item.dart
+
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../domain/entities/transaction_detail.dart';
+
+class TransactionListItem extends StatelessWidget {
+  final TransactionDetail transaction;
+  final VoidCallback onTap;
+
+  const TransactionListItem({
+    super.key,
+    required this.transaction,
+    required this.onTap,
+  });
+
+  IconData _getCategoryIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'food':
+        return Icons.restaurant;
+      case 'transport':
+        return Icons.directions_car;
+      case 'shopping':
+        return Icons.shopping_bag;
+      case 'utilities':
+        return Icons.lightbulb;
+      case 'entertainment':
+        return Icons.movie;
+      case 'salary':
+        return Icons.attach_money;
+      case 'transfer':
+        return Icons.swap_horiz;
+      case 'bill payment':
+        return Icons.receipt;
+      case 'subscription':
+        return Icons.subscriptions;
+      default:
+        return Icons.category;
+    }
+  }
+
+  Color _getCategoryColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'food':
+        return Colors.orange;
+      case 'transport':
+        return Colors.blue;
+      case 'shopping':
+        return Colors.purple;
+      case 'utilities':
+        return Colors.amber;
+      case 'entertainment':
+        return Colors.pink;
+      case 'salary':
+        return Colors.green;
+      case 'transfer':
+        return Colors.indigo;
+      case 'bill payment':
+        return Colors.red;
+      case 'subscription':
+        return Colors.teal;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return Colors.green;
+      case 'pending':
+        return Colors.orange;
+      case 'failed':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isCredit = transaction.isCredit;
+    final amountColor = isCredit ? Colors.green : Colors.red;
+    final amountPrefix = isCredit ? '+' : '-';
+    final categoryColor = _getCategoryColor(transaction.category);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Category Icon
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: categoryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  _getCategoryIcon(transaction.category),
+                  color: categoryColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Transaction Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Description
+                    Text(
+                      transaction.description,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Recipient/Sender Name or Category
+                    Text(
+                      transaction.recipientName ??
+                          transaction.senderName ??
+                          transaction.category,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Time and Status
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          size: 12,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          DateFormat('hh:mm a').format(transaction.timestamp),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        if (!transaction.isCompleted) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(transaction.status)
+                                  .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              transaction.status,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: _getStatusColor(transaction.status),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Amount
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '$amountPrefix${transaction.currency} ${transaction.amount.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: amountColor,
+                    ),
+                  ),
+                  if (transaction.referenceNumber != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Ref: ${transaction.referenceNumber}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
