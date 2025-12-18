@@ -1,5 +1,3 @@
-///home/hp/JERE/pesaflow/lib/core/constants/app_colors.dart
-
 import 'package:flutter/material.dart';
 
 class AppColors {
@@ -67,6 +65,84 @@ class AppColors {
   
   static const LinearGradient accentGradient = LinearGradient(
     colors: [accent, accentOrange],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  // ==========================================
+  // 🎨 PROFESSIONAL AUTH SCREEN GRADIENTS
+  // ==========================================
+  
+  // OPTION 1: Modern Purple to Blue (Recommended - Very Professional)
+  static const LinearGradient authBackgroundGradient = LinearGradient(
+    colors: [
+      Color(0xFF667eea), // Purple
+      Color(0xFF764ba2), // Deep Purple
+      Color(0xFFf093fb), // Light Pink
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    stops: [0.0, 0.5, 1.0],
+  );
+  
+  // OPTION 2: Sunset Orange to Pink (Warm & Inviting)
+  static const LinearGradient authBackgroundGradient2 = LinearGradient(
+    colors: [
+      Color(0xFFfa709a), // Pink
+      Color(0xFFfee140), // Yellow
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  // OPTION 3: Ocean Blue to Teal (Fresh & Clean)
+  static const LinearGradient authBackgroundGradient3 = LinearGradient(
+    colors: [
+      Color(0xFF4facfe), // Light Blue
+      Color(0xFF00f2fe), // Cyan
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  // OPTION 4: Mint Green to Blue (Calming & Professional)
+  static const LinearGradient authBackgroundGradient4 = LinearGradient(
+    colors: [
+      Color(0xFF43e97b), // Green
+      Color(0xFF38f9d7), // Turquoise
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  // OPTION 5: Deep Blue to Purple (Corporate & Elegant)
+  static const LinearGradient authBackgroundGradient5 = LinearGradient(
+    colors: [
+      Color(0xFF2196F3), // Blue
+      Color(0xFF3F51B5), // Indigo
+      Color(0xFF673AB7), // Deep Purple
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    stops: [0.0, 0.5, 1.0],
+  );
+  
+  // OPTION 6: Peach to Coral (Soft & Modern)
+  static const LinearGradient authBackgroundGradient6 = LinearGradient(
+    colors: [
+      Color(0xFFffecd2), // Light Peach
+      Color(0xFFfcb69f), // Coral
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  // OPTION 7: Dark Gradient (For Premium Look)
+  static const LinearGradient authBackgroundGradient7 = LinearGradient(
+    colors: [
+      Color(0xFF1e3c72), // Dark Blue
+      Color(0xFF2a5298), // Medium Blue
+    ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

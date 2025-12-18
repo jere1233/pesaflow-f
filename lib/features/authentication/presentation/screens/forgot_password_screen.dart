@@ -66,146 +66,174 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => context.pop(),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.authBackgroundGradient,
         ),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth > 600 ? 40 : 24,
-                vertical: 20,
-              ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(height: screenHeight * 0.03),
-                      
-                      // Icon
-                      Center(
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Icon(
-                            Icons.lock_reset_rounded,
-                            size: 40,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 32),
-                      
-                      // Title
-                      Text(
-                        'Forgot Password?',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      
-                      const SizedBox(height: 12),
-                      
-                      Text(
-                        'Don\'t worry! Enter your email address and we\'ll send you a link to reset your password.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                          height: 1.5,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      
-                      const SizedBox(height: 40),
-                      
-                      // Email Field
-                      CustomTextField(
-                        controller: _emailController,
-                        labelText: 'Email Address',
-                        hintText: 'Enter your email',
-                        prefixIcon: Icons.email_outlined,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.done,
-                        onFieldSubmitted: (_) => _handleForgotPassword(),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      
-                      const SizedBox(height: 32),
-                      
-                      // Reset Button
-                      Consumer<AuthProvider>(
-                        builder: (context, authProvider, _) {
-                          return CustomButton(
-                            text: 'Send Reset Link',
-                            onPressed: _handleForgotPassword,
-                            isLoading: authProvider.isLoading,
-                          );
-                        },
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Back to Login
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.arrow_back,
-                            size: 16,
-                            color: AppColors.primary,
-                          ),
-                          const SizedBox(width: 4),
-                          TextButton(
-                            onPressed: () => context.pop(),
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: const Text(
-                              'Back to Login',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 20),
-                    ],
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Custom Back Button - WHITE
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                    onPressed: () => context.pop(),
                   ),
                 ),
               ),
-            ),
+              // Content
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth > 600 ? 40 : 24,
+                        vertical: 20,
+                      ),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 400),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(height: screenHeight * 0.03),
+                              
+                              // Icon - WHITE BACKGROUND
+                              Center(
+                                child: Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 10),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.lock_reset_rounded,
+                                    size: 40,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                              
+                              const SizedBox(height: 32),
+                              
+                              // Title - WHITE TEXT
+                              Text(
+                                'Forgot Password?',
+                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 28,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              
+                              const SizedBox(height: 12),
+                              
+                              // Subtitle - WHITE TEXT
+                              Text(
+                                'Don\'t worry! Enter your email address and we\'ll send you a link to reset your password.',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Colors.white.withOpacity(0.9),
+                                  height: 1.5,
+                                  fontSize: 15,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              
+                              const SizedBox(height: 40),
+                              
+                              // Email Field
+                              CustomTextField(
+                                controller: _emailController,
+                                labelText: 'Email Address',
+                                hintText: 'Enter your email',
+                                prefixIcon: Icons.email_outlined,
+                                keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.done,
+                                onFieldSubmitted: (_) => _handleForgotPassword(),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your email';
+                                  }
+                                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                    return 'Please enter a valid email';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              
+                              const SizedBox(height: 32),
+                              
+                              // Reset Button
+                              Consumer<AuthProvider>(
+                                builder: (context, authProvider, _) {
+                                  return CustomButton(
+                                    text: 'Send Reset Link',
+                                    onPressed: _handleForgotPassword,
+                                    isLoading: authProvider.isLoading,
+                                    backgroundColor: Colors.white,
+                                    textColor: AppColors.primary,
+                                  );
+                                },
+                              ),
+                              
+                              const SizedBox(height: 24),
+                              
+                              // Back to Login - WHITE TEXT
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.arrow_back,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  TextButton(
+                                    onPressed: () => context.pop(),
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: Size.zero,
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: const Text(
+                                      'Back to Login',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                        decoration: TextDecoration.underline,
+                                        decorationColor: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              
+                              const SizedBox(height: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

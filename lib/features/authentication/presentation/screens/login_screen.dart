@@ -1,9 +1,6 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:local_auth/local_auth.dart' 
-    if (dart.library.html) 'package:pesaflow/core/utils/web_auth_stub.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/routes/route_names.dart';
@@ -26,8 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
-  
-  final LocalAuthentication? _localAuth = kIsWeb ? null : LocalAuthentication();
 
   @override
   void dispose() {
@@ -60,53 +55,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _handleBiometricLogin() async {
-    if (kIsWeb) {
-      Fluttertoast.showToast(
-        msg: "Biometric authentication is not available on web browsers",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.orange,
-        textColor: Colors.white,
-      );
-      return;
-    }
-
-    try {
-      // FIXED: Properly await both Future<bool> values before using them
-      final canCheckBiometrics = await _localAuth!.canCheckBiometrics;
-      final isDeviceSupported = await _localAuth!.isDeviceSupported();
-      final canAuthenticate = canCheckBiometrics || isDeviceSupported;
-      
-      if (!canAuthenticate) {
-        _showErrorDialog('Biometric authentication is not available on this device');
-        return;
-      }
-
-      final authenticated = await _localAuth!.authenticate(
-        localizedReason: 'Please authenticate to login',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
-      );
-
-      if (authenticated && mounted) {
-        Fluttertoast.showToast(
-          msg: "Biometric authentication successful!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: AppColors.success,
-          textColor: Colors.white,
-        );
-        // You might want to actually login here or navigate
-        // context.go(RouteNames.home);
-      }
-    } catch (e) {
-      _showErrorDialog('Biometric authentication failed: ${e.toString()}');
-    }
-  }
-
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -129,184 +77,151 @@ class _LoginScreenState extends State<LoginScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth > 600 ? 40 : 24,
-                vertical: 20,
-              ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(height: screenHeight * 0.03),
-                      
-                      // Header with Logo
-                      const AuthHeader(
-                        title: 'Welcome Back!',
-                        subtitle: 'Sign in to manage your finances',
-                      ),
-                      
-                      const SizedBox(height: 32),
-                      
-                      // Email Field
-                      CustomTextField(
-                        controller: _emailController,
-                        labelText: 'Email Address',
-                        hintText: 'Enter your email',
-                        prefixIcon: Icons.email_outlined,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      
-                      const SizedBox(height: 16),
-                      
-                      // Password Field
-                      PasswordTextField(
-                        controller: _passwordController,
-                        textInputAction: TextInputAction.done,
-                        onFieldSubmitted: (_) => _handleLogin(),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
-                          }
-                          if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
-                          }
-                          return null;
-                        },
-                      ),
-                      
-                      const SizedBox(height: 12),
-                      
-                      // Remember Me & Forgot Password
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: Checkbox(
-                                  value: _rememberMe,
-                                  onChanged: (value) {
-                                    setState(() => _rememberMe = value ?? false);
-                                  },
-                                  activeColor: AppColors.primary,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.authBackgroundGradient,
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth > 600 ? 40 : 24,
+                  vertical: 20,
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(height: screenHeight * 0.05),
+                        
+                        const AuthHeader(
+                          title: 'Welcome Back!',
+                          subtitle: 'Sign in to manage your pension',
+                        ),
+                        
+                        const SizedBox(height: 40),
+                        
+                        CustomTextField(
+                          controller: _emailController,
+                          labelText: 'Email Address',
+                          hintText: 'Enter your email',
+                          prefixIcon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
+                            }
+                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                              return 'Please enter a valid email';
+                            }
+                            return null;
+                          },
+                        ),
+                        
+                        const SizedBox(height: 16),
+                        
+                        PasswordTextField(
+                          controller: _passwordController,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _handleLogin(),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            if (value.length < 6) {
+                              return 'Password must be at least 6 characters';
+                            }
+                            return null;
+                          },
+                        ),
+                        
+                        const SizedBox(height: 16),
+                        
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: Checkbox(
+                                    value: _rememberMe,
+                                    onChanged: (value) {
+                                      setState(() => _rememberMe = value ?? false);
+                                    },
+                                    activeColor: Colors.white,
+                                    checkColor: AppColors.primary,
+                                    side: const BorderSide(color: Colors.white, width: 2),
+                                  ),
                                 ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Remember me',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            TextButton(
+                              onPressed: () => context.push(RouteNames.forgotPassword),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Remember me',
+                              child: const Text(
+                                'Forgot Password?',
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: Colors.white,
                                 ),
-                              ),
-                            ],
-                          ),
-                          TextButton(
-                            onPressed: () => context.push(RouteNames.forgotPassword),
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: const Text(
-                              'Forgot Password?',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Login Button
-                      Consumer<AuthProvider>(
-                        builder: (context, authProvider, _) {
-                          return CustomButton(
-                            text: 'Login',
-                            onPressed: _handleLogin,
-                            isLoading: authProvider.isLoading,
-                          );
-                        },
-                      ),
-                      
-                      const SizedBox(height: 20),
-                      
-                      // Biometric Login (mobile only)
-                      if (!kIsWeb) ...[
-                        Row(
-                          children: [
-                            const Expanded(
-                              child: Divider(
-                                color: AppColors.border,
-                                thickness: 1,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              child: Text(
-                                'OR',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            const Expanded(
-                              child: Divider(
-                                color: AppColors.border,
-                                thickness: 1,
                               ),
                             ),
                           ],
                         ),
                         
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 32),
                         
-                        CustomButton(
-                          text: 'Login with Biometrics',
-                          onPressed: _handleBiometricLogin,
-                          buttonType: ButtonType.outline,
-                          icon: Icons.fingerprint_rounded,
+                        Consumer<AuthProvider>(
+                          builder: (context, authProvider, _) {
+                            return CustomButton(
+                              text: 'Login',
+                              onPressed: _handleLogin,
+                              isLoading: authProvider.isLoading,
+                              backgroundColor: Colors.white,
+                              textColor: AppColors.primary,
+                              height: 52,
+                            );
+                          },
                         ),
+                        
+                        const SizedBox(height: 32),
+                        
+                        LinkText(
+                          normalText: "Don't have an account? ",
+                          linkText: 'Sign Up',
+                          onTap: () => context.push(RouteNames.register),
+                          normalTextColor: Colors.white,
+                          linkTextColor: Colors.white,
+                        ),
+                        
+                        const SizedBox(height: 20),
                       ],
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Sign Up Link
-                      LinkText(
-                        normalText: "Don't have an account? ",
-                        linkText: 'Sign Up',
-                        onTap: () => context.push(RouteNames.register),
-                      ),
-                      
-                      const SizedBox(height: 20),
-                    ],
+                    ),
                   ),
                 ),
               ),

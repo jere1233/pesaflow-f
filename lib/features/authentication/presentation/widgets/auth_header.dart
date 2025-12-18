@@ -24,20 +24,20 @@ class AuthHeader extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
+                    color: Colors.black.withOpacity(0.2),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.account_balance_wallet_rounded,
                 size: 40,
-                color: Colors.white,
+                color: AppColors.primary,
               ),
             ),
           ),
@@ -45,23 +45,26 @@ class AuthHeader extends StatelessWidget {
         
         const SizedBox(height: 32),
         
-        // Title
+        // Title - WHITE TEXT
         Text(
           title,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+            color: Colors.white,
+            fontSize: 28,
           ),
           textAlign: TextAlign.center,
         ),
         
         const SizedBox(height: 8),
         
-        // Subtitle
+        // Subtitle - WHITE TEXT
         Text(
           subtitle,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
+            color: Colors.white.withOpacity(0.9),
+            fontSize: 15,
+            height: 1.4,
           ),
           textAlign: TextAlign.center,
         ),
