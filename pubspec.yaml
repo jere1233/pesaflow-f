@@ -71,6 +71,9 @@ dependencies:
   # Animations
   animate_do: ^3.1.2
   
+  # Authentication
+  local_auth: ^2.1.7
+  
   # Icons
   cupertino_icons: ^1.0.6
   font_awesome_flutter: ^10.7.0

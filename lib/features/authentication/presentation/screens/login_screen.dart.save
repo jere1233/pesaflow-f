@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:local_auth/local_auth.dart' 
     if (dart.library.html) 'package:pesaflow/core/utils/web_auth_stub.dart';
+
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/routes/route_names.dart';
@@ -73,12 +74,10 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
-      // FIXED: Properly await both Future<bool> values before using them
-      final canCheckBiometrics = await _localAuth!.canCheckBiometrics;
+      final canCheckBiometrics = await _localAuth!.canCheckBiometrics();
       final isDeviceSupported = await _localAuth!.isDeviceSupported();
-      final canAuthenticate = canCheckBiometrics || isDeviceSupported;
-      
-      if (!canAuthenticate) {
+
+      if (!canCheckBiometrics || !isDeviceSupported) {
         _showErrorDialog('Biometric authentication is not available on this device');
         return;
       }
@@ -99,8 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
           backgroundColor: AppColors.success,
           textColor: Colors.white,
         );
-        // You might want to actually login here or navigate
-        // context.go(RouteNames.home);
       }
     } catch (e) {
       _showErrorDialog('Biometric authentication failed: ${e.toString()}');
