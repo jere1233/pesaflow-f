@@ -165,21 +165,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
           : null,
     );
 
-    final success = await authProvider.register(request);
+    final initiation = await authProvider.register(request);
 
-    if (success && mounted) {
+    if (initiation.success && mounted) {
       Fluttertoast.showToast(
-        msg: "Registration initiated! Please complete M-Pesa payment.",
+        msg: initiation.message ?? 'Registration initiated! Please complete M-Pesa payment.',
         toastLength: Toast.LENGTH_LONG,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: AppColors.info,
         textColor: Colors.white,
       );
-      
-      // Navigate to payment status screen or home
-      context.go(RouteNames.home);
+
+      // If there's a transactionId we can navigate to a status screen or home
+      if (initiation.transactionId != null && initiation.transactionId!.isNotEmpty) {
+        // For now navigate to home; you can implement a status screen if desired
+        context.go(RouteNames.home);
+      } else {
+        context.go(RouteNames.home);
+      }
     } else if (mounted) {
-      _showErrorDialog(authProvider.errorMessage ?? 'Registration failed');
+      _showErrorDialog(authProvider.errorMessage ?? initiation.message ?? 'Registration failed');
     }
   }
 
