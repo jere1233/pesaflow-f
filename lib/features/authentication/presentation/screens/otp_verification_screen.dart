@@ -1,5 +1,3 @@
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/otp_verification_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -11,13 +9,16 @@ import '../../../../shared/routes/route_names.dart';
 import '../widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
 
+// ============================================================================
+// 🚀 UNIFIED OTP VERIFICATION - Supports BOTH Email and Phone
+// ============================================================================
 class OtpVerificationScreen extends StatefulWidget {
-  final String phoneNumber;
+  final String identifier; // Can be email OR phone number
   final String verificationType;
 
   const OtpVerificationScreen({
     super.key,
-    required this.phoneNumber,
+    required this.identifier,
     required this.verificationType,
   });
 
@@ -35,6 +36,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   int _resendCountdown = 60;
   Timer? _timer;
   bool _canResend = false;
+
+  // Detect if identifier is email or phone
+  bool get _isEmail => widget.identifier.contains('@');
+  String get _identifierType => _isEmail ? 'email' : 'phone';
+  IconData get _identifierIcon => _isEmail ? Icons.email_outlined : Icons.sms_outlined;
+  String get _identifierLabel => _isEmail ? 'Email' : 'Number';
 
   @override
   void initState() {
@@ -88,8 +95,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
     final authProvider = context.read<AuthProvider>();
     
+    // Use unified OTP verification (works for both email and phone)
     final success = await authProvider.verifyOtp(
-      widget.phoneNumber,
+      widget.identifier,
       otp,
       widget.verificationType,
     );
@@ -126,11 +134,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
     final authProvider = context.read<AuthProvider>();
     
-    final success = await authProvider.sendOtp(widget.phoneNumber);
+    // Use unified send OTP (works for both email and phone)
+    final success = await authProvider.sendOtp(widget.identifier);
 
     if (success && mounted) {
       Fluttertoast.showToast(
-        msg: "OTP sent successfully!",
+        msg: "OTP sent to your $_identifierLabel!",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: AppColors.success,
@@ -185,7 +194,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   children: [
                     SizedBox(height: screenHeight * 0.03),
                     
-                    // Icon
+                    // Icon - Dynamic based on email or phone
                     Center(
                       child: Container(
                         width: 80,
@@ -194,8 +203,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           color: AppColors.primary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Icon(
-                          Icons.sms_outlined,
+                        child: Icon(
+                          _identifierIcon,
                           size: 40,
                           color: AppColors.primary,
                         ),
@@ -204,9 +213,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     
                     const SizedBox(height: 32),
                     
-                    // Title
+                    // Title - Dynamic based on email or phone
                     Text(
-                      'Verify Your Number',
+                      'Verify Your $_identifierLabel',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -216,8 +225,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     
                     const SizedBox(height: 12),
                     
+                    // Subtitle showing identifier
                     Text(
-                      'Enter the 6-digit code sent to\n${widget.phoneNumber}',
+                      'Enter the 6-digit code sent to\n${widget.identifier}',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
                         height: 1.5,
@@ -276,6 +286,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                 _focusNodes[index - 1].requestFocus();
                               }
                               
+                              // Auto-verify when all 6 digits entered
                               if (index == 5 && value.isNotEmpty) {
                                 _handleVerifyOtp();
                               }

@@ -1,5 +1,3 @@
-///home/hp/JERE/pension-frontend/lib/features/authentication/data/models/auth_response_model.dart
-
 import 'user_model.dart';
 
 class AuthResponseModel {
@@ -20,7 +18,7 @@ class AuthResponseModel {
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
     return AuthResponseModel(
       accessToken: json['access_token']?.toString() ?? json['accessToken']?.toString() ?? json['token']?.toString() ?? '',
-      refreshToken: json['refresh_token']?.toString() ?? json['refreshToken']?.toString() ?? json['refresh_token']?.toString() ?? '',
+      refreshToken: json['refresh_token']?.toString() ?? json['refreshToken']?.toString() ?? '',
       user: UserModel.fromJson(json['user'] ?? {}),
       tokenType: json['token_type']?.toString() ?? json['tokenType']?.toString() ?? 'Bearer',
       expiresIn: json['expires_in'] ?? json['expiresIn'] ?? 3600,
@@ -227,30 +225,38 @@ class RegisterInitiationResponseModel {
   }
 }
 
+// ============================================================================
+// 🚀 UNIFIED OTP VERIFICATION MODEL - Works with both email and phone
+// ============================================================================
+
 class OtpVerificationModel {
-  final String phoneNumber;
+  final String identifier; // Can be email OR phone number
   final String otp;
   final String verificationType;
 
   const OtpVerificationModel({
-    required this.phoneNumber,
+    required this.identifier,
     required this.otp,
     required this.verificationType,
   });
 
   factory OtpVerificationModel.fromJson(Map<String, dynamic> json) {
     return OtpVerificationModel(
-      phoneNumber: json['phone_number']?.toString() ?? json['phoneNumber']?.toString() ?? '',
+      identifier: json['identifier']?.toString() ?? 
+                  json['phone_number']?.toString() ?? 
+                  json['phoneNumber']?.toString() ?? 
+                  json['email']?.toString() ?? '',
       otp: json['otp']?.toString() ?? '',
-      verificationType: json['verification_type']?.toString() ?? json['verificationType']?.toString() ?? '',
+      verificationType: json['verification_type']?.toString() ?? 
+                        json['verificationType']?.toString() ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'phone_number': phoneNumber,
+      'identifier': identifier,
       'otp': otp,
-      'verification_type': verificationType,
+      'verificationType': verificationType,
     };
   }
 }

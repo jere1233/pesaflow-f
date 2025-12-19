@@ -171,13 +171,18 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Send OTP
-  Future<bool> sendOtp(String phoneNumber) async {
+  // ============================================================================
+  // 🚀 UNIFIED OTP METHODS - Work with both email and phone
+  // ============================================================================
+
+  /// Send OTP to email or phone (automatically detected by backend)
+  /// @param identifier - Can be email (user@example.com) or phone (+254712345678)
+  Future<bool> sendOtp(String identifier) async {
     try {
       _setLoading(true);
       _errorMessage = null;
 
-      await _authDataSource.sendOtp(phoneNumber);
+      await _authDataSource.sendOtp(identifier);
 
       _setLoading(false);
       return true;
@@ -189,15 +194,17 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Verify OTP
-  Future<bool> verifyOtp(
-      String phoneNumber, String otp, String verificationType) async {
+  /// Verify OTP from email or phone (automatically detected by backend)
+  /// @param identifier - Can be email or phone number
+  /// @param otp - 6-digit OTP code
+  /// @param verificationType - Type of verification (login, register, etc.)
+  Future<bool> verifyOtp(String identifier, String otp, String verificationType) async {
     try {
       _setLoading(true);
       _errorMessage = null;
 
       final request = OtpVerificationModel(
-        phoneNumber: phoneNumber,
+        identifier: identifier,
         otp: otp,
         verificationType: verificationType,
       );
@@ -217,6 +224,8 @@ class AuthProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  // ============================================================================
 
   // Forgot Password
   Future<bool> forgotPassword(String email) async {

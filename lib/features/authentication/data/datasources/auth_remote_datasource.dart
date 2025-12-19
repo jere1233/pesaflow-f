@@ -1,5 +1,3 @@
-///home/hp/JERE/pension-frontend/lib/features/authentication/data/datasources/auth_remote_datasource.dart
-
 import 'dart:convert';
 import '../../../../core/network/api_client.dart';
 import '../models/auth_response_model.dart';
@@ -64,7 +62,7 @@ class AuthRemoteDataSource {
           final authJson = <String, dynamic>{
             'access_token': data['access_token'] ?? data['token'],
             'refresh_token': data['refresh_token'] ?? data['refreshToken'] ?? '',
-            'user': data['user'] ?? data['user'] ?? {},
+            'user': data['user'] ?? {},
             'token_type': data['token_type'] ?? data['tokenType'] ?? 'Bearer',
             'expires_in': data['expires_in'] ?? data['expiresIn'] ?? 3600,
           };
@@ -94,12 +92,12 @@ class AuthRemoteDataSource {
     }
   }
 
-  // Send OTP
-  Future<void> sendOtp(String phoneNumber) async {
+  // Send OTP to email or phone (backend auto-detects)
+  Future<void> sendOtp(String identifier) async {
     try {
       final response = await apiClient.post(
         '/auth/send-otp',
-        data: {'phone_number': phoneNumber},
+        data: {'identifier': identifier},
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
@@ -110,7 +108,8 @@ class AuthRemoteDataSource {
     }
   }
 
-  // Verify OTP
+  /// Verify OTP from email or phone (backend auto-detects)
+  /// @param request - Contains identifier, otp, and verificationType
   Future<AuthResponseModel> verifyOtp(OtpVerificationModel request) async {
     try {
       final response = await apiClient.post(
@@ -127,6 +126,8 @@ class AuthRemoteDataSource {
       throw Exception('Failed to verify OTP: ${e.toString()}');
     }
   }
+
+  // ============================================================================
 
   // Forgot Password
   Future<void> forgotPassword(String email) async {

@@ -34,19 +34,22 @@ class AppRouter {
         name: RouteNames.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
+      // ============================================================================
+      // 🔧 UPDATED: OTP route now uses 'identifier' instead of 'phoneNumber'
+      // ============================================================================
       GoRoute(
         path: RouteNames.otpVerification,
         name: RouteNames.otpVerification,
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
           return OtpVerificationScreen(
-            phoneNumber: extra?['phoneNumber'] ?? '',
+            identifier: extra?['identifier'] ?? '', // ⬅️ UPDATED: Changed from phoneNumber
             verificationType: extra?['verificationType'] ?? 'login',
           );
         },
       ),
       
-      // Payment Status Route (NEW)
+      // Payment Status Route
       GoRoute(
         path: '${RouteNames.paymentStatus}/:transactionId',
         name: RouteNames.paymentStatus,
