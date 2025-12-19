@@ -1,3 +1,4 @@
+// lib/shared/routes/app_router.dart
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/presentation/screens/login_screen.dart';
@@ -5,7 +6,7 @@ import '../../features/authentication/presentation/screens/register_screen.dart'
 import '../../features/authentication/presentation/screens/forgot_password_screen.dart';
 import '../../features/authentication/presentation/screens/otp_verification_screen.dart';
 import '../../features/authentication/presentation/screens/payment_status_screen.dart';
-import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/dashboard/presentation/screens/dashboard_screen.dart'; 
 import '../../features/transactions/presentation/screens/transactions_screen.dart';
 import '../../features/transactions/presentation/screens/transaction_detail_screen.dart';
 import '../../features/transfer/presentation/screens/transfer_screen.dart';
@@ -59,11 +60,13 @@ class AppRouter {
         },
       ),
       
-      // Main App Routes
+      // ============================================================================
+      // 🎯 UPDATED: Dashboard (formerly Home)
+      // ============================================================================
       GoRoute(
-        path: RouteNames.home,
+        path: RouteNames.home, // Keeps /home route for compatibility
         name: RouteNames.home,
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) => const DashboardScreen(), // ⬅️ UPDATED
       ),
       
       // Transaction Routes
@@ -125,7 +128,7 @@ class AppRouter {
             const SizedBox(height: 8),
             TextButton(
               onPressed: () => context.go(RouteNames.home),
-              child: const Text('Go to Home'),
+              child: const Text('Go to Dashboard'),
             ),
           ],
         ),
