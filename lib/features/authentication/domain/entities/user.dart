@@ -1,6 +1,7 @@
 
 ///home/hp/JERE/pesaflow/lib/features/authentication/domain/entities/user.dart
 
+
 import 'package:equatable/equatable.dart';
 
 class User extends Equatable {

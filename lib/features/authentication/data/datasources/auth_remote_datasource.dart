@@ -1,3 +1,5 @@
+///home/hp/JERE/pension-frontend/lib/features/authentication/data/datasources/auth_remote_datasource.dart
+
 import 'dart:convert';
 import '../../../../core/network/api_client.dart';
 import '../models/auth_response_model.dart';
@@ -28,8 +30,8 @@ class AuthRemoteDataSource {
     }
   }
 
-  // Register
-  Future<AuthResponseModel> register(RegisterRequestModel request) async {
+  // Register (initiate payment + registration)
+  Future<RegisterInitiationResponseModel> register(RegisterRequestModel request) async {
     try {
       final response = await apiClient.post(
         '/auth/register',
@@ -37,12 +39,45 @@ class AuthRemoteDataSource {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return AuthResponseModel.fromJson(response.data);
+        return RegisterInitiationResponseModel.fromJson(
+            response.data is Map ? Map<String, dynamic>.from(response.data) : {});
       } else {
-        throw Exception(response.data['message'] ?? 'Registration failed');
+        throw Exception(response.data['message'] ?? 'Registration initiation failed');
       }
     } catch (e) {
-      throw Exception('Failed to register: ${e.toString()}');
+      throw Exception('Failed to initiate registration: ${e.toString()}');
+    }
+  }
+
+  // Check registration payment/status
+  Future<AuthResponseModel> checkRegisterStatus(String transactionId) async {
+    try {
+      final response = await apiClient.get('/auth/register/status/$transactionId');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // If the backend returns tokens/user after payment completion, try to parse AuthResponseModel
+        final data = response.data is Map ? Map<String, dynamic>.from(response.data) : {};
+
+        // Some backends put token in `token` field
+        if (data.containsKey('token') || data.containsKey('access_token')) {
+          // Normalize to AuthResponseModel
+          final authJson = <String, dynamic>{
+            'access_token': data['access_token'] ?? data['token'],
+            'refresh_token': data['refresh_token'] ?? data['refreshToken'] ?? '',
+            'user': data['user'] ?? data['user'] ?? {},
+            'token_type': data['token_type'] ?? data['tokenType'] ?? 'Bearer',
+            'expires_in': data['expires_in'] ?? data['expiresIn'] ?? 3600,
+          };
+          return AuthResponseModel.fromJson(authJson);
+        }
+
+        // Otherwise, throw to indicate payment still pending or no tokens yet
+        throw Exception(data['message'] ?? data['error'] ?? 'Payment pending');
+      } else {
+        throw Exception(response.data['message'] ?? 'Failed to check registration status');
+      }
+    } catch (e) {
+      throw Exception('Failed to check registration status: ${e.toString()}');
     }
   }
 

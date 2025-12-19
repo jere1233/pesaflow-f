@@ -1,3 +1,5 @@
+///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/providers/auth_provider.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -57,7 +59,7 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(true);
       _errorMessage = null;
 
-      final request = LoginRequestModel(email: email, password: password);
+      final request = LoginRequestModel(identifier: email, password: password);
       final response = await _authDataSource.login(request);
 
       await _saveTokens(response);
@@ -75,30 +77,35 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Register (without referral code)
-  Future<bool> register({
-    required String email,
-    required String password,
-    required String firstName,
-    required String lastName,
-    required String phoneNumber,
-  }) async {
+  // Register (initiate payment + registration)
+  Future<RegisterInitiationResponseModel> register(RegisterRequestModel request) async {
     try {
       _setLoading(true);
       _errorMessage = null;
 
-      final request = RegisterRequestModel(
-        email: email,
-        password: password,
-        firstName: firstName,
-        lastName: lastName,
-        phoneNumber: phoneNumber,
-      );
-
       final response = await _authDataSource.register(request);
 
-      await _saveTokens(response);
-      _user = response.user.toEntity();
+      _setLoading(false);
+      return response;
+    } catch (e) {
+      _setLoading(false);
+      final msg = e.toString().replaceAll('Exception: ', '');
+      _errorMessage = msg;
+      notifyListeners();
+      return RegisterInitiationResponseModel(success: false, status: 'failed', message: msg);
+    }
+  }
+
+  // Check registration payment status and complete registration if tokens returned
+  Future<bool> checkRegistrationStatus(String transactionId) async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      final authResponse = await _authDataSource.checkRegisterStatus(transactionId);
+
+      await _saveTokens(authResponse);
+      _user = authResponse.user.toEntity();
       _status = AuthStatus.authenticated;
 
       _setLoading(false);
@@ -106,7 +113,6 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       _setLoading(false);
       _errorMessage = e.toString().replaceAll('Exception: ', '');
-      _status = AuthStatus.unauthenticated;
       notifyListeners();
       return false;
     }
