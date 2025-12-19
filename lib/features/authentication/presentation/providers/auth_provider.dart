@@ -1,5 +1,3 @@
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/providers/auth_provider.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -28,6 +26,10 @@ class AuthProvider extends ChangeNotifier {
   User? _user;
   String? _errorMessage;
   bool _isLoading = false;
+  
+  // Registration payment tracking
+  String? _registrationTransactionId;
+  String? _registrationCheckoutRequestId;
 
   // Getters
   AuthStatus get status => _status;
@@ -35,6 +37,8 @@ class AuthProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _status == AuthStatus.authenticated;
+  String? get registrationTransactionId => _registrationTransactionId;
+  String? get registrationCheckoutRequestId => _registrationCheckoutRequestId;
 
   // Check if user is logged in
   Future<void> checkAuthStatus() async {
@@ -85,7 +89,20 @@ class AuthProvider extends ChangeNotifier {
 
       final response = await _authDataSource.register(request);
 
+      // Store transaction details for status checking
+      _registrationTransactionId = response.transactionId;
+      _registrationCheckoutRequestId = response.checkoutRequestId;
+
+      // Save transaction ID to storage for persistence
+      if (_registrationTransactionId != null) {
+        await _storage.write(
+          key: 'pending_registration_tx',
+          value: _registrationTransactionId,
+        );
+      }
+
       _setLoading(false);
+
       return response;
     } catch (e) {
       _setLoading(false);
@@ -96,17 +113,23 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Check registration payment status and complete registration if tokens returned
+  // Check registration payment status
   Future<bool> checkRegistrationStatus(String transactionId) async {
     try {
       _setLoading(true);
       _errorMessage = null;
 
-      final authResponse = await _authDataSource.checkRegisterStatus(transactionId);
+      final response = await _authDataSource.checkRegisterStatus(transactionId);
 
-      await _saveTokens(authResponse);
-      _user = authResponse.user.toEntity();
+      // If successful, save tokens and user data
+      await _saveTokens(response);
+      _user = response.user.toEntity();
       _status = AuthStatus.authenticated;
+      
+      // Clear pending transaction
+      await _storage.delete(key: 'pending_registration_tx');
+      _registrationTransactionId = null;
+      _registrationCheckoutRequestId = null;
 
       _setLoading(false);
       return true;
@@ -115,6 +138,20 @@ class AuthProvider extends ChangeNotifier {
       _errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
       return false;
+    }
+  }
+
+  // Check for pending registration on app start
+  Future<void> checkPendingRegistration() async {
+    try {
+      final pendingTx = await _storage.read(key: 'pending_registration_tx');
+      if (pendingTx != null) {
+        _registrationTransactionId = pendingTx;
+        // Optionally auto-check status
+        await checkRegistrationStatus(pendingTx);
+      }
+    } catch (e) {
+      // Ignore errors, user can manually check
     }
   }
 

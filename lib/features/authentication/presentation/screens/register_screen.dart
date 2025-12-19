@@ -1,7 +1,4 @@
-
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/register_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -9,8 +6,13 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/routes/route_names.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/password_text_field.dart';
+import '../widgets/phone_text_field.dart';
+import '../widgets/date_picker_field.dart';
+import '../widgets/dropdown_field.dart';
+import '../widgets/numeric_text_field.dart';
+import '../widgets/children_input_widget.dart';
 import '../widgets/custom_button.dart';
-import '../widgets/auth_header.dart';
+import '../widgets/step_indicator.dart';
 import '../widgets/link_text.dart';
 import '../providers/auth_provider.dart';
 import '../../data/models/auth_response_model.dart';
@@ -23,242 +25,162 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final _formKeys = List.generate(5, (_) => GlobalKey<FormState>());
+  int _currentStep = 0;
+  
+  // Step 1: Basic Info
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
-  final _emailOrPhoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  // Additional controllers for full registration payload
-  final _dobController = TextEditingController();
-  String? _genderValue;
-  String? _maritalStatusValue;
+  
+  // Step 2: Personal Details
+  final _dateOfBirthController = TextEditingController();
+  String? _gender;
+  String? _maritalStatus;
+  final _nationalIdController = TextEditingController();
+  
+  // Step 3: Family Info
   final _spouseNameController = TextEditingController();
   final _spouseDobController = TextEditingController();
-  final List<ChildModel> _childrenList = [];
-  final _nationalIdController = TextEditingController();
+  List<ChildModel> _children = [];
+  
+  // Step 4: Address & Employment
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
   final _countryController = TextEditingController();
   final _occupationController = TextEditingController();
   final _employerController = TextEditingController();
+  
+  // Step 5: Financial Info
   final _salaryController = TextEditingController();
-  final _contributionController = TextEditingController();
-  final _retirementController = TextEditingController();
+  final _contributionRateController = TextEditingController();
+  final _retirementAgeController = TextEditingController();
+
+  final List<String> _stepLabels = [
+    'Basic Info',
+    'Personal Details',
+    'Family Info',
+    'Employment',
+    'Financial',
+  ];
 
   @override
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _emailOrPhoneController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
-    _dobController.dispose();
+    _dateOfBirthController.dispose();
+    _nationalIdController.dispose();
     _spouseNameController.dispose();
     _spouseDobController.dispose();
-    _nationalIdController.dispose();
     _addressController.dispose();
     _cityController.dispose();
     _countryController.dispose();
     _occupationController.dispose();
     _employerController.dispose();
     _salaryController.dispose();
-    _contributionController.dispose();
-    _retirementController.dispose();
+    _contributionRateController.dispose();
+    _retirementAgeController.dispose();
     super.dispose();
   }
 
-  bool _isEmail(String value) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value);
-  }
-
-  bool _isPhone(String value) {
-    return RegExp(r'^0[0-9]{9}$').hasMatch(value);
-  }
-
-  Future<void> _handleRegister() async {
-    if (_formKey.currentState!.validate()) {
-      final authProvider = context.read<AuthProvider>();
-      final emailOrPhone = _emailOrPhoneController.text.trim();
-      final registerRequest = RegisterRequestModel(
-        email: _isEmail(emailOrPhone) ? emailOrPhone : '',
-        password: _passwordController.text,
-        phone: _isPhone(emailOrPhone) ? emailOrPhone : '',
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        dateOfBirth: _dobController.text.isNotEmpty ? _dobController.text : null,
-        gender: _genderValue,
-        maritalStatus: _maritalStatusValue,
-        spouseName: _spouseNameController.text.isNotEmpty ? _spouseNameController.text : null,
-        spouseDob: _spouseDobController.text.isNotEmpty ? _spouseDobController.text : null,
-        children: _childrenList.isNotEmpty ? List<ChildModel>.from(_childrenList) : null,
-        nationalId: _nationalIdController.text.isNotEmpty ? _nationalIdController.text : null,
-        address: _addressController.text.isNotEmpty ? _addressController.text : null,
-        city: _cityController.text.isNotEmpty ? _cityController.text : null,
-        country: _countryController.text.isNotEmpty ? _countryController.text : null,
-        occupation: _occupationController.text.isNotEmpty ? _occupationController.text : null,
-        employer: _employerController.text.isNotEmpty ? _employerController.text : null,
-        salary: _salaryController.text.isNotEmpty ? num.tryParse(_salaryController.text) : null,
-        contributionRate: _contributionController.text.isNotEmpty ? num.tryParse(_contributionController.text) : null,
-        retirementAge: _retirementController.text.isNotEmpty ? int.tryParse(_retirementController.text) : null,
-      );
-
-      final initiation = await authProvider.register(registerRequest);
-
-      if (initiation.success && mounted) {
-        Fluttertoast.showToast(
-          msg: initiation.message ?? 'Payment initiated. Complete M-Pesa on your phone.',
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: AppColors.success,
-          textColor: Colors.white,
-        );
-
-        // If we have a transactionId, poll the status endpoint until completed
-        if (initiation.transactionId != null && initiation.transactionId!.isNotEmpty) {
-          _pollRegistrationStatus(initiation.transactionId!);
-        } else {
-          // No transaction id — just inform the user
-          _showInfoDialog('Payment initiated', initiation.message ?? 'Please complete payment on your phone.');
-        }
-      } else if (mounted) {
-        _showErrorDialog(authProvider.errorMessage ?? initiation.message ?? 'Registration initiation failed');
+  void _nextStep() {
+    if (_formKeys[_currentStep].currentState!.validate()) {
+      if (_currentStep < 4) {
+        setState(() => _currentStep++);
+      } else {
+        _handleRegister();
       }
     }
   }
 
-  void _showInfoDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+  void _previousStep() {
+    if (_currentStep > 0) {
+      setState(() => _currentStep--);
+    } else {
+      context.pop();
+    }
   }
 
-  void _pollRegistrationStatus(String transactionId) {
+  Future<void> _handleRegister() async {
     final authProvider = context.read<AuthProvider>();
-    // Show a progress dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        // Start polling when dialog shows
-        Future.microtask(() async {
-          const int maxAttempts = 24; // poll for up to 2 minutes (24 * 5s)
-          int attempts = 0;
-
-          while (attempts < maxAttempts) {
-            attempts++;
-            final completed = await authProvider.checkRegistrationStatus(transactionId);
-            if (completed && mounted) {
-              Navigator.of(context).pop(); // close dialog
-              Fluttertoast.showToast(
-                msg: 'Registration completed!',
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                backgroundColor: AppColors.success,
-                textColor: Colors.white,
-              );
-              if (mounted) context.go(RouteNames.home);
-              return;
-            }
-
-            // wait 5 seconds before next poll
-            await Future.delayed(const Duration(seconds: 5));
-          }
-
-          // timed out
-          if (mounted) {
-            Navigator.of(context).pop();
-            _showErrorDialog('Payment not confirmed yet. Please check your M-Pesa and try again later.');
-          }
-        });
-
-        return AlertDialog(
-          title: const Text('Waiting for payment confirmation'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              Text('Please approve the M-Pesa prompt on your phone.'),
-              SizedBox(height: 16),
-              CircularProgressIndicator(),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<ChildModel?> _showAddChildDialog() async {
-    final nameController = TextEditingController();
-    final dobController = TextEditingController();
-    ChildModel? result;
-
-    await showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Add Child'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-              ),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime(2015),
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime.now(),
-                  );
-                  if (picked != null) {
-                    dobController.text = picked.toIso8601String().split('T').first;
-                  }
-                },
-                child: AbsorbPointer(
-                  child: TextField(
-                    controller: dobController,
-                    decoration: const InputDecoration(labelText: 'DOB (YYYY-MM-DD)'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final name = nameController.text.trim();
-                final dob = dobController.text.trim();
-                if (name.isEmpty || dob.isEmpty) return;
-                result = ChildModel(name: name, dob: dob);
-                Navigator.of(context).pop();
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
+    
+    final request = RegisterRequestModel(
+      // Basic Info
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      phone: _phoneController.text.trim(),
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      
+      // Personal Details
+      dateOfBirth: _dateOfBirthController.text.isNotEmpty 
+          ? _dateOfBirthController.text 
+          : null,
+      gender: _gender,
+      maritalStatus: _maritalStatus,
+      nationalId: _nationalIdController.text.isNotEmpty 
+          ? _nationalIdController.text.trim() 
+          : null,
+      
+      // Family Info
+      spouseName: _spouseNameController.text.isNotEmpty 
+          ? _spouseNameController.text.trim() 
+          : null,
+      spouseDob: _spouseDobController.text.isNotEmpty 
+          ? _spouseDobController.text 
+          : null,
+      children: _children.isNotEmpty ? _children : null,
+      
+      // Address & Employment
+      address: _addressController.text.isNotEmpty 
+          ? _addressController.text.trim() 
+          : null,
+      city: _cityController.text.isNotEmpty 
+          ? _cityController.text.trim() 
+          : null,
+      country: _countryController.text.isNotEmpty 
+          ? _countryController.text.trim() 
+          : null,
+      occupation: _occupationController.text.isNotEmpty 
+          ? _occupationController.text.trim() 
+          : null,
+      employer: _employerController.text.isNotEmpty 
+          ? _employerController.text.trim() 
+          : null,
+      
+      // Financial Info
+      salary: _salaryController.text.isNotEmpty 
+          ? num.tryParse(_salaryController.text) 
+          : null,
+      contributionRate: _contributionRateController.text.isNotEmpty 
+          ? num.tryParse(_contributionRateController.text) 
+          : null,
+      retirementAge: _retirementAgeController.text.isNotEmpty 
+          ? int.tryParse(_retirementAgeController.text) 
+          : null,
     );
 
-    nameController.dispose();
-    dobController.dispose();
-    return result;
+    final success = await authProvider.register(request);
+
+    if (success && mounted) {
+      Fluttertoast.showToast(
+        msg: "Registration initiated! Please complete M-Pesa payment.",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: AppColors.info,
+        textColor: Colors.white,
+      );
+      
+      // Navigate to payment status screen or home
+      context.go(RouteNames.home);
+    } else if (mounted) {
+      _showErrorDialog(authProvider.errorMessage ?? 'Registration failed');
+    }
   }
 
   void _showErrorDialog(String message) {
@@ -290,411 +212,58 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // Custom Back Button - WHITE
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                    onPressed: () => context.pop(),
-                  ),
+              // Back Button & Progress
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                          onPressed: _previousStep,
+                        ),
+                        const Expanded(child: SizedBox()),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    StepIndicator(
+                      currentStep: _currentStep,
+                      totalSteps: 5,
+                      stepLabels: _stepLabels,
+                    ),
+                  ],
                 ),
               ),
+              
               // Content
               Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: screenWidth > 600 ? 40 : 24,
-                        vertical: 20,
-                      ),
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 400),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(height: screenHeight * 0.02),
-                              
-                              const AuthHeader(
-                                title: 'Create Account',
-                                subtitle: 'Sign up to start managing your pension',
-                              ),
-                              
-                              const SizedBox(height: 32),
-                              
-                              CustomTextField(
-                                controller: _firstNameController,
-                                labelText: 'First Name',
-                                hintText: 'Enter your first name',
-                                prefixIcon: Icons.person_outline,
-                                textInputAction: TextInputAction.next,
-                                textCapitalization: TextCapitalization.words,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your first name';
-                                  }
-                                  if (value.length < 2) {
-                                    return 'Name must be at least 2 characters';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              
-                              const SizedBox(height: 16),
-                              
-                              CustomTextField(
-                                controller: _lastNameController,
-                                labelText: 'Last Name',
-                                hintText: 'Enter your last name',
-                                prefixIcon: Icons.person_outline,
-                                textInputAction: TextInputAction.next,
-                                textCapitalization: TextCapitalization.words,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your last name';
-                                  }
-                                  if (value.length < 2) {
-                                    return 'Name must be at least 2 characters';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              
-                              const SizedBox(height: 16),
-                              
-                              // Combined Email or Phone Field
-                              CustomTextField(
-                                controller: _emailOrPhoneController,
-                                labelText: 'Email or Phone',
-                                hintText: 'Enter email or phone (07XXXXXXXX)',
-                                prefixIcon: Icons.alternate_email,
-                                keyboardType: TextInputType.text,
-                                textInputAction: TextInputAction.next,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your email or phone number';
-                                  }
-                                  
-                                  final isEmail = _isEmail(value);
-                                  final isPhone = _isPhone(value);
-                                  
-                                  if (!isEmail && !isPhone) {
-                                    return 'Enter a valid email or phone (07XXXXXXXX)';
-                                  }
-                                  
-                                  return null;
-                                },
-                              ),
-                              
-                              const SizedBox(height: 16),
-                              
-                              PasswordTextField(
-                                controller: _passwordController,
-                                textInputAction: TextInputAction.done,
-                                onFieldSubmitted: (_) => _handleRegister(),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter a password';
-                                  }
-                                  if (value.length < 8) {
-                                    return 'Password must be at least 8 characters';
-                                  }
-                                  if (!value.contains(RegExp(r'[A-Z]'))) {
-                                    return 'Password must contain at least one uppercase letter';
-                                  }
-                                  if (!value.contains(RegExp(r'[0-9]'))) {
-                                    return 'Password must contain at least one number';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              
-                              const SizedBox(height: 16),
-
-                              // Date of Birth
-                              GestureDetector(
-                                onTap: () async {
-                                  final picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime(1990, 1, 1),
-                                    firstDate: DateTime(1900),
-                                    lastDate: DateTime.now(),
-                                  );
-                                  if (picked != null) {
-                                    _dobController.text = picked.toIso8601String().split('T').first;
-                                    setState(() {});
-                                  }
-                                },
-                                child: AbsorbPointer(
-                                  child: CustomTextField(
-                                    controller: _dobController,
-                                    labelText: 'Date of Birth',
-                                    hintText: 'YYYY-MM-DD',
-                                    prefixIcon: Icons.cake_outlined,
-                                    readOnly: true,
-                                    validator: (value) {
-                                      // optional
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Gender & Marital Status
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: DropdownButtonFormField<String>(
-                                      value: _genderValue,
-                                      items: const [
-                                        DropdownMenuItem(value: 'Male', child: Text('Male')),
-                                        DropdownMenuItem(value: 'Female', child: Text('Female')),
-                                        DropdownMenuItem(value: 'Other', child: Text('Other')),
-                                      ],
-                                      decoration: const InputDecoration(
-                                        labelText: 'Gender',
-                                      ),
-                                      onChanged: (v) => setState(() => _genderValue = v),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: DropdownButtonFormField<String>(
-                                      value: _maritalStatusValue,
-                                      items: const [
-                                        DropdownMenuItem(value: 'Single', child: Text('Single')),
-                                        DropdownMenuItem(value: 'Married', child: Text('Married')),
-                                        DropdownMenuItem(value: 'Divorced', child: Text('Divorced')),
-                                        DropdownMenuItem(value: 'Widowed', child: Text('Widowed')),
-                                      ],
-                                      decoration: const InputDecoration(
-                                        labelText: 'Marital Status',
-                                      ),
-                                      onChanged: (v) => setState(() => _maritalStatusValue = v),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Spouse fields (shown when married)
-                              if (_maritalStatusValue == 'Married') ...[
-                                CustomTextField(
-                                  controller: _spouseNameController,
-                                  labelText: 'Spouse Name',
-                                  hintText: 'Enter spouse name',
-                                  prefixIcon: Icons.person_outline,
-                                  textInputAction: TextInputAction.next,
-                                  validator: (value) => null,
-                                ),
-                                const SizedBox(height: 12),
-                                GestureDetector(
-                                  onTap: () async {
-                                    final picked = await showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime(1990, 1, 1),
-                                      firstDate: DateTime(1900),
-                                      lastDate: DateTime.now(),
-                                    );
-                                    if (picked != null) {
-                                      _spouseDobController.text = picked.toIso8601String().split('T').first;
-                                      setState(() {});
-                                    }
-                                  },
-                                  child: AbsorbPointer(
-                                    child: CustomTextField(
-                                      controller: _spouseDobController,
-                                      labelText: 'Spouse DOB',
-                                      hintText: 'YYYY-MM-DD',
-                                      prefixIcon: Icons.cake_outlined,
-                                      readOnly: true,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                              ],
-
-                              // Children list
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  const Text('Children', style: TextStyle(fontWeight: FontWeight.w600)),
-                                  const SizedBox(height: 8),
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: _childrenList.map((c) {
-                                      return Chip(
-                                        label: Text('${c.name} (${c.dob})'),
-                                        onDeleted: () {
-                                          setState(() => _childrenList.remove(c));
-                                        },
-                                      );
-                                    }).toList(),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: TextButton.icon(
-                                      onPressed: () async {
-                                        final child = await _showAddChildDialog();
-                                        if (child != null) setState(() => _childrenList.add(child));
-                                      },
-                                      icon: const Icon(Icons.add_circle_outline, color: Colors.white),
-                                      label: const Text('Add Child', style: TextStyle(color: Colors.white)),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              CustomTextField(
-                                controller: _nationalIdController,
-                                labelText: 'National ID',
-                                hintText: 'Enter national ID',
-                                prefixIcon: Icons.contact_mail_outlined,
-                                textInputAction: TextInputAction.next,
-                                validator: (value) => null,
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              CustomTextField(
-                                controller: _addressController,
-                                labelText: 'Address',
-                                hintText: 'Enter your address',
-                                prefixIcon: Icons.home_outlined,
-                                textInputAction: TextInputAction.next,
-                                maxLines: 2,
-                                validator: (value) => null,
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: CustomTextField(
-                                      controller: _cityController,
-                                      labelText: 'City',
-                                      hintText: 'City',
-                                      prefixIcon: Icons.location_city_outlined,
-                                      validator: (v) => null,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: CustomTextField(
-                                      controller: _countryController,
-                                      labelText: 'Country',
-                                      hintText: 'Country',
-                                      prefixIcon: Icons.public_outlined,
-                                      validator: (v) => null,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              CustomTextField(
-                                controller: _occupationController,
-                                labelText: 'Occupation',
-                                hintText: 'Enter occupation',
-                                prefixIcon: Icons.work_outline,
-                                validator: (v) => null,
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              CustomTextField(
-                                controller: _employerController,
-                                labelText: 'Employer',
-                                hintText: 'Enter employer',
-                                prefixIcon: Icons.business_outlined,
-                                validator: (v) => null,
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: CustomTextField(
-                                      controller: _salaryController,
-                                      labelText: 'Salary',
-                                      hintText: '0',
-                                      prefixIcon: Icons.attach_money_outlined,
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                      validator: (v) => null,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: CustomTextField(
-                                      controller: _contributionController,
-                                      labelText: 'Contribution Rate (%)',
-                                      hintText: '0',
-                                      prefixIcon: Icons.trending_up_outlined,
-                                      keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9\.]'))],
-                                      validator: (v) => null,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              CustomTextField(
-                                controller: _retirementController,
-                                labelText: 'Retirement Age',
-                                hintText: '0',
-                                prefixIcon: Icons.calendar_today_outlined,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                validator: (v) => null,
-                              ),
-
-                              const SizedBox(height: 24),
-                              
-                              Consumer<AuthProvider>(
-                                builder: (context, authProvider, _) {
-                                  return CustomButton(
-                                    text: 'Create Account',
-                                    onPressed: _handleRegister,
-                                    isLoading: authProvider.isLoading,
-                                    backgroundColor: Colors.white,
-                                    textColor: AppColors.primary,
-                                  );
-                                },
-                              ),
-                              
-                              const SizedBox(height: 24),
-                              
-                              LinkText(
-                                normalText: 'Already have an account? ',
-                                linkText: 'Login',
-                                onTap: () => context.pop(),
-                                normalTextColor: Colors.white,
-                                linkTextColor: Colors.white,
-                              ),
-                              
-                              const SizedBox(height: 20),
-                            ],
-                          ),
-                        ),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth > 600 ? 40 : 24,
+                      vertical: 20,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: Column(
+                        children: [
+                          _buildCurrentStep(),
+                          const SizedBox(height: 32),
+                          _buildNavigationButtons(),
+                          if (_currentStep == 0) ...[
+                            const SizedBox(height: 24),
+                            LinkText(
+                              normalText: 'Already have an account? ',
+                              linkText: 'Login',
+                              onTap: () => context.pop(),
+                              normalTextColor: Colors.white,
+                              linkTextColor: Colors.white,
+                            ),
+                          ],
+                          const SizedBox(height: 20),
+                        ],
                       ),
                     ),
                   ),
@@ -704,6 +273,598 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCurrentStep() {
+    switch (_currentStep) {
+      case 0:
+        return _buildStep1BasicInfo();
+      case 1:
+        return _buildStep2PersonalDetails();
+      case 2:
+        return _buildStep3FamilyInfo();
+      case 3:
+        return _buildStep4AddressEmployment();
+      case 4:
+        return _buildStep5FinancialInfo();
+      default:
+        return const SizedBox();
+    }
+  }
+
+  // Step 1: Basic Info
+  Widget _buildStep1BasicInfo() {
+    return Form(
+      key: _formKeys[0],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Create Account',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 8),
+          
+          Text(
+            'Let\'s get started with your basic information',
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.white.withOpacity(0.9),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 32),
+          
+          CustomTextField(
+            controller: _firstNameController,
+            labelText: 'First Name',
+            hintText: 'Enter your first name',
+            prefixIcon: Icons.person_outline,
+            textInputAction: TextInputAction.next,
+            textCapitalization: TextCapitalization.words,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your first name';
+              }
+              if (value.length < 2) {
+                return 'Name must be at least 2 characters';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          CustomTextField(
+            controller: _lastNameController,
+            labelText: 'Last Name',
+            hintText: 'Enter your last name',
+            prefixIcon: Icons.person_outline,
+            textInputAction: TextInputAction.next,
+            textCapitalization: TextCapitalization.words,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your last name';
+              }
+              if (value.length < 2) {
+                return 'Name must be at least 2 characters';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          CustomTextField(
+            controller: _emailController,
+            labelText: 'Email Address',
+            hintText: 'Enter your email',
+            prefixIcon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your email';
+              }
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                return 'Please enter a valid email';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          PhoneTextField(
+            controller: _phoneController,
+            labelText: 'Phone Number',
+            hintText: '+254712345678',
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your phone number';
+              }
+              if (!RegExp(r'^\+254[17]\d{8}$').hasMatch(value)) {
+                return 'Enter valid Kenyan number (+254...)';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          PasswordTextField(
+            controller: _passwordController,
+            textInputAction: TextInputAction.done,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter a password';
+              }
+              if (value.length < 8) {
+                return 'Password must be at least 8 characters';
+              }
+              if (!value.contains(RegExp(r'[A-Z]'))) {
+                return 'Password must contain at least one uppercase letter';
+              }
+              if (!value.contains(RegExp(r'[0-9]'))) {
+                return 'Password must contain at least one number';
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Step 2: Personal Details
+  Widget _buildStep2PersonalDetails() {
+    return Form(
+      key: _formKeys[1],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Personal Details',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 8),
+          
+          Text(
+            'Tell us more about yourself',
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.white.withOpacity(0.9),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 32),
+          
+          DatePickerField(
+            controller: _dateOfBirthController,
+            labelText: 'Date of Birth',
+            hintText: 'Select your date of birth',
+            prefixIcon: Icons.cake_outlined,
+            lastDate: DateTime.now().subtract(const Duration(days: 6570)), // 18 years ago
+            initialDate: DateTime.now().subtract(const Duration(days: 9125)), // 25 years ago
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select your date of birth';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          DropdownField(
+            value: _gender,
+            labelText: 'Gender',
+            hintText: 'Select gender',
+            prefixIcon: Icons.wc_outlined,
+            items: const ['Male', 'Female', 'Other'],
+            onChanged: (value) => setState(() => _gender = value),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select your gender';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          DropdownField(
+            value: _maritalStatus,
+            labelText: 'Marital Status',
+            hintText: 'Select marital status',
+            prefixIcon: Icons.favorite_outline,
+            items: const ['Single', 'Married', 'Divorced', 'Widowed'],
+            onChanged: (value) => setState(() => _maritalStatus = value),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select your marital status';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          CustomTextField(
+            controller: _nationalIdController,
+            labelText: 'National ID',
+            hintText: 'Enter your national ID',
+            prefixIcon: Icons.badge_outlined,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your national ID';
+              }
+              if (value.length < 7) {
+                return 'Please enter a valid national ID';
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Step 3: Family Info
+  Widget _buildStep3FamilyInfo() {
+    return Form(
+      key: _formKeys[2],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Family Information',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 8),
+          
+          Text(
+            'Add your family details (optional)',
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.white.withOpacity(0.9),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 32),
+          
+          if (_maritalStatus == 'Married') ...[
+            CustomTextField(
+              controller: _spouseNameController,
+              labelText: 'Spouse Name',
+              hintText: 'Enter spouse name',
+              prefixIcon: Icons.person_outline,
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.next,
+            ),
+            
+            const SizedBox(height: 16),
+            
+            DatePickerField(
+              controller: _spouseDobController,
+              labelText: 'Spouse Date of Birth',
+              hintText: 'Select date',
+              prefixIcon: Icons.cake_outlined,
+              lastDate: DateTime.now(),
+            ),
+            
+            const SizedBox(height: 24),
+          ],
+          
+          ChildrenInputWidget(
+            children: _children,
+            onChildrenChanged: (children) {
+              setState(() => _children = children);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Step 4: Address & Employment
+  Widget _buildStep4AddressEmployment() {
+    return Form(
+      key: _formKeys[3],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Address & Employment',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 8),
+          
+          Text(
+            'Where do you live and work?',
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.white.withOpacity(0.9),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 32),
+          
+          CustomTextField(
+            controller: _addressController,
+            labelText: 'Address',
+            hintText: 'Enter your address',
+            prefixIcon: Icons.home_outlined,
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.next,
+            maxLines: 2,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your address';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          CustomTextField(
+            controller: _cityController,
+            labelText: 'City',
+            hintText: 'Enter your city',
+            prefixIcon: Icons.location_city_outlined,
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your city';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          CustomTextField(
+            controller: _countryController,
+            labelText: 'Country',
+            hintText: 'Enter your country',
+            prefixIcon: Icons.flag_outlined,
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your country';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          CustomTextField(
+            controller: _occupationController,
+            labelText: 'Occupation',
+            hintText: 'Enter your occupation',
+            prefixIcon: Icons.work_outline,
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your occupation';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          CustomTextField(
+            controller: _employerController,
+            labelText: 'Employer',
+            hintText: 'Enter your employer',
+            prefixIcon: Icons.business_outlined,
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.done,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your employer';
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Step 5: Financial Info
+  Widget _buildStep5FinancialInfo() {
+    return Form(
+      key: _formKeys[4],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Financial Details',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 8),
+          
+          Text(
+            'Final step - tell us about your finances',
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.white.withOpacity(0.9),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 32),
+          
+          NumericTextField(
+            controller: _salaryController,
+            labelText: 'Monthly Salary',
+            hintText: 'Enter your monthly salary',
+            prefixIcon: Icons.attach_money,
+            prefixText: 'KES ',
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your salary';
+              }
+              final salary = num.tryParse(value);
+              if (salary == null || salary <= 0) {
+                return 'Please enter a valid amount';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          NumericTextField(
+            controller: _contributionRateController,
+            labelText: 'Contribution Rate',
+            hintText: 'Enter contribution rate',
+            prefixIcon: Icons.percent_outlined,
+            suffixText: '%',
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter contribution rate';
+              }
+              final rate = num.tryParse(value);
+              if (rate == null || rate <= 0 || rate > 100) {
+                return 'Enter valid percentage (1-100)';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          NumericTextField(
+            controller: _retirementAgeController,
+            labelText: 'Retirement Age',
+            hintText: 'Enter planned retirement age',
+            prefixIcon: Icons.calendar_today_outlined,
+            suffixText: 'years',
+            allowDecimal: false,
+            textInputAction: TextInputAction.done,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter retirement age';
+              }
+              final age = int.tryParse(value);
+              if (age == null || age < 50 || age > 75) {
+                return 'Enter age between 50 and 75';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 24),
+          
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
+            ),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.info_outline,
+                  color: Colors.white,
+                  size: 32,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Upon registration, you\'ll receive an M-Pesa prompt to pay the registration fee.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.9),
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationButtons() {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        return Row(
+          children: [
+            if (_currentStep > 0)
+              Expanded(
+                child: CustomButton(
+                  text: 'Back',
+                  onPressed: authProvider.isLoading ? null : _previousStep,
+                  buttonType: ButtonType.outline,
+                  backgroundColor: Colors.white,
+                  textColor: Colors.white,
+                ),
+              ),
+            if (_currentStep > 0) const SizedBox(width: 16),
+            Expanded(
+              flex: _currentStep == 0 ? 1 : 1,
+              child: CustomButton(
+                text: _currentStep < 4 ? 'Next' : 'Complete Registration',
+                onPressed: _nextStep,
+                isLoading: authProvider.isLoading,
+                backgroundColor: Colors.white,
+                textColor: AppColors.primary,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
