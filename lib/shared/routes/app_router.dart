@@ -4,6 +4,7 @@ import '../../features/authentication/presentation/screens/login_screen.dart';
 import '../../features/authentication/presentation/screens/register_screen.dart';
 import '../../features/authentication/presentation/screens/forgot_password_screen.dart';
 import '../../features/authentication/presentation/screens/otp_verification_screen.dart';
+import '../../features/authentication/presentation/screens/payment_status_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/transactions/presentation/screens/transactions_screen.dart';
 import '../../features/transactions/presentation/screens/transaction_detail_screen.dart';
@@ -42,6 +43,16 @@ class AppRouter {
             phoneNumber: extra?['phoneNumber'] ?? '',
             verificationType: extra?['verificationType'] ?? 'login',
           );
+        },
+      ),
+      
+      // Payment Status Route (NEW)
+      GoRoute(
+        path: '${RouteNames.paymentStatus}/:transactionId',
+        name: RouteNames.paymentStatus,
+        builder: (context, state) {
+          final transactionId = state.pathParameters['transactionId']!;
+          return PaymentStatusScreen(transactionId: transactionId);
         },
       ),
       

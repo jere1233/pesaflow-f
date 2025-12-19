@@ -168,6 +168,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final initiation = await authProvider.register(request);
 
     if (initiation.success && mounted) {
+      final transactionId = initiation.transactionId ?? authProvider.registrationTransactionId;
+
       Fluttertoast.showToast(
         msg: initiation.message ?? 'Registration initiated! Please complete M-Pesa payment.',
         toastLength: Toast.LENGTH_LONG,
@@ -176,11 +178,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         textColor: Colors.white,
       );
 
-      // If there's a transactionId we can navigate to a status screen or home
-      if (initiation.transactionId != null && initiation.transactionId!.isNotEmpty) {
-        // For now navigate to home; you can implement a status screen if desired
-        context.go(RouteNames.home);
+      if (transactionId != null && transactionId.isNotEmpty) {
+        // Navigate to payment status screen
+        context.go('${RouteNames.paymentStatus}/$transactionId');
       } else {
+        // If no transaction ID, go to home
         context.go(RouteNames.home);
       }
     } else if (mounted) {

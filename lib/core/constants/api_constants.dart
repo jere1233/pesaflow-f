@@ -1,15 +1,18 @@
 class ApiConstants {
-  // Base URLs
-  static const String baseUrl = 'http://localhost:8000/api'; // Change for production
-  static const String prodBaseUrl = 'https://your-production-url.com/api';
+  // Base URL - Use 10.0.2.2 for Android Emulator to access localhost
+  // Change to your production URL when deploying
+  static const String baseUrl = 'http://10.0.2.2:5000/api';
   
-  // Timeout
+  // Alternative URLs (uncomment the one you need):
+  // static const String baseUrl = 'http://localhost:5000/api'; // For iOS Simulator
+  // static const String baseUrl = 'http://192.168.1.x:5000/api'; // For physical device (replace x with your IP)
+  // static const String baseUrl = 'https://your-production-url.com/api'; // For production
+  
+  // Timeouts
   static const int connectionTimeout = 30000; // 30 seconds
-  static const int receiveTimeout = 30000;
+  static const int receiveTimeout = 30000; // 30 seconds
   
-  // API Endpoints
-  
-  // Authentication
+  // Authentication Endpoints
   static const String login = '/auth/login';
   static const String register = '/auth/register';
   static const String logout = '/auth/logout';
@@ -17,52 +20,39 @@ class ApiConstants {
   static const String forgotPassword = '/auth/forgot-password';
   static const String resetPassword = '/auth/reset-password';
   static const String verifyOtp = '/auth/verify-otp';
-  static const String resendOtp = '/auth/resend-otp';
+  static const String sendOtp = '/auth/send-otp';
+  static const String currentUser = '/auth/me';
+  static const String checkRegisterStatus = '/auth/register/status'; // /{transactionId}
   
-  // User/Profile
-  static const String profile = '/user/profile';
-  static const String updateProfile = '/user/profile/update';
-  static const String changePassword = '/user/change-password';
-  static const String uploadAvatar = '/user/avatar/upload';
+  // User Endpoints
+  static const String updateProfile = '/users/profile';
+  static const String changePassword = '/users/change-password';
+  static const String deleteAccount = '/users/account';
   
-  // Account
-  static const String accounts = '/accounts';
-  static const String accountBalance = '/accounts/balance';
-  static const String accountStatement = '/accounts/statement';
-  
-  // Transactions
+  // Transaction Endpoints
   static const String transactions = '/transactions';
-  static const String transactionDetail = '/transactions'; // + /{id}
-  static const String recentTransactions = '/transactions/recent';
+  static const String transactionDetail = '/transactions'; // /{id}
+  static const String userTransactions = '/transactions/user'; // /{userId}
   
-  // Transfer
-  static const String transfer = '/transfer/send';
-  static const String beneficiaries = '/transfer/beneficiaries';
-  static const String addBeneficiary = '/transfer/beneficiaries/add';
-  static const String deleteBeneficiary = '/transfer/beneficiaries'; // + /{id}
-  static const String validateAccount = '/transfer/validate-account';
+  // Payment Endpoints
+  static const String initiatePayment = '/payments/initiate';
+  static const String checkPaymentStatus = '/payments/status'; // /{transactionId}
+  static const String paymentCallback = '/payments/callback';
   
-  // Payments
-  static const String payments = '/payments';
-  static const String payBill = '/payments/bill';
-  static const String mpesaPayment = '/payments/mpesa';
-  static const String bills = '/payments/bills';
-  static const String paymentHistory = '/payments/history';
+  // M-Pesa Endpoints
+  static const String mpesaSTKPush = '/mpesa/stk-push';
+  static const String mpesaCallback = '/mpesa/callback';
+  static const String mpesaQuery = '/mpesa/query';
   
-  // Notifications
+  // Other Endpoints
+  static const String health = '/health';
   static const String notifications = '/notifications';
-  static const String markAsRead = '/notifications'; // + /{id}/read
-  static const String markAllAsRead = '/notifications/read-all';
   
-  // Settings
-  static const String settings = '/settings';
-  static const String updateSettings = '/settings/update';
+  // Helper method to get full URL
+  static String getFullUrl(String endpoint) => baseUrl + endpoint;
   
-  // Support
-  static const String contactSupport = '/support/contact';
-  static const String faq = '/support/faq';
-  
-  // KYC
-  static const String uploadKyc = '/kyc/upload';
-  static const String kycStatus = '/kyc/status';
+  // Helper method to build URL with path parameter
+  static String buildUrl(String endpoint, String pathParam) {
+    return '$baseUrl$endpoint/$pathParam';
+  }
 }
