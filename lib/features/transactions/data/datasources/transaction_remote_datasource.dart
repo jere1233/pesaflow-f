@@ -90,9 +90,9 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
         // Handle different response structures
         Map<String, dynamic> transactionData;
         if (data is Map && data.containsKey('data')) {
-          transactionData = data['data'];
+          transactionData = Map<String, dynamic>.from(data['data']);
         } else if (data is Map) {
-          transactionData = data;
+          transactionData = Map<String, dynamic>.from(data);
         } else {
           throw ServerException('Invalid response format');
         }

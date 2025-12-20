@@ -34,7 +34,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } on UnauthorizedException catch (e) {
-      return Left(UnauthorizedFailure(e.message));
+      return Left(AuthenticationFailure(e.message));
     } on NotFoundException catch (e) {
       return Left(NotFoundFailure(e.message));
     } catch (e) {
@@ -52,7 +52,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } on UnauthorizedException catch (e) {
-      return Left(UnauthorizedFailure(e.message));
+      return Left(AuthenticationFailure(e.message));
     } on NotFoundException catch (e) {
       return Left(NotFoundFailure(e.message));
     } catch (e) {

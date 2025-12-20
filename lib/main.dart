@@ -17,6 +17,11 @@ import 'features/authentication/presentation/providers/auth_provider.dart';
 import 'features/dashboard/data/datasources/dashboard_remote_datasource.dart';
 import 'features/dashboard/data/repositories/dashboard_repository_impl.dart';
 import 'features/dashboard/presentation/providers/dashboard_provider.dart';
+import 'features/transactions/data/datasources/transaction_remote_datasource.dart';
+import 'features/transactions/data/repositories/transaction_repository_impl.dart';
+import 'features/transactions/domain/usecases/get_all_transactions_usecase.dart';
+import 'features/transactions/domain/usecases/get_transaction_detail_usecase.dart';
+import 'features/transactions/presentation/providers/transaction_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,11 +42,11 @@ void main() async {
     ),
   );
   
-  runApp(const PesaFlowApp());
+  runApp(const pension());
 }
 
-class PesaFlowApp extends StatelessWidget {
-  const PesaFlowApp({super.key});
+class pension extends StatelessWidget {
+  const pension({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +83,19 @@ class PesaFlowApp extends StatelessWidget {
             ),
           ),
         ),
+        // Transactions Provider
+        ChangeNotifierProvider(
+          create: (_) {
+            final transactionRemote = TransactionRemoteDataSourceImpl(dio: apiClient.dio);
+            final transactionRepo = TransactionRepositoryImpl(remoteDataSource: transactionRemote);
+            final getAll = GetAllTransactionsUseCase(transactionRepo);
+            final getDetail = GetTransactionDetailUseCase(transactionRepo);
+            return TransactionProvider(
+              getAllTransactionsUseCase: getAll,
+              getTransactionDetailUseCase: getDetail,
+            );
+          },
+        ),
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),
@@ -86,7 +104,7 @@ class PesaFlowApp extends StatelessWidget {
         builder: (context, child) {
           return MaterialApp.router(
             debugShowCheckedModeBanner: false,
-            title: 'PesaFlow',
+            title: 'Pension',
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: ThemeMode.system,
