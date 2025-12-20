@@ -1,7 +1,7 @@
 // lib/core/constants/api_constants.dart
 class ApiConstants {
-  // Base URL - Use 10.0.2.2 for Android Emulator to access localhost
-  static const String baseUrl = 'http://10.0.2.2:5000/api';
+  // Base URL - Updated to use Render backend
+  static const String baseUrl = 'https://pension-backend-rs4h.onrender.com/api';
   
   // Timeouts
   static const int connectionTimeout = 30000; // 30 seconds
@@ -9,6 +9,7 @@ class ApiConstants {
   
   // Authentication Endpoints
   static const String login = '/auth/login';
+  static const String loginOtp = '/auth/login/otp';
   static const String register = '/auth/register';
   static const String logout = '/auth/logout';
   static const String refreshToken = '/auth/refresh';
@@ -16,7 +17,7 @@ class ApiConstants {
   static const String resetPassword = '/auth/reset-password';
   static const String verifyOtp = '/auth/verify-otp';
   static const String sendOtp = '/auth/send-otp';
-  static const String currentUser = '/auth/me';
+  static const String currentUser = '/auth/verify'; 
   static const String checkRegisterStatus = '/auth/register/status';
   
   // Dashboard Endpoints (NEW)
