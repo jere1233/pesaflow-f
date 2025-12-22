@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../authentication/data/models/auth_response_model.dart';
+import '../../../authentication/data/models/register_request_model.dart';
 import 'date_picker_field.dart';
 import 'custom_text_field.dart';
 

@@ -1,11 +1,8 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'core/theme/app_theme.dart';
 import 'core/network/api_client.dart';
@@ -52,7 +49,6 @@ class pension extends StatelessWidget {
   Widget build(BuildContext context) {
     // Initialize dependencies
     final apiClient = ApiClient();
-    final storage = const FlutterSecureStorage();
     final logger = Logger();
     final networkInfo = NetworkInfoImpl(Connectivity());
     
@@ -69,7 +65,6 @@ class pension extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(
             authDataSource: authDataSource,
-            storage: storage,
           )..checkAuthStatus(),
         ),
         

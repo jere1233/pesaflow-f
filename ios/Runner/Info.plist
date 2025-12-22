@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>pension</string>
+	<string>Pension</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -45,5 +45,24 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- Permissions for iOS -->
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera to take profile photos and upload documents.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to select and upload images.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need permission to save photos to your library.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your location to provide location-based services.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>We use Face ID for secure authentication.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

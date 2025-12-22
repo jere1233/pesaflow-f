@@ -1,10 +1,13 @@
+///home/hp/JERE/pension-frontend/lib/core/network/api_client.dart
+
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../constants/api_constants.dart';
-import '../storage/secure_storage_helper.dart';
 
 class ApiClient {
   late Dio _dio;
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   ApiClient() {
     _dio = Dio(
@@ -32,7 +35,7 @@ class ApiClient {
     return InterceptorsWrapper(
       onRequest: (options, handler) async {
         // Add token to headers if available
-        final token = await SecureStorageHelper.read('auth_token');
+        final token = await _storage.read(key: 'auth_token');
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
@@ -48,7 +51,7 @@ class ApiClient {
             return handler.resolve(await _retry(error.requestOptions));
           } else {
             // Logout user
-            await SecureStorageHelper.deleteAll();
+            await _storage.deleteAll();
             // Navigate to login screen (implement navigation)
           }
         }
@@ -73,7 +76,7 @@ class ApiClient {
   // Refresh Token
   Future<bool> _refreshToken() async {
     try {
-      final refreshToken = await SecureStorageHelper.read('refresh_token');
+      final refreshToken = await _storage.read(key: 'refresh_token');
       if (refreshToken == null) return false;
 
       final response = await _dio.post(
@@ -85,8 +88,8 @@ class ApiClient {
         final newToken = response.data['access_token'];
         final newRefreshToken = response.data['refresh_token'];
         
-        await SecureStorageHelper.write('auth_token', newToken);
-        await SecureStorageHelper.write('refresh_token', newRefreshToken);
+        await _storage.write(key: 'auth_token', value: newToken);
+        await _storage.write(key: 'refresh_token', value: newRefreshToken);
         
         return true;
       }

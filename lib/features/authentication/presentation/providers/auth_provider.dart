@@ -1,10 +1,12 @@
-//home/hp/JERE/pension-frontend/lib/features/authentication/presentation/providers/auth_provider.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../../../core/storage/secure_storage_helper.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/models/auth_response_model.dart';
+import '../../data/models/login_request_model.dart';
+import '../../data/models/register_request_model.dart';
+import '../../data/models/register_initiation_response_model.dart';
+import '../../data/models/otp_verification_model.dart';
 import '../../domain/entities/user.dart';
 
 enum AuthStatus {
@@ -16,13 +18,10 @@ enum AuthStatus {
 
 class AuthProvider extends ChangeNotifier {
   final AuthRemoteDataSource _authDataSource;
-  final FlutterSecureStorage _storage;
 
   AuthProvider({
     required AuthRemoteDataSource authDataSource,
-    required FlutterSecureStorage storage,
-  })  : _authDataSource = authDataSource,
-        _storage = storage;
+  }) : _authDataSource = authDataSource;
 
   AuthStatus _status = AuthStatus.initial;
   User? _user;
@@ -45,7 +44,7 @@ class AuthProvider extends ChangeNotifier {
   // Check if user is logged in
   Future<void> checkAuthStatus() async {
     try {
-      final token = await _storage.read(key: 'auth_token');
+      final token = await SecureStorageHelper.read('auth_token');
       if (token != null) {
         _status = AuthStatus.authenticated;
         // Fetch user data
@@ -97,9 +96,9 @@ class AuthProvider extends ChangeNotifier {
 
       // Save transaction ID to storage for persistence
       if (_registrationTransactionId != null) {
-        await _storage.write(
-          key: 'pending_registration_tx',
-          value: _registrationTransactionId,
+        await SecureStorageHelper.write(
+          'pending_registration_tx',
+          _registrationTransactionId!,
         );
       }
 
@@ -129,7 +128,7 @@ class AuthProvider extends ChangeNotifier {
       _status = AuthStatus.authenticated;
       
       // Clear pending transaction
-      await _storage.delete(key: 'pending_registration_tx');
+      await SecureStorageHelper.delete('pending_registration_tx');
       _registrationTransactionId = null;
       _registrationCheckoutRequestId = null;
 
@@ -146,7 +145,7 @@ class AuthProvider extends ChangeNotifier {
   // Check for pending registration on app start
   Future<void> checkPendingRegistration() async {
     try {
-      final pendingTx = await _storage.read(key: 'pending_registration_tx');
+      final pendingTx = await SecureStorageHelper.read('pending_registration_tx');
       if (pendingTx != null) {
         _registrationTransactionId = pendingTx;
         // Optionally auto-check status
@@ -280,14 +279,14 @@ class AuthProvider extends ChangeNotifier {
 
   // Save tokens
   Future<void> _saveTokens(AuthResponseModel response) async {
-    await _storage.write(key: 'auth_token', value: response.accessToken);
-    await _storage.write(key: 'refresh_token', value: response.refreshToken);
+    await SecureStorageHelper.write('auth_token', response.accessToken);
+    await SecureStorageHelper.write('refresh_token', response.refreshToken);
   }
 
   // Clear tokens
   Future<void> _clearTokens() async {
-    await _storage.delete(key: 'auth_token');
-    await _storage.delete(key: 'refresh_token');
+    await SecureStorageHelper.delete('auth_token');
+    await SecureStorageHelper.delete('refresh_token');
   }
 
   // Set loading state

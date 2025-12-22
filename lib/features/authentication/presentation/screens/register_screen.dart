@@ -15,7 +15,7 @@ import '../widgets/custom_button.dart';
 import '../widgets/step_indicator.dart';
 import '../widgets/link_text.dart';
 import '../providers/auth_provider.dart';
-import '../../data/models/auth_response_model.dart';
+import '../../data/models/register_request_model.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

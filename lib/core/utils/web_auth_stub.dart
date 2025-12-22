@@ -1,3 +1,4 @@
+//home/hp/JERE/pension-frontend/lib/core/utils/web_auth_stub.dart
 // Stub for web platform where local_auth is not available
 class LocalAuthentication {
   Future<bool> canCheckBiometrics() async => false;
