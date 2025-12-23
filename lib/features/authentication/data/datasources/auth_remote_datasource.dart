@@ -10,7 +10,7 @@ import '../models/register_initiation_response_model.dart';
 import '../models/otp_verification_model.dart';
 
 class AuthRemoteDataSource {
-  final ApiClient apiClient;
+  final ApiClient apiClient;[]
 
   AuthRemoteDataSource({
     required this.apiClient,
