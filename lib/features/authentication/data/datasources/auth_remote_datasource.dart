@@ -1,5 +1,3 @@
-///home/hp/JERE/pension-frontend/lib/features/authentication/data/datasources/auth_remote_datasource.dart
-
 import 'dart:convert';
 import '../../../../core/network/api_client.dart';
 import '../models/auth_response_model.dart';
@@ -10,7 +8,7 @@ import '../models/register_initiation_response_model.dart';
 import '../models/otp_verification_model.dart';
 
 class AuthRemoteDataSource {
-  final ApiClient apiClient;[]
+  final ApiClient apiClient;
 
   AuthRemoteDataSource({
     required this.apiClient,
@@ -59,12 +57,9 @@ class AuthRemoteDataSource {
       final response = await apiClient.get('/auth/register/status/$transactionId');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // If the backend returns tokens/user after payment completion, try to parse AuthResponseModel
         final data = response.data is Map ? Map<String, dynamic>.from(response.data) : {};
 
-        // Some backends put token in `token` field
         if (data.containsKey('token') || data.containsKey('access_token')) {
-          // Normalize to AuthResponseModel
           final authJson = <String, dynamic>{
             'access_token': data['access_token'] ?? data['token'],
             'refresh_token': data['refresh_token'] ?? data['refreshToken'] ?? '',
@@ -75,7 +70,6 @@ class AuthRemoteDataSource {
           return AuthResponseModel.fromJson(authJson);
         }
 
-        // Otherwise, throw to indicate payment still pending or no tokens yet
         throw Exception(data['message'] ?? data['error'] ?? 'Payment pending');
       } else {
         throw Exception(response.data['message'] ?? 'Failed to check registration status');
@@ -88,17 +82,13 @@ class AuthRemoteDataSource {
   // Logout
   Future<void> logout() async {
     try {
-      // If you have a logout endpoint on backend
-      // await apiClient.post('/auth/logout');
-      
-      // For now, just return success as logout is handled client-side
       return;
     } catch (e) {
       throw Exception('Failed to logout: ${e.toString()}');
     }
   }
 
-  // Send OTP to email or phone (backend auto-detects)
+  // Send OTP
   Future<void> sendOtp(String identifier) async {
     try {
       final response = await apiClient.post(
@@ -114,8 +104,7 @@ class AuthRemoteDataSource {
     }
   }
 
-  /// Verify OTP from email or phone (backend auto-detects)
-  /// @param request - Contains identifier, otp, and verificationType
+  // Verify OTP
   Future<AuthResponseModel> verifyOtp(OtpVerificationModel request) async {
     try {
       final response = await apiClient.post(
@@ -132,8 +121,6 @@ class AuthRemoteDataSource {
       throw Exception('Failed to verify OTP: ${e.toString()}');
     }
   }
-
-  // ============================================================================
 
   // Forgot Password
   Future<void> forgotPassword(String email) async {

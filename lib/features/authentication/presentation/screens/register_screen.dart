@@ -1,3 +1,4 @@
+///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/register_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -771,10 +772,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           NumericTextField(
             controller: _contributionRateController,
             labelText: 'Contribution Rate',
-            hintText: 'Enter contribution rate',
+            hintText: 'Select or enter contribution rate',
             prefixIcon: Icons.percent_outlined,
             suffixText: '%',
             textInputAction: TextInputAction.next,
+            quickSelectOptions: const ['2', '5', '10', '15', '20'],
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Please enter contribution rate';
