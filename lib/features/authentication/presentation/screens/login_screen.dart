@@ -50,8 +50,8 @@ class _LoginScreenState extends State<LoginScreen> {
           textColor: Colors.white,
         );
         
-        // Navigate to OTP verification screen
-        context.push(
+        // ✅ FIXED: Use context.go() instead of context.push()
+        context.go(
           RouteNames.loginOtpVerification,
           extra: {
             'identifier': _identifierController.text.trim(),

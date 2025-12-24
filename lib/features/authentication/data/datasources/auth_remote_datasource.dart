@@ -1,5 +1,7 @@
+///home/hp/JERE/pension-frontend/lib/features/authentication/data/datasources/auth_remote_datasource.dart
 import 'dart:convert';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../models/auth_response_model.dart';
 import '../models/user_model.dart';
 import '../models/login_request_model.dart';
@@ -14,11 +16,15 @@ class AuthRemoteDataSource {
     required this.apiClient,
   });
 
+  // ============================================================================
+  // ✅ FIXED: Now using ApiConstants instead of hardcoded paths
+  // ============================================================================
+
   // Login Step 1: Send password, get OTP sent to email
   Future<Map<String, dynamic>> initiateLogin(LoginRequestModel request) async {
     try {
       final response = await apiClient.post(
-        '/auth/login',
+        ApiConstants.login, // ✅ Using constant instead of '/auth/login'
         data: request.toJson(),
       );
 
@@ -48,7 +54,7 @@ class AuthRemoteDataSource {
       }
 
       final response = await apiClient.post(
-        '/auth/login/otp',
+        ApiConstants.loginOtp, 
         data: data,
       );
 
@@ -73,7 +79,7 @@ class AuthRemoteDataSource {
   Future<RegisterInitiationResponseModel> register(RegisterRequestModel request) async {
     try {
       final response = await apiClient.post(
-        '/auth/register',
+        ApiConstants.register, // ✅ Using constant
         data: request.toJson(),
       );
 
@@ -91,7 +97,9 @@ class AuthRemoteDataSource {
   // Check registration payment/status
   Future<AuthResponseModel> checkRegisterStatus(String transactionId) async {
     try {
-      final response = await apiClient.get('/auth/register/status/$transactionId');
+      final response = await apiClient.get(
+        ApiConstants.getRegisterStatusUrl(transactionId), // ✅ Using helper method
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data is Map ? Map<String, dynamic>.from(response.data) : {};
@@ -119,6 +127,8 @@ class AuthRemoteDataSource {
   // Logout
   Future<void> logout() async {
     try {
+      // If backend has logout endpoint, uncomment:
+      // await apiClient.post(ApiConstants.logout);
       return;
     } catch (e) {
       throw Exception('Failed to logout: ${e.toString()}');
@@ -129,7 +139,7 @@ class AuthRemoteDataSource {
   Future<void> forgotPassword(String email) async {
     try {
       final response = await apiClient.post(
-        '/auth/forgot-password',
+        ApiConstants.forgotPassword, // ✅ Using constant
         data: {'email': email},
       );
 
@@ -145,7 +155,7 @@ class AuthRemoteDataSource {
   Future<void> resetPassword(String email, String otp, String newPassword) async {
     try {
       final response = await apiClient.post(
-        '/auth/reset-password',
+        ApiConstants.resetPassword, // ✅ Using constant
         data: {
           'email': email,
           'otp': otp,
@@ -164,7 +174,7 @@ class AuthRemoteDataSource {
   // Get Current User
   Future<UserModel> getCurrentUser() async {
     try {
-      final response = await apiClient.get('/auth/me');
+      final response = await apiClient.get(ApiConstants.currentUser); // ✅ Using constant
 
       if (response.statusCode == 200) {
         return UserModel.fromJson(response.data['user'] ?? response.data);
@@ -180,7 +190,7 @@ class AuthRemoteDataSource {
   Future<AuthResponseModel> refreshToken(String refreshToken) async {
     try {
       final response = await apiClient.post(
-        '/auth/refresh',
+        ApiConstants.refreshToken, // ✅ Using constant
         data: {'refresh_token': refreshToken},
       );
 
@@ -191,6 +201,58 @@ class AuthRemoteDataSource {
       }
     } catch (e) {
       throw Exception('Failed to refresh token: ${e.toString()}');
+    }
+  }
+
+  // Send OTP (for generic OTP sending)
+  Future<void> sendOtp(String identifier) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.sendOtp, // ✅ Using constant
+        data: {'identifier': identifier},
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(response.data['message'] ?? 'Failed to send OTP');
+      }
+    } catch (e) {
+      throw Exception('Failed to send OTP: ${e.toString()}');
+    }
+  }
+
+  // Verify OTP (for generic OTP verification)
+  Future<void> verifyOtp(String identifier, String otp, String verificationType) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.verifyOtp, // ✅ Using constant
+        data: {
+          'identifier': identifier,
+          'otp': otp,
+          'verificationType': verificationType,
+        },
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(response.data['message'] ?? 'OTP verification failed');
+      }
+    } catch (e) {
+      throw Exception('Failed to verify OTP: ${e.toString()}');
+    }
+  }
+
+  // Set Password (for setting/changing permanent password)
+  Future<void> setPassword(String newPassword) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.setPassword, // ✅ Using constant
+        data: {'newPassword': newPassword},
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(response.data['message'] ?? 'Failed to set password');
+      }
+    } catch (e) {
+      throw Exception('Failed to set password: ${e.toString()}');
     }
   }
 }
