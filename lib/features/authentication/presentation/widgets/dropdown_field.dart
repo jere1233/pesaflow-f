@@ -9,6 +9,7 @@ class DropdownField extends StatelessWidget {
   final List<String> items;
   final void Function(String?) onChanged;
   final String? Function(String?)? validator;
+  final String? displaySuffix;
 
   const DropdownField({
     super.key,
@@ -19,6 +20,7 @@ class DropdownField extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.validator,
+    this.displaySuffix,
   });
 
   @override
@@ -32,6 +34,22 @@ class DropdownField extends StatelessWidget {
         hintText: hintText,
         hintStyle: const TextStyle(color: Colors.black38),
         prefixIcon: Icon(prefixIcon, size: 20, color: Colors.black54),
+        suffixIcon: displaySuffix != null
+            ? Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Center(
+                  widthFactor: 0.0,
+                  child: Text(
+                    displaySuffix!,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              )
+            : null,
         filled: true,
         fillColor: Colors.grey[50],
         border: OutlineInputBorder(
@@ -63,7 +81,7 @@ class DropdownField extends StatelessWidget {
         return DropdownMenuItem<String>(
           value: item,
           child: Text(
-            item,
+            displaySuffix != null ? '$item$displaySuffix' : item,
             style: const TextStyle(
               fontSize: 15,
               color: Colors.black87,

@@ -1,10 +1,10 @@
-//home/hp/JERE/pension-frontend/lib/shared/routes/route_names.dart
 class RouteNames {
   // Authentication Routes
   static const String login = '/login';
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
   static const String otpVerification = '/otp-verification';
+  static const String loginOtpVerification = '/login-otp-verification'; 
   static const String paymentStatus = '/payment-status'; 
   
   // Main App Routes

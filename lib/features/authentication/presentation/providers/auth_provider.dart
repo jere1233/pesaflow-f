@@ -6,7 +6,6 @@ import '../../data/models/auth_response_model.dart';
 import '../../data/models/login_request_model.dart';
 import '../../data/models/register_request_model.dart';
 import '../../data/models/register_initiation_response_model.dart';
-import '../../data/models/otp_verification_model.dart';
 import '../../domain/entities/user.dart';
 
 enum AuthStatus {
@@ -14,6 +13,8 @@ enum AuthStatus {
   authenticated,
   unauthenticated,
   loading,
+  awaitingOtp,
+  tempPasswordRequired,
 }
 
 class AuthProvider extends ChangeNotifier {
@@ -28,6 +29,10 @@ class AuthProvider extends ChangeNotifier {
   String? _errorMessage;
   bool _isLoading = false;
   
+  // Login flow tracking
+  String? _pendingLoginIdentifier;
+  String? _pendingLoginOtp;
+  
   // Registration payment tracking
   String? _registrationTransactionId;
   String? _registrationCheckoutRequestId;
@@ -38,6 +43,7 @@ class AuthProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _status == AuthStatus.authenticated;
+  String? get pendingLoginIdentifier => _pendingLoginIdentifier;
   String? get registrationTransactionId => _registrationTransactionId;
   String? get registrationCheckoutRequestId => _registrationCheckoutRequestId;
 
@@ -47,7 +53,6 @@ class AuthProvider extends ChangeNotifier {
       final token = await SecureStorageHelper.read('auth_token');
       if (token != null) {
         _status = AuthStatus.authenticated;
-        // Fetch user data
         await getCurrentUser();
       } else {
         _status = AuthStatus.unauthenticated;
@@ -58,29 +63,102 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Login
-  Future<bool> login(String email, String password) async {
+  // Login Step 1: Initiate login (sends OTP)
+  Future<bool> initiateLogin(String identifier, String password) async {
     try {
       _setLoading(true);
       _errorMessage = null;
 
-      final request = LoginRequestModel(identifier: email, password: password);
-      final response = await _authDataSource.login(request);
+      final request = LoginRequestModel(identifier: identifier, password: password);
+      final response = await _authDataSource.initiateLogin(request);
 
-      await _saveTokens(response);
-      _user = response.user.toEntity();
-      _status = AuthStatus.authenticated;
+      if (response['success'] == true) {
+        _pendingLoginIdentifier = identifier;
+        _status = AuthStatus.awaitingOtp;
+        _setLoading(false);
+        return true;
+      }
 
       _setLoading(false);
-      return true;
+      return false;
     } catch (e) {
       _setLoading(false);
-      _errorMessage = e.toString().replaceAll('Exception: ', '');
-      _status = AuthStatus.unauthenticated;
+      _errorMessage = e.toString().replaceAll('Exception: ', '').replaceAll('Failed to initiate login: ', '');
       notifyListeners();
       return false;
     }
   }
+
+  // Login Step 2: Verify OTP (and set permanent password if needed)
+  Future<bool> verifyLoginOtp(String otp, {String? newPassword}) async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      if (_pendingLoginIdentifier == null) {
+        throw Exception('No pending login session');
+      }
+
+      final response = await _authDataSource.loginWithOtp(
+        _pendingLoginIdentifier!,
+        otp,
+        newPassword: newPassword,
+      );
+
+      await _saveTokens(response);
+      _user = response.user.toEntity();
+      _status = AuthStatus.authenticated;
+      _pendingLoginIdentifier = null;
+      _pendingLoginOtp = null;
+
+      _setLoading(false);
+      return true;
+    } on Exception catch (e) {
+      final errorMsg = e.toString();
+      
+      if (errorMsg.contains('TEMP_PASSWORD_REQUIRED')) {
+        // User needs to set permanent password
+        _pendingLoginOtp = otp;
+        _status = AuthStatus.tempPasswordRequired;
+        _setLoading(false);
+        notifyListeners();
+        return false;
+      }
+
+      _setLoading(false);
+      _errorMessage = errorMsg.replaceAll('Exception: ', '').replaceAll('Failed to verify OTP: ', '');
+      _status = AuthStatus.awaitingOtp;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // LEGACY METHODS - For backward compatibility with old OTP screen
+  // ============================================================================
+  
+  /// Send OTP (Legacy - redirects to initiateLogin for login flow)
+  Future<bool> sendOtp(String identifier) async {
+    // This is a placeholder for the old OTP screen
+    // In reality, OTP is sent during initiateLogin
+    _errorMessage = "Please use the login screen to initiate OTP";
+    notifyListeners();
+    return false;
+  }
+
+  /// Verify OTP (Legacy - redirects to verifyLoginOtp)
+  Future<bool> verifyOtp(String identifier, String otp, String verificationType) async {
+    if (verificationType == 'login') {
+      _pendingLoginIdentifier = identifier;
+      return await verifyLoginOtp(otp);
+    }
+    
+    _errorMessage = "Invalid verification type";
+    notifyListeners();
+    return false;
+  }
+
+  // ============================================================================
 
   // Register (initiate payment + registration)
   Future<RegisterInitiationResponseModel> register(RegisterRequestModel request) async {
@@ -90,11 +168,9 @@ class AuthProvider extends ChangeNotifier {
 
       final response = await _authDataSource.register(request);
 
-      // Store transaction details for status checking
       _registrationTransactionId = response.transactionId;
       _registrationCheckoutRequestId = response.checkoutRequestId;
 
-      // Save transaction ID to storage for persistence
       if (_registrationTransactionId != null) {
         await SecureStorageHelper.write(
           'pending_registration_tx',
@@ -103,7 +179,6 @@ class AuthProvider extends ChangeNotifier {
       }
 
       _setLoading(false);
-
       return response;
     } catch (e) {
       _setLoading(false);
@@ -122,12 +197,10 @@ class AuthProvider extends ChangeNotifier {
 
       final response = await _authDataSource.checkRegisterStatus(transactionId);
 
-      // If successful, save tokens and user data
       await _saveTokens(response);
       _user = response.user.toEntity();
       _status = AuthStatus.authenticated;
       
-      // Clear pending transaction
       await SecureStorageHelper.delete('pending_registration_tx');
       _registrationTransactionId = null;
       _registrationCheckoutRequestId = null;
@@ -142,20 +215,6 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Check for pending registration on app start
-  Future<void> checkPendingRegistration() async {
-    try {
-      final pendingTx = await SecureStorageHelper.read('pending_registration_tx');
-      if (pendingTx != null) {
-        _registrationTransactionId = pendingTx;
-        // Optionally auto-check status
-        await checkRegistrationStatus(pendingTx);
-      }
-    } catch (e) {
-      // Ignore errors, user can manually check
-    }
-  }
-
   // Logout
   Future<void> logout() async {
     try {
@@ -164,6 +223,8 @@ class AuthProvider extends ChangeNotifier {
       await _clearTokens();
       _user = null;
       _status = AuthStatus.unauthenticated;
+      _pendingLoginIdentifier = null;
+      _pendingLoginOtp = null;
       _setLoading(false);
     } catch (e) {
       _setLoading(false);
@@ -171,62 +232,6 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  // ============================================================================
-  // 🚀 UNIFIED OTP METHODS - Work with both email and phone
-  // ============================================================================
-
-  /// Send OTP to email or phone (automatically detected by backend)
-  /// @param identifier - Can be email (user@example.com) or phone (+254712345678)
-  Future<bool> sendOtp(String identifier) async {
-    try {
-      _setLoading(true);
-      _errorMessage = null;
-
-      await _authDataSource.sendOtp(identifier);
-
-      _setLoading(false);
-      return true;
-    } catch (e) {
-      _setLoading(false);
-      _errorMessage = e.toString().replaceAll('Exception: ', '');
-      notifyListeners();
-      return false;
-    }
-  }
-
-  /// Verify OTP from email or phone (automatically detected by backend)
-  /// @param identifier - Can be email or phone number
-  /// @param otp - 6-digit OTP code
-  /// @param verificationType - Type of verification (login, register, etc.)
-  Future<bool> verifyOtp(String identifier, String otp, String verificationType) async {
-    try {
-      _setLoading(true);
-      _errorMessage = null;
-
-      final request = OtpVerificationModel(
-        identifier: identifier,
-        otp: otp,
-        verificationType: verificationType,
-      );
-
-      final response = await _authDataSource.verifyOtp(request);
-
-      await _saveTokens(response);
-      _user = response.user.toEntity();
-      _status = AuthStatus.authenticated;
-
-      _setLoading(false);
-      return true;
-    } catch (e) {
-      _setLoading(false);
-      _errorMessage = e.toString().replaceAll('Exception: ', '');
-      notifyListeners();
-      return false;
-    }
-  }
-
-  // ============================================================================
 
   // Forgot Password
   Future<bool> forgotPassword(String email) async {
@@ -247,8 +252,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Reset Password
-  Future<bool> resetPassword(
-      String email, String otp, String newPassword) async {
+  Future<bool> resetPassword(String email, String otp, String newPassword) async {
     try {
       _setLoading(true);
       _errorMessage = null;

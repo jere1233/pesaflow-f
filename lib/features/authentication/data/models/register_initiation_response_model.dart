@@ -1,3 +1,5 @@
+///home/hp/JERE/pension-frontend/lib/features/authentication/data/models/register_initiation_response_model.dart
+
 class RegisterInitiationResponseModel {
   final bool success;
   final String status;

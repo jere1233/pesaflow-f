@@ -1,3 +1,5 @@
+///home/hp/JERE/pension-frontend/lib/features/authentication/data/models/register_request_model.dart
+
 class RegisterRequestModel {
   final String email;
   final String password;

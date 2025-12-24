@@ -1,6 +1,3 @@
-
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/login_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -23,13 +20,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _identifierController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -38,20 +35,29 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       final authProvider = context.read<AuthProvider>();
       
-      final success = await authProvider.login(
-        _emailController.text.trim(),
+      // Step 1: Initiate login (sends OTP to email)
+      final success = await authProvider.initiateLogin(
+        _identifierController.text.trim(),
         _passwordController.text,
       );
 
       if (success && mounted) {
         Fluttertoast.showToast(
-          msg: "Login successful!",
-          toastLength: Toast.LENGTH_SHORT,
+          msg: "OTP sent to your email. Please check your inbox.",
+          toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.BOTTOM,
-          backgroundColor: AppColors.success,
+          backgroundColor: AppColors.info,
           textColor: Colors.white,
         );
-        context.go(RouteNames.home);
+        
+        // Navigate to OTP verification screen
+        context.push(
+          RouteNames.loginOtpVerification,
+          extra: {
+            'identifier': _identifierController.text.trim(),
+            'verificationType': 'login',
+          },
+        );
       } else if (mounted) {
         _showErrorDialog(authProvider.errorMessage ?? 'Login failed');
       }
@@ -111,18 +117,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 40),
                         
                         CustomTextField(
-                          controller: _emailController,
-                          labelText: 'Email Address',
-                          hintText: 'Enter your email',
-                          prefixIcon: Icons.email_outlined,
-                          keyboardType: TextInputType.emailAddress,
+                          controller: _identifierController,
+                          labelText: 'Email, Username, or Phone',
+                          hintText: 'Enter email, username, or phone number',
+                          prefixIcon: Icons.person_outline,
+                          keyboardType: TextInputType.text,
                           textInputAction: TextInputAction.next,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                              return 'Please enter a valid email';
+                              return 'Please enter your email, username, or phone';
                             }
                             return null;
                           },

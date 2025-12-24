@@ -5,6 +5,7 @@ import '../../features/authentication/presentation/screens/login_screen.dart';
 import '../../features/authentication/presentation/screens/register_screen.dart';
 import '../../features/authentication/presentation/screens/forgot_password_screen.dart';
 import '../../features/authentication/presentation/screens/otp_verification_screen.dart';
+import '../../features/authentication/presentation/screens/login_otp_verification_screen.dart';
 import '../../features/authentication/presentation/screens/payment_status_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart'; 
 import '../../features/transactions/presentation/screens/transactions_screen.dart';
@@ -35,8 +36,24 @@ class AppRouter {
         name: RouteNames.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
+      
       // ============================================================================
-      // 🔧 UPDATED: OTP route now uses 'identifier' instead of 'phoneNumber'
+      // 🆕 NEW: Login OTP Verification (with optional password setting)
+      // ============================================================================
+      GoRoute(
+        path: RouteNames.loginOtpVerification,
+        name: RouteNames.loginOtpVerification,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return LoginOtpVerificationScreen(
+            identifier: extra?['identifier'] ?? '',
+            verificationType: extra?['verificationType'] ?? 'login',
+          );
+        },
+      ),
+      
+      // ============================================================================
+      // 🔧 EXISTING: OTP Verification (for registration, forgot password, etc.)
       // ============================================================================
       GoRoute(
         path: RouteNames.otpVerification,
@@ -44,8 +61,8 @@ class AppRouter {
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
           return OtpVerificationScreen(
-            identifier: extra?['identifier'] ?? '', // ⬅️ UPDATED: Changed from phoneNumber
-            verificationType: extra?['verificationType'] ?? 'login',
+            identifier: extra?['identifier'] ?? '',
+            verificationType: extra?['verificationType'] ?? 'register',
           );
         },
       ),
@@ -61,12 +78,12 @@ class AppRouter {
       ),
       
       // ============================================================================
-      // 🎯 UPDATED: Dashboard (formerly Home)
+      // 🎯 Dashboard (Home)
       // ============================================================================
       GoRoute(
-        path: RouteNames.home, // Keeps /home route for compatibility
+        path: RouteNames.home,
         name: RouteNames.home,
-        builder: (context, state) => const DashboardScreen(), // ⬅️ UPDATED
+        builder: (context, state) => const DashboardScreen(),
       ),
       
       // Transaction Routes
@@ -126,6 +143,11 @@ class AppRouter {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
+            Text(
+              'Route: ${state.uri.path}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 16),
             TextButton(
               onPressed: () => context.go(RouteNames.home),
               child: const Text('Go to Dashboard'),

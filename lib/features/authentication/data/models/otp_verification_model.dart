@@ -1,5 +1,6 @@
+///home/hp/JERE/pension-frontend/lib/features/authentication/data/models/otp_verification_model.dart
 class OtpVerificationModel {
-  final String identifier; // Can be email OR phone number
+  final String identifier; 
   final String otp;
   final String verificationType;
 

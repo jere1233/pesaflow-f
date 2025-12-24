@@ -14,8 +14,8 @@ class AuthRemoteDataSource {
     required this.apiClient,
   });
 
-  // Login
-  Future<AuthResponseModel> login(LoginRequestModel request) async {
+  // Login Step 1: Send password, get OTP sent to email
+  Future<Map<String, dynamic>> initiateLogin(LoginRequestModel request) async {
     try {
       final response = await apiClient.post(
         '/auth/login',
@@ -23,12 +23,49 @@ class AuthRemoteDataSource {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return AuthResponseModel.fromJson(response.data);
+        return {
+          'success': response.data['success'] ?? true,
+          'message': response.data['message'] ?? 'OTP sent to your email',
+        };
       } else {
-        throw Exception(response.data['message'] ?? 'Login failed');
+        throw Exception(response.data['message'] ?? response.data['error'] ?? 'Login failed');
       }
     } catch (e) {
-      throw Exception('Failed to login: ${e.toString()}');
+      throw Exception('Failed to initiate login: ${e.toString()}');
+    }
+  }
+
+  // Login Step 2: Verify OTP (and optionally set permanent password)
+  Future<AuthResponseModel> loginWithOtp(String identifier, String otp, {String? newPassword}) async {
+    try {
+      final data = {
+        'identifier': identifier,
+        'otp': otp,
+      };
+      
+      if (newPassword != null) {
+        data['newPassword'] = newPassword;
+      }
+
+      final response = await apiClient.post(
+        '/auth/login/otp',
+        data: data,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+        
+        // Check if temporary password needs to be set
+        if (responseData['temporary'] == true) {
+          throw Exception('TEMP_PASSWORD_REQUIRED');
+        }
+        
+        return AuthResponseModel.fromJson(responseData);
+      } else {
+        throw Exception(response.data['message'] ?? 'OTP verification failed');
+      }
+    } catch (e) {
+      throw Exception('Failed to verify OTP: ${e.toString()}');
     }
   }
 
@@ -85,40 +122,6 @@ class AuthRemoteDataSource {
       return;
     } catch (e) {
       throw Exception('Failed to logout: ${e.toString()}');
-    }
-  }
-
-  // Send OTP
-  Future<void> sendOtp(String identifier) async {
-    try {
-      final response = await apiClient.post(
-        '/auth/send-otp',
-        data: {'identifier': identifier},
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception(response.data['message'] ?? 'Failed to send OTP');
-      }
-    } catch (e) {
-      throw Exception('Failed to send OTP: ${e.toString()}');
-    }
-  }
-
-  // Verify OTP
-  Future<AuthResponseModel> verifyOtp(OtpVerificationModel request) async {
-    try {
-      final response = await apiClient.post(
-        '/auth/verify-otp',
-        data: request.toJson(),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return AuthResponseModel.fromJson(response.data);
-      } else {
-        throw Exception(response.data['message'] ?? 'OTP verification failed');
-      }
-    } catch (e) {
-      throw Exception('Failed to verify OTP: ${e.toString()}');
     }
   }
 

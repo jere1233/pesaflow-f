@@ -1,4 +1,3 @@
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/register_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -56,7 +55,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   
   // Step 5: Financial Info
   final _salaryController = TextEditingController();
-  final _contributionRateController = TextEditingController();
+  String? _contributionRate; // Changed to String dropdown
   final _retirementAgeController = TextEditingController();
 
   final List<String> _stepLabels = [
@@ -84,7 +83,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _occupationController.dispose();
     _employerController.dispose();
     _salaryController.dispose();
-    _contributionRateController.dispose();
     _retirementAgeController.dispose();
     super.dispose();
   }
@@ -158,8 +156,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       salary: _salaryController.text.isNotEmpty 
           ? num.tryParse(_salaryController.text) 
           : null,
-      contributionRate: _contributionRateController.text.isNotEmpty 
-          ? num.tryParse(_contributionRateController.text) 
+      contributionRate: _contributionRate != null 
+          ? num.tryParse(_contributionRate!) 
           : null,
       retirementAge: _retirementAgeController.text.isNotEmpty 
           ? int.tryParse(_retirementAgeController.text) 
@@ -769,21 +767,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
           
           const SizedBox(height: 16),
           
-          NumericTextField(
-            controller: _contributionRateController,
+          DropdownField(
+            value: _contributionRate,
             labelText: 'Contribution Rate',
-            hintText: 'Select or enter contribution rate',
+            hintText: 'Select contribution rate',
             prefixIcon: Icons.percent_outlined,
-            suffixText: '%',
-            textInputAction: TextInputAction.next,
-            quickSelectOptions: const ['2', '5', '10', '15', '20'],
+            items: const ['2', '5', '10', '15', '20'],
+            onChanged: (value) => setState(() => _contributionRate = value),
+            displaySuffix: '%',
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter contribution rate';
-              }
-              final rate = num.tryParse(value);
-              if (rate == null || rate <= 0 || rate > 100) {
-                return 'Enter valid percentage (1-100)';
+                return 'Please select a contribution rate';
               }
               return null;
             },

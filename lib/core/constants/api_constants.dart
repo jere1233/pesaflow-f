@@ -1,11 +1,10 @@
 // lib/core/constants/api_constants.dart
 class ApiConstants {
-  // Base URL - Updated to use Render backend
-  static const String baseUrl = 'https://pension-backend-rs4h.onrender.com/api';
+  static const String baseUrl = 'http://10.0.2.2:5000/api';
   
   // Timeouts
-  static const int connectionTimeout = 30000; // 30 seconds
-  static const int receiveTimeout = 30000; // 30 seconds
+  static const int connectionTimeout = 30000; 
+  static const int receiveTimeout = 30000; 
   
   // Authentication Endpoints
   static const String login = '/auth/login';
@@ -20,7 +19,7 @@ class ApiConstants {
   static const String currentUser = '/auth/verify'; 
   static const String checkRegisterStatus = '/auth/register/status';
   
-  // Dashboard Endpoints (NEW)
+  // Dashboard Endpoints
   static const String dashboardUser = '/dashboard/user';
   static const String dashboardTransactions = '/dashboard/transactions';
   static const String dashboardStats = '/dashboard/stats';
