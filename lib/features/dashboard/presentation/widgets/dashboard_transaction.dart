@@ -24,33 +24,19 @@ class DashboardTransaction extends Equatable {
   });
 
   // Helper getters
-  bool get isDebit => type.toLowerCase() == 'debit' || 
-                      type.toLowerCase() == 'send' ||
-                      type.toLowerCase() == 'contribution';
-  
-  bool get isCredit => type.toLowerCase() == 'credit' || 
-                       type.toLowerCase() == 'receive' ||
-                       type.toLowerCase() == 'incoming';
-  
+  bool get isDebit => type.toLowerCase() == 'debit' || type.toLowerCase() == 'contribution';
+  bool get isCredit => type.toLowerCase() == 'credit' || type.toLowerCase() == 'incoming';
   bool get isCompleted => status.toLowerCase() == 'completed';
   bool get isPending => status.toLowerCase() == 'pending';
-  bool get isFailed => status.toLowerCase() == 'failed';
-
+  
   String get displayName {
-    // Priority: description > recipientName > senderName > fallback
     if (description != null && description!.isNotEmpty) {
       return description!;
     }
-    if (isDebit && recipientName != null && recipientName!.isNotEmpty) {
-      return recipientName!;
+    if (isDebit) {
+      return recipientName ?? 'Contribution';
     }
-    if (isCredit && senderName != null && senderName!.isNotEmpty) {
-      return senderName!;
-    }
-    // Fallback based on type
-    if (isDebit) return 'Contribution';
-    if (isCredit) return 'Incoming';
-    return 'Transaction';
+    return senderName ?? 'Incoming';
   }
 
   @override
