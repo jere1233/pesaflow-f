@@ -1,3 +1,4 @@
+///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/register_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +15,7 @@ import '../widgets/children_input_widget.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/step_indicator.dart';
 import '../widgets/link_text.dart';
+import '../widgets/terms_acceptance_checkbox.dart';
 import '../providers/auth_provider.dart';
 import '../../data/models/register_request_model.dart';
 
@@ -31,6 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // Step 1: Basic Info
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -55,8 +58,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   
   // Step 5: Financial Info
   final _salaryController = TextEditingController();
-  String? _contributionRate; // Changed to String dropdown
+  String? _contributionRate;
   final _retirementAgeController = TextEditingController();
+
+  // 🆕 Terms and Conditions acceptance
+  bool _acceptedTerms = false;
+  String? _termsError;
 
   final List<String> _stepLabels = [
     'Basic Info',
@@ -67,9 +74,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Fetch T&C when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().fetchTermsAndConditions();
+    });
+  }
+
+  @override
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
+    _usernameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
@@ -92,6 +109,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (_currentStep < 4) {
         setState(() => _currentStep++);
       } else {
+        // Final step - validate terms acceptance
+        if (!_acceptedTerms) {
+          setState(() {
+            _termsError = 'You must accept the Terms and Conditions to continue';
+          });
+          return;
+        }
         _handleRegister();
       }
     }
@@ -105,6 +129,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  void _handleTermsTap() {
+    final authProvider = context.read<AuthProvider>();
+    final terms = authProvider.termsAndConditions;
+
+    if (terms != null && terms.body.isNotEmpty) {
+      context.push(
+        RouteNames.termsAndConditions,
+        extra: {
+          'htmlContent': terms.body,
+          'showAcceptButton': false,
+        },
+      );
+    } else {
+      // Terms not loaded yet
+      Fluttertoast.showToast(
+        msg: "Loading Terms and Conditions...",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: AppColors.info,
+        textColor: Colors.white,
+      );
+      
+      authProvider.fetchTermsAndConditions().then((success) {
+        if (success && mounted) {
+          _handleTermsTap(); // Retry after loading
+        }
+      });
+    }
+  }
+
   Future<void> _handleRegister() async {
     final authProvider = context.read<AuthProvider>();
     
@@ -113,6 +167,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       email: _emailController.text.trim(),
       password: _passwordController.text,
       phone: _phoneController.text.trim(),
+      username: _usernameController.text.trim(),
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
       
@@ -362,6 +417,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
               }
               if (value.length < 2) {
                 return 'Name must be at least 2 characters';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          CustomTextField(
+            controller: _usernameController,
+            labelText: 'Username',
+            hintText: 'Choose a unique username',
+            prefixIcon: Icons.alternate_email,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter a username';
+              }
+              if (value.length < 3) {
+                return 'Username must be at least 3 characters';
+              }
+              if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
+                return 'Username can only contain letters, numbers, and underscores';
               }
               return null;
             },
@@ -803,6 +880,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
               }
               return null;
             },
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // 🆕 NEW: Terms and Conditions Checkbox
+          TermsAcceptanceCheckbox(
+            value: _acceptedTerms,
+            onChanged: (value) {
+              setState(() {
+                _acceptedTerms = value ?? false;
+                if (_acceptedTerms) {
+                  _termsError = null; // Clear error when accepted
+                }
+              });
+            },
+            onTermsTap: _handleTermsTap,
+            errorText: _termsError,
           ),
           
           const SizedBox(height: 24),

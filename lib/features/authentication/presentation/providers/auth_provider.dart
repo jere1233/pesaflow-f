@@ -1,3 +1,4 @@
+///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/providers/auth_provider.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../core/storage/secure_storage_helper.dart';
@@ -6,6 +7,7 @@ import '../../data/models/auth_response_model.dart';
 import '../../data/models/login_request_model.dart';
 import '../../data/models/register_request_model.dart';
 import '../../data/models/register_initiation_response_model.dart';
+import '../../data/models/terms_and_conditions_model.dart';
 import '../../domain/entities/user.dart';
 
 enum AuthStatus {
@@ -37,6 +39,10 @@ class AuthProvider extends ChangeNotifier {
   String? _registrationTransactionId;
   String? _registrationCheckoutRequestId;
 
+  // Terms and Conditions
+  TermsAndConditionsModel? _termsAndConditions;
+  bool _isLoadingTerms = false;
+
   // Getters
   AuthStatus get status => _status;
   User? get user => _user;
@@ -46,6 +52,8 @@ class AuthProvider extends ChangeNotifier {
   String? get pendingLoginIdentifier => _pendingLoginIdentifier;
   String? get registrationTransactionId => _registrationTransactionId;
   String? get registrationCheckoutRequestId => _registrationCheckoutRequestId;
+  TermsAndConditionsModel? get termsAndConditions => _termsAndConditions;
+  bool get isLoadingTerms => _isLoadingTerms;
 
   // Check if user is logged in
   Future<void> checkAuthStatus() async {
@@ -280,6 +288,43 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // ============================================================================
+  // 🆕 NEW: Terms and Conditions Methods
+  // ============================================================================
+
+  /// Fetch Terms and Conditions from API
+  Future<bool> fetchTermsAndConditions() async {
+    try {
+      _isLoadingTerms = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      final response = await _authDataSource.getTermsAndConditions();
+      _termsAndConditions = TermsAndConditionsModel.fromJson(response);
+
+      _isLoadingTerms = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoadingTerms = false;
+      _errorMessage = e.toString().replaceAll('Exception: ', '').replaceAll('Failed to fetch terms and conditions: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Get cached terms or fetch if not available
+  Future<TermsAndConditionsModel?> getTermsAndConditions() async {
+    if (_termsAndConditions != null) {
+      return _termsAndConditions;
+    }
+    
+    final success = await fetchTermsAndConditions();
+    return success ? _termsAndConditions : null;
+  }
+
+  // ============================================================================
 
   // Save tokens
   Future<void> _saveTokens(AuthResponseModel response) async {

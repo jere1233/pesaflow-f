@@ -255,4 +255,25 @@ class AuthRemoteDataSource {
       throw Exception('Failed to set password: ${e.toString()}');
     }
   }
+
+  // ============================================================================
+  // 🆕 NEW: Terms and Conditions
+  // ============================================================================
+  
+  // Get Terms and Conditions (no auth required - public endpoint)
+  Future<Map<String, dynamic>> getTermsAndConditions() async {
+    try {
+      final response = await apiClient.get(
+        ApiConstants.termsAndConditions,
+      );
+
+      if (response.statusCode == 200) {
+        return response.data is Map ? Map<String, dynamic>.from(response.data) : {};
+      } else {
+        throw Exception(response.data['error'] ?? 'Failed to fetch terms and conditions');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch terms and conditions: ${e.toString()}');
+    }
+  }
 }

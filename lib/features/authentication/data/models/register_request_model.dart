@@ -4,6 +4,7 @@ class RegisterRequestModel {
   final String email;
   final String password;
   final String phone;
+  final String username; 
   final String firstName;
   final String lastName;
   final String? dateOfBirth; 
@@ -26,6 +27,7 @@ class RegisterRequestModel {
     required this.email,
     required this.password,
     required this.phone,
+    required this.username, 
     required this.firstName,
     required this.lastName,
     this.dateOfBirth,
@@ -57,6 +59,7 @@ class RegisterRequestModel {
       email: json['email']?.toString() ?? '',
       password: json['password']?.toString() ?? '',
       phone: json['phone']?.toString() ?? json['phone_number']?.toString() ?? '',
+      username: json['username']?.toString() ?? '', 
       firstName: json['firstName']?.toString() ?? json['first_name']?.toString() ?? '',
       lastName: json['lastName']?.toString() ?? json['last_name']?.toString() ?? '',
       dateOfBirth: json['dateOfBirth']?.toString() ?? json['date_of_birth']?.toString(),
@@ -82,6 +85,7 @@ class RegisterRequestModel {
       'email': email,
       'password': password,
       'phone': phone,
+      'username': username, 
       'firstName': firstName,
       'lastName': lastName,
       if (dateOfBirth != null) 'dateOfBirth': dateOfBirth,

@@ -7,6 +7,7 @@ import '../../features/authentication/presentation/screens/forgot_password_scree
 import '../../features/authentication/presentation/screens/otp_verification_screen.dart';
 import '../../features/authentication/presentation/screens/login_otp_verification_screen.dart';
 import '../../features/authentication/presentation/screens/payment_status_screen.dart';
+import '../../features/authentication/presentation/screens/terms_and_conditions_screen.dart'; // 🆕 NEW
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart'; 
 import '../../features/transactions/presentation/screens/transactions_screen.dart';
 import '../../features/transactions/presentation/screens/transaction_detail_screen.dart';
@@ -35,6 +36,22 @@ class AppRouter {
         path: RouteNames.forgotPassword,
         name: RouteNames.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      
+      // ============================================================================
+      // 🆕 NEW: Terms and Conditions Screen
+      // ============================================================================
+      GoRoute(
+        path: RouteNames.termsAndConditions,
+        name: RouteNames.termsAndConditions,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return TermsAndConditionsScreen(
+            htmlContent: extra?['htmlContent'],
+            showAcceptButton: extra?['showAcceptButton'] ?? false,
+            onAccept: extra?['onAccept'],
+          );
+        },
       ),
       
       // ============================================================================
