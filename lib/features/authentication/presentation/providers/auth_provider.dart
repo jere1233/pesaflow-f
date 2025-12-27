@@ -1,4 +1,5 @@
 ///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/providers/auth_provider.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../core/storage/secure_storage_helper.dart';
@@ -55,7 +56,10 @@ class AuthProvider extends ChangeNotifier {
   TermsAndConditionsModel? get termsAndConditions => _termsAndConditions;
   bool get isLoadingTerms => _isLoadingTerms;
 
-  // Check if user is logged in
+  // ============================================================================
+  // AUTH STATUS CHECK
+  // ============================================================================
+
   Future<void> checkAuthStatus() async {
     try {
       final token = await SecureStorageHelper.read('auth_token');
@@ -71,7 +75,11 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Login Step 1: Initiate login (sends OTP)
+  // ============================================================================
+  // LOGIN FLOW (Two-Step)
+  // ============================================================================
+
+  /// Step 1: Initiate login (sends OTP to email/SMS)
   Future<bool> initiateLogin(String identifier, String password) async {
     try {
       _setLoading(true);
@@ -97,7 +105,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Login Step 2: Verify OTP (and set permanent password if needed)
+  /// Step 2: Verify OTP (and set permanent password if needed)
   Future<bool> verifyLoginOtp(String otp, {String? newPassword}) async {
     try {
       _setLoading(true);
@@ -142,33 +150,10 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // ============================================================================
-  // LEGACY METHODS - For backward compatibility with old OTP screen
-  // ============================================================================
-  
-  /// Send OTP (Legacy - redirects to initiateLogin for login flow)
-  Future<bool> sendOtp(String identifier) async {
-    // This is a placeholder for the old OTP screen
-    // In reality, OTP is sent during initiateLogin
-    _errorMessage = "Please use the login screen to initiate OTP";
-    notifyListeners();
-    return false;
-  }
-
-  /// Verify OTP (Legacy - redirects to verifyLoginOtp)
-  Future<bool> verifyOtp(String identifier, String otp, String verificationType) async {
-    if (verificationType == 'login') {
-      _pendingLoginIdentifier = identifier;
-      return await verifyLoginOtp(otp);
-    }
-    
-    _errorMessage = "Invalid verification type";
-    notifyListeners();
-    return false;
-  }
-
+  // REGISTRATION FLOW
   // ============================================================================
 
-  // Register (initiate payment + registration)
+  /// Initiate registration (M-Pesa payment)
   Future<RegisterInitiationResponseModel> register(RegisterRequestModel request) async {
     try {
       _setLoading(true);
@@ -197,7 +182,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Check registration payment status
+  /// Check registration payment status
   Future<bool> checkRegistrationStatus(String transactionId) async {
     try {
       _setLoading(true);
@@ -223,25 +208,35 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Logout
-  Future<void> logout() async {
+  // ============================================================================
+  // PASSWORD MANAGEMENT (🆕 NEW)
+  // ============================================================================
+
+  /// Change password (authenticated)
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
     try {
       _setLoading(true);
-      await _authDataSource.logout();
-      await _clearTokens();
-      _user = null;
-      _status = AuthStatus.unauthenticated;
-      _pendingLoginIdentifier = null;
-      _pendingLoginOtp = null;
+      _errorMessage = null;
+
+      await _authDataSource.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+
       _setLoading(false);
+      return true;
     } catch (e) {
       _setLoading(false);
       _errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
+      return false;
     }
   }
 
-  // Forgot Password
+  /// Request password reset OTP
   Future<bool> forgotPassword(String email) async {
     try {
       _setLoading(true);
@@ -259,13 +254,21 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Reset Password
-  Future<bool> resetPassword(String email, String otp, String newPassword) async {
+  /// Verify OTP and reset password
+  Future<bool> forgotPasswordVerify({
+    required String email,
+    required String otp,
+    required String newPassword,
+  }) async {
     try {
       _setLoading(true);
       _errorMessage = null;
 
-      await _authDataSource.resetPassword(email, otp, newPassword);
+      await _authDataSource.forgotPasswordVerify(
+        email: email,
+        otp: otp,
+        newPassword: newPassword,
+      );
 
       _setLoading(false);
       return true;
@@ -277,7 +280,83 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Get Current User
+  // ============================================================================
+  // PIN MANAGEMENT (🆕 NEW)
+  // ============================================================================
+
+  /// Change PIN (authenticated)
+  Future<bool> changePin({
+    required String currentPin,
+    required String newPin,
+  }) async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      await _authDataSource.changePin(
+        currentPin: currentPin,
+        newPin: newPin,
+      );
+
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _setLoading(false);
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Request PIN reset OTP
+  Future<bool> resetPin(String phone) async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      await _authDataSource.resetPin(phone);
+
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _setLoading(false);
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Verify OTP and reset PIN
+  Future<bool> resetPinVerify({
+    required String phone,
+    required String otp,
+    required String newPin,
+  }) async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      await _authDataSource.resetPinVerify(
+        phone: phone,
+        otp: otp,
+        newPin: newPin,
+      );
+
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _setLoading(false);
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // USER MANAGEMENT
+  // ============================================================================
+
+  /// Get current user
   Future<void> getCurrentUser() async {
     try {
       final userModel = await _authDataSource.getCurrentUser();
@@ -289,8 +368,26 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Logout
+  Future<void> logout() async {
+    try {
+      _setLoading(true);
+      await _authDataSource.logout();
+      await _clearTokens();
+      _user = null;
+      _status = AuthStatus.unauthenticated;
+      _pendingLoginIdentifier = null;
+      _pendingLoginOtp = null;
+      _setLoading(false);
+    } catch (e) {
+      _setLoading(false);
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+    }
+  }
+
   // ============================================================================
-  // 🆕 NEW: Terms and Conditions Methods
+  // TERMS & CONDITIONS
   // ============================================================================
 
   /// Fetch Terms and Conditions from API
@@ -325,26 +422,28 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // ============================================================================
+  // HELPER METHODS
+  // ============================================================================
 
-  // Save tokens
+  /// Save tokens
   Future<void> _saveTokens(AuthResponseModel response) async {
     await SecureStorageHelper.write('auth_token', response.accessToken);
     await SecureStorageHelper.write('refresh_token', response.refreshToken);
   }
 
-  // Clear tokens
+  /// Clear tokens
   Future<void> _clearTokens() async {
     await SecureStorageHelper.delete('auth_token');
     await SecureStorageHelper.delete('refresh_token');
   }
 
-  // Set loading state
+  /// Set loading state
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
   }
 
-  // Clear error message
+  /// Clear error message
   void clearError() {
     _errorMessage = null;
     notifyListeners();

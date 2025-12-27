@@ -1,4 +1,5 @@
-// lib/shared/routes/app_router.dart - COMPLETE UPDATED VERSION
+///home/hp/JERE/pension-frontend/lib/shared/routes/app_router.dart
+
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/presentation/screens/login_screen.dart';
@@ -8,7 +9,10 @@ import '../../features/authentication/presentation/screens/otp_verification_scre
 import '../../features/authentication/presentation/screens/login_otp_verification_screen.dart';
 import '../../features/authentication/presentation/screens/payment_status_screen.dart';
 import '../../features/authentication/presentation/screens/terms_and_conditions_screen.dart';
-import '../../features/dashboard/presentation/screens/dashboard_screen.dart'; 
+import '../../features/authentication/presentation/screens/change_password_screen.dart';
+import '../../features/authentication/presentation/screens/change_pin_screen.dart';
+import '../../features/authentication/presentation/screens/reset_pin_screen.dart';
+import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/transactions/presentation/screens/transactions_screen.dart';
 import '../../features/transactions/presentation/screens/transaction_detail_screen.dart';
 import '../../features/transfer/presentation/screens/transfer_screen.dart';
@@ -43,9 +47,26 @@ class AppRouter {
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
       
-      // ============================================================================
-      // 🆕 Terms and Conditions Screen
-      // ============================================================================
+      // 🆕 Password & PIN Management (Authenticated)
+      GoRoute(
+        path: RouteNames.changePassword,
+        name: RouteNames.changePassword,
+        builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.changePin,
+        name: RouteNames.changePin,
+        builder: (context, state) => const ChangePinScreen(),
+      ),
+      
+      // 🆕 Reset PIN (Unauthenticated)
+      GoRoute(
+        path: RouteNames.resetPin,
+        name: RouteNames.resetPin,
+        builder: (context, state) => const ResetPinScreen(),
+      ),
+      
+      // Terms and Conditions Screen
       GoRoute(
         path: RouteNames.termsAndConditions,
         name: RouteNames.termsAndConditions,
@@ -59,9 +80,7 @@ class AppRouter {
         },
       ),
       
-      // ============================================================================
-      // 🆕 Login OTP Verification (with optional password setting)
-      // ============================================================================
+      // Login OTP Verification (with optional password setting)
       GoRoute(
         path: RouteNames.loginOtpVerification,
         name: RouteNames.loginOtpVerification,
@@ -74,9 +93,7 @@ class AppRouter {
         },
       ),
       
-      // ============================================================================
-      // 🔧 OTP Verification (for registration, forgot password, etc.)
-      // ============================================================================
+      // OTP Verification (for registration, forgot password, etc.)
       GoRoute(
         path: RouteNames.otpVerification,
         name: RouteNames.otpVerification,
@@ -100,7 +117,7 @@ class AppRouter {
       ),
       
       // ============================================================================
-      // 🎯 DASHBOARD (HOME)
+      // DASHBOARD (HOME)
       // ============================================================================
       GoRoute(
         path: RouteNames.home,
@@ -154,24 +171,18 @@ class AppRouter {
       ),
       
       // ============================================================================
-      // 🆕 NEW ROUTES - PENSION MANAGEMENT FEATURES
+      // PENSION MANAGEMENT FEATURES
       // ============================================================================
-      
-      // 🆕 Pension Plans Screen
       GoRoute(
         path: RouteNames.pensionPlans,
         name: RouteNames.pensionPlans,
         builder: (context, state) => const PensionPlansScreen(),
       ),
-      
-      // 🆕 Download Statement Screen
       GoRoute(
         path: RouteNames.downloadStatement,
         name: RouteNames.downloadStatement,
         builder: (context, state) => const DownloadStatementScreen(),
       ),
-      
-      // 🆕 Retirement Goals Screen
       GoRoute(
         path: RouteNames.retirementGoals,
         name: RouteNames.retirementGoals,

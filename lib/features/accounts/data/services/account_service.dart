@@ -1,4 +1,4 @@
-// lib/features/accounts/data/services/account_service.dart - CORRECTED
+///home/hp/JERE/pension-frontend/lib/features/accounts/data/services/account_service.dart
 
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
@@ -10,6 +10,10 @@ class AccountService {
 
   AccountService({ApiClient? apiClient}) 
       : _apiClient = apiClient ?? ApiClient();
+
+  // ============================================================================
+  // ACCOUNT CRUD OPERATIONS
+  // ============================================================================
 
   /// Get all accounts for the current user
   /// GET /api/accounts
@@ -33,7 +37,9 @@ class AccountService {
   /// GET /api/accounts/:id
   Future<AccountModel> getAccountById(int id) async {
     try {
-      final response = await _apiClient.get(ApiConstants.getAccountUrl(id.toString()));
+      final response = await _apiClient.get(
+        ApiConstants.getAccountUrl(id.toString()),
+      );
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -45,6 +51,10 @@ class AccountService {
       throw Exception('Failed to fetch account: $e');
     }
   }
+
+  // ============================================================================
+  // CONTRIBUTIONS (🆕 NEW)
+  // ============================================================================
 
   /// Add contribution to account
   /// POST /api/accounts/:id/contribution
@@ -75,6 +85,10 @@ class AccountService {
     }
   }
 
+  // ============================================================================
+  // EARNINGS (🆕 NEW)
+  // ============================================================================
+
   /// Add earnings to account (interest, investment returns, dividends)
   /// POST /api/accounts/:id/earnings
   Future<AccountModel> addEarnings({
@@ -103,6 +117,50 @@ class AccountService {
       throw Exception('Failed to add earnings: $e');
     }
   }
+
+  // ============================================================================
+  // DEPOSITS (🆕 NEW - M-Pesa Integration)
+  // ============================================================================
+
+  /// Deposit funds to account via M-Pesa STK Push
+  /// POST /api/accounts/:id/deposit
+  Future<Map<String, dynamic>> depositFunds({
+    required int accountId,
+    required double amount,
+    String? phone,
+    String? description,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.getAccountDepositUrl(accountId.toString()),
+        data: {
+          'amount': amount,
+          if (phone != null) 'phone': phone,
+          if (description != null) 'description': description,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return {
+          'success': data['success'] ?? true,
+          'status': data['status'],
+          'message': data['message'],
+          'transactionId': data['transactionId'],
+          'checkoutRequestId': data['checkoutRequestId'],
+          'statusCheckUrl': data['statusCheckUrl'],
+        };
+      } else {
+        throw Exception(response.data['error'] ?? 'Failed to initiate deposit');
+      }
+    } catch (e) {
+      throw Exception('Failed to deposit funds: $e');
+    }
+  }
+
+  // ============================================================================
+  // WITHDRAWALS (🆕 NEW)
+  // ============================================================================
 
   /// Withdraw funds from account
   /// POST /api/accounts/:id/withdraw
@@ -133,6 +191,10 @@ class AccountService {
     }
   }
 
+  // ============================================================================
+  // ACCOUNT STATUS (🆕 NEW)
+  // ============================================================================
+
   /// Update account status
   /// PUT /api/accounts/:id/status
   Future<AccountModel> updateAccountStatus({
@@ -157,6 +219,10 @@ class AccountService {
       throw Exception('Failed to update account status: $e');
     }
   }
+
+  // ============================================================================
+  // ACCOUNT SUMMARY (🆕 NEW)
+  // ============================================================================
 
   /// Get account summary with all balances
   /// GET /api/accounts/:id/summary

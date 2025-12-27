@@ -1,4 +1,5 @@
 ///home/hp/JERE/pension-frontend/lib/features/authentication/data/datasources/auth_remote_datasource.dart
+
 import 'dart:convert';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/constants/api_constants.dart';
@@ -7,7 +8,6 @@ import '../models/user_model.dart';
 import '../models/login_request_model.dart';
 import '../models/register_request_model.dart';
 import '../models/register_initiation_response_model.dart';
-import '../models/otp_verification_model.dart';
 
 class AuthRemoteDataSource {
   final ApiClient apiClient;
@@ -17,14 +17,15 @@ class AuthRemoteDataSource {
   });
 
   // ============================================================================
-  // ✅ FIXED: Now using ApiConstants instead of hardcoded paths
+  // LOGIN FLOW (Two-Step: Password + OTP)
   // ============================================================================
 
-  // Login Step 1: Send password, get OTP sent to email
+  /// Step 1: Send password, get OTP sent to email/SMS
+  /// POST /api/auth/login
   Future<Map<String, dynamic>> initiateLogin(LoginRequestModel request) async {
     try {
       final response = await apiClient.post(
-        ApiConstants.login, // ✅ Using constant instead of '/auth/login'
+        ApiConstants.login,
         data: request.toJson(),
       );
 
@@ -41,8 +42,13 @@ class AuthRemoteDataSource {
     }
   }
 
-  // Login Step 2: Verify OTP (and optionally set permanent password)
-  Future<AuthResponseModel> loginWithOtp(String identifier, String otp, {String? newPassword}) async {
+  /// Step 2: Verify OTP (and optionally set permanent password for first-time users)
+  /// POST /api/auth/login/otp
+  Future<AuthResponseModel> loginWithOtp(
+    String identifier,
+    String otp, {
+    String? newPassword,
+  }) async {
     try {
       final data = {
         'identifier': identifier,
@@ -54,7 +60,7 @@ class AuthRemoteDataSource {
       }
 
       final response = await apiClient.post(
-        ApiConstants.loginOtp, 
+        ApiConstants.loginOtp,
         data: data,
       );
 
@@ -75,17 +81,23 @@ class AuthRemoteDataSource {
     }
   }
 
-  // Register (initiate payment + registration)
+  // ============================================================================
+  // REGISTRATION FLOW (M-Pesa Payment + Auto Account Creation)
+  // ============================================================================
+
+  /// Initiate registration and M-Pesa payment
+  /// POST /api/auth/register
   Future<RegisterInitiationResponseModel> register(RegisterRequestModel request) async {
     try {
       final response = await apiClient.post(
-        ApiConstants.register, // ✅ Using constant
+        ApiConstants.register,
         data: request.toJson(),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return RegisterInitiationResponseModel.fromJson(
-            response.data is Map ? Map<String, dynamic>.from(response.data) : {});
+          response.data is Map ? Map<String, dynamic>.from(response.data) : {},
+        );
       } else {
         throw Exception(response.data['message'] ?? 'Registration initiation failed');
       }
@@ -94,11 +106,12 @@ class AuthRemoteDataSource {
     }
   }
 
-  // Check registration payment/status
+  /// Check registration payment status
+  /// GET /api/auth/register/status/:transactionId
   Future<AuthResponseModel> checkRegisterStatus(String transactionId) async {
     try {
       final response = await apiClient.get(
-        ApiConstants.getRegisterStatusUrl(transactionId), // ✅ Using helper method
+        ApiConstants.getRegisterStatusUrl(transactionId),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -124,57 +137,182 @@ class AuthRemoteDataSource {
     }
   }
 
-  // Logout
-  Future<void> logout() async {
-    try {
-      // If backend has logout endpoint, uncomment:
-      // await apiClient.post(ApiConstants.logout);
-      return;
-    } catch (e) {
-      throw Exception('Failed to logout: ${e.toString()}');
-    }
-  }
+  // ============================================================================
+  // PASSWORD MANAGEMENT (🆕 NEW)
+  // ============================================================================
 
-  // Forgot Password
-  Future<void> forgotPassword(String email) async {
+  /// Change password (authenticated)
+  /// POST /api/auth/change-password
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
     try {
       final response = await apiClient.post(
-        ApiConstants.forgotPassword, // ✅ Using constant
-        data: {'email': email},
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception(response.data['message'] ?? 'Failed to send reset link');
-      }
-    } catch (e) {
-      throw Exception('Failed to send reset link: ${e.toString()}');
-    }
-  }
-
-  // Reset Password
-  Future<void> resetPassword(String email, String otp, String newPassword) async {
-    try {
-      final response = await apiClient.post(
-        ApiConstants.resetPassword, // ✅ Using constant
+        ApiConstants.changePassword,
         data: {
-          'email': email,
-          'otp': otp,
-          'new_password': newPassword,
+          'currentPassword': currentPassword,
+          'newPassword': newPassword,
         },
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception(response.data['message'] ?? 'Failed to reset password');
+        throw Exception(response.data['error'] ?? 'Failed to change password');
+      }
+    } catch (e) {
+      throw Exception('Failed to change password: ${e.toString()}');
+    }
+  }
+
+  /// Request password reset OTP (unauthenticated)
+  /// POST /api/auth/forgot-password
+  Future<void> forgotPassword(String email) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.forgotPassword,
+        data: {'email': email},
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(response.data['error'] ?? 'Failed to send reset OTP');
+      }
+    } catch (e) {
+      throw Exception('Failed to send reset OTP: ${e.toString()}');
+    }
+  }
+
+  /// Verify OTP and reset password (unauthenticated)
+  /// POST /api/auth/forgot-password/verify
+  Future<void> forgotPasswordVerify({
+    required String email,
+    required String otp,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.forgotPasswordVerify,
+        data: {
+          'email': email,
+          'otp': otp,
+          'newPassword': newPassword,
+        },
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(response.data['error'] ?? 'Failed to reset password');
       }
     } catch (e) {
       throw Exception('Failed to reset password: ${e.toString()}');
     }
   }
 
-  // Get Current User
+  // ============================================================================
+  // PIN MANAGEMENT (🆕 NEW)
+  // ============================================================================
+
+  /// Change PIN (authenticated)
+  /// POST /api/auth/change-pin
+  Future<void> changePin({
+    required String currentPin,
+    required String newPin,
+  }) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.changePin,
+        data: {
+          'currentPin': currentPin,
+          'newPin': newPin,
+        },
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(response.data['error'] ?? 'Failed to change PIN');
+      }
+    } catch (e) {
+      throw Exception('Failed to change PIN: ${e.toString()}');
+    }
+  }
+
+  /// Request PIN reset OTP (unauthenticated)
+  /// POST /api/auth/reset-pin
+  Future<void> resetPin(String phone) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.resetPin,
+        data: {'phone': phone},
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(response.data['error'] ?? 'Failed to send PIN reset OTP');
+      }
+    } catch (e) {
+      throw Exception('Failed to send PIN reset OTP: ${e.toString()}');
+    }
+  }
+
+  /// Verify OTP and reset PIN (unauthenticated)
+  /// POST /api/auth/reset-pin/verify
+  Future<void> resetPinVerify({
+    required String phone,
+    required String otp,
+    required String newPin,
+  }) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.resetPinVerify,
+        data: {
+          'phone': phone,
+          'otp': otp,
+          'newPin': newPin,
+        },
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(response.data['error'] ?? 'Failed to reset PIN');
+      }
+    } catch (e) {
+      throw Exception('Failed to reset PIN: ${e.toString()}');
+    }
+  }
+
+  // ============================================================================
+  // SET PASSWORD & PIN (Authenticated)
+  // ============================================================================
+
+  /// Set permanent password (and optionally PIN)
+  /// POST /api/auth/set-password
+  Future<void> setPassword({
+    required String password,
+    String? pin,
+  }) async {
+    try {
+      final data = {'password': password};
+      if (pin != null) {
+        data['pin'] = pin;
+      }
+
+      final response = await apiClient.post(
+        ApiConstants.setPassword,
+        data: data,
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(response.data['error'] ?? 'Failed to set password');
+      }
+    } catch (e) {
+      throw Exception('Failed to set password: ${e.toString()}');
+    }
+  }
+
+  // ============================================================================
+  // USER MANAGEMENT
+  // ============================================================================
+
+  /// Get current user
+  /// GET /api/auth/verify
   Future<UserModel> getCurrentUser() async {
     try {
-      final response = await apiClient.get(ApiConstants.currentUser); // ✅ Using constant
+      final response = await apiClient.get(ApiConstants.currentUser);
 
       if (response.statusCode == 200) {
         return UserModel.fromJson(response.data['user'] ?? response.data);
@@ -186,11 +324,22 @@ class AuthRemoteDataSource {
     }
   }
 
-  // Refresh Token
+  /// Logout
+  Future<void> logout() async {
+    try {
+      // Backend doesn't have logout endpoint yet
+      // Just clear local tokens
+      return;
+    } catch (e) {
+      throw Exception('Failed to logout: ${e.toString()}');
+    }
+  }
+
+  /// Refresh token
   Future<AuthResponseModel> refreshToken(String refreshToken) async {
     try {
       final response = await apiClient.post(
-        ApiConstants.refreshToken, // ✅ Using constant
+        ApiConstants.refreshToken,
         data: {'refresh_token': refreshToken},
       );
 
@@ -204,63 +353,12 @@ class AuthRemoteDataSource {
     }
   }
 
-  // Send OTP (for generic OTP sending)
-  Future<void> sendOtp(String identifier) async {
-    try {
-      final response = await apiClient.post(
-        ApiConstants.sendOtp, // ✅ Using constant
-        data: {'identifier': identifier},
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception(response.data['message'] ?? 'Failed to send OTP');
-      }
-    } catch (e) {
-      throw Exception('Failed to send OTP: ${e.toString()}');
-    }
-  }
-
-  // Verify OTP (for generic OTP verification)
-  Future<void> verifyOtp(String identifier, String otp, String verificationType) async {
-    try {
-      final response = await apiClient.post(
-        ApiConstants.verifyOtp, // ✅ Using constant
-        data: {
-          'identifier': identifier,
-          'otp': otp,
-          'verificationType': verificationType,
-        },
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception(response.data['message'] ?? 'OTP verification failed');
-      }
-    } catch (e) {
-      throw Exception('Failed to verify OTP: ${e.toString()}');
-    }
-  }
-
-  // Set Password (for setting/changing permanent password)
-  Future<void> setPassword(String newPassword) async {
-    try {
-      final response = await apiClient.post(
-        ApiConstants.setPassword, // ✅ Using constant
-        data: {'newPassword': newPassword},
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception(response.data['message'] ?? 'Failed to set password');
-      }
-    } catch (e) {
-      throw Exception('Failed to set password: ${e.toString()}');
-    }
-  }
-
   // ============================================================================
-  // 🆕 NEW: Terms and Conditions
+  // TERMS & CONDITIONS
   // ============================================================================
-  
-  // Get Terms and Conditions (no auth required - public endpoint)
+
+  /// Get Terms and Conditions (public endpoint)
+  /// GET /api/terms-and-conditions
   Future<Map<String, dynamic>> getTermsAndConditions() async {
     try {
       final response = await apiClient.get(

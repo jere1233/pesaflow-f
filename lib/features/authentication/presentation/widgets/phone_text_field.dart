@@ -1,3 +1,5 @@
+///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/widgets/phone_text_field.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -8,6 +10,7 @@ class PhoneTextField extends StatelessWidget {
   final String hintText;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
+  final void Function(String)? onFieldSubmitted; 
   final TextInputAction? textInputAction;
 
   const PhoneTextField({
@@ -17,6 +20,7 @@ class PhoneTextField extends StatelessWidget {
     this.hintText = '+254712345678',
     this.validator,
     this.onChanged,
+    this.onFieldSubmitted, // 🆕 ADDED
     this.textInputAction,
   });
 
@@ -28,6 +32,7 @@ class PhoneTextField extends StatelessWidget {
       textInputAction: textInputAction ?? TextInputAction.next,
       validator: validator,
       onChanged: onChanged,
+      onFieldSubmitted: onFieldSubmitted, // 🆕 ADDED
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
         LengthLimitingTextInputFormatter(13), // +254XXXXXXXXX

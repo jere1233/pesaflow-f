@@ -1,16 +1,25 @@
-// lib/shared/routes/route_names.dart - COMPLETE UPDATED VERSION
+///home/hp/JERE/pension-frontend/lib/shared/routes/route_names.dart
 
 class RouteNames {
-  // Authentication Routes
+  // ============================================================================
+  // AUTHENTICATION ROUTES
+  // ============================================================================
   static const String login = '/login';
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
   static const String otpVerification = '/otp-verification';
-  static const String loginOtpVerification = '/login-otp-verification'; 
+  static const String loginOtpVerification = '/login-otp-verification';
   static const String paymentStatus = '/payment-status';
-  static const String termsAndConditions = '/terms-and-conditions'; 
+  static const String termsAndConditions = '/terms-and-conditions';
   
-  // Main App Routes
+  // 🆕 Password & PIN Management
+  static const String changePassword = '/change-password';
+  static const String changePin = '/change-pin';
+  static const String resetPin = '/reset-pin';
+  
+  // ============================================================================
+  // MAIN APP ROUTES
+  // ============================================================================
   static const String home = '/home';
   static const String transactions = '/transactions';
   static const String transactionDetail = '/transaction-detail';
@@ -19,18 +28,23 @@ class RouteNames {
   static const String profile = '/profile';
   static const String notifications = '/notifications';
   
-  // 🆕 NEW ROUTES - Pension Management Features
+  // ============================================================================
+  // PENSION MANAGEMENT FEATURES
+  // ============================================================================
   static const String pensionPlans = '/pension-plans';
   static const String downloadStatement = '/download-statement';
   static const String retirementGoals = '/retirement-goals';
   
-  // Settings Routes
+  // ============================================================================
+  // SETTINGS ROUTES
+  // ============================================================================
   static const String settings = '/settings';
   static const String editProfile = '/edit-profile';
-  static const String changePassword = '/change-password';
   static const String security = '/security';
   
-  // Additional Routes
+  // ============================================================================
+  // ADDITIONAL ROUTES
+  // ============================================================================
   static const String beneficiaries = '/beneficiaries';
   static const String addBeneficiary = '/add-beneficiary';
   static const String accountStatement = '/account-statement';

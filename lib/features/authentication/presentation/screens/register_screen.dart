@@ -1,4 +1,5 @@
 ///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/register_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +33,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // Step 1: Basic Info
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
-  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   
@@ -74,7 +74,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch T&C when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthProvider>().fetchTermsAndConditions();
     });
@@ -84,7 +83,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _usernameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
     _dateOfBirthController.dispose();
@@ -106,7 +104,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (_currentStep < 4) {
         setState(() => _currentStep++);
       } else {
-        // Final step - validate terms acceptance
         if (!_acceptedTerms) {
           setState(() {
             _termsError = 'You must accept the Terms and Conditions to continue';
@@ -139,7 +136,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         },
       );
     } else {
-      // Terms not loaded yet
       Fluttertoast.showToast(
         msg: "Loading Terms and Conditions...",
         toastLength: Toast.LENGTH_SHORT,
@@ -150,7 +146,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       
       authProvider.fetchTermsAndConditions().then((success) {
         if (success && mounted) {
-          _handleTermsTap(); // Retry after loading
+          _handleTermsTap();
         }
       });
     }
@@ -160,10 +156,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final authProvider = context.read<AuthProvider>();
     
     final request = RegisterRequestModel(
-      // Basic Info
+      // Basic Info (REQUIRED)
       email: _emailController.text.trim(),
       phone: _phoneController.text.trim(),
-      username: _usernameController.text.trim(),
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
       
@@ -213,6 +208,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
       retirementAge: _retirementAgeController.text.isNotEmpty 
           ? int.tryParse(_retirementAgeController.text) 
           : null,
+      
+      // 🆕 Account Configuration (optional - backend uses defaults)
+      accountType: 'MANDATORY', // Default account type
+      riskProfile: 'MEDIUM', // Default risk profile
+      currency: 'KES', // Default currency
+      accountStatus: 'ACTIVE', // Default status
+      kycVerified: false, // Not verified yet
+      complianceStatus: 'PENDING', // Pending approval
+      // pin: null, // Optional 4-digit PIN - can be set later
     );
 
     final initiation = await authProvider.register(request);
@@ -229,10 +233,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (transactionId != null && transactionId.isNotEmpty) {
-        // Navigate to payment status screen
         context.go('${RouteNames.paymentStatus}/$transactionId');
       } else {
-        // If no transaction ID, go to home
         context.go(RouteNames.home);
       }
     } else if (mounted) {
@@ -269,7 +271,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // Back Button & Progress
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -293,7 +294,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               
-              // Content
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -350,7 +350,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  // Step 1: Basic Info
+  // ✅ UPDATED: Step 1 - Removed username field
   Widget _buildStep1BasicInfo() {
     return Form(
       key: _formKeys[0],
@@ -421,28 +421,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           const SizedBox(height: 16),
           
           CustomTextField(
-            controller: _usernameController,
-            labelText: 'Username',
-            hintText: 'Choose a unique username',
-            prefixIcon: Icons.alternate_email,
-            textInputAction: TextInputAction.next,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a username';
-              }
-              if (value.length < 3) {
-                return 'Username must be at least 3 characters';
-              }
-              if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
-                return 'Username can only contain letters, numbers, and underscores';
-              }
-              return null;
-            },
-          ),
-          
-          const SizedBox(height: 16),
-          
-          CustomTextField(
             controller: _emailController,
             labelText: 'Email Address',
             hintText: 'Enter your email',
@@ -480,7 +458,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           
           const SizedBox(height: 24),
           
-          // Info box about temporary password
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -549,8 +526,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             labelText: 'Date of Birth',
             hintText: 'Select your date of birth',
             prefixIcon: Icons.cake_outlined,
-            lastDate: DateTime.now().subtract(const Duration(days: 6570)), // 18 years ago
-            initialDate: DateTime.now().subtract(const Duration(days: 9125)), // 25 years ago
+            lastDate: DateTime.now().subtract(const Duration(days: 6570)),
+            initialDate: DateTime.now().subtract(const Duration(days: 9125)),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Please select your date of birth';
@@ -890,14 +867,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           
           const SizedBox(height: 24),
           
-          // Terms and Conditions Checkbox
           TermsAcceptanceCheckbox(
             value: _acceptedTerms,
             onChanged: (value) {
               setState(() {
                 _acceptedTerms = value ?? false;
                 if (_acceptedTerms) {
-                  _termsError = null; // Clear error when accepted
+                  _termsError = null;
                 }
               });
             },

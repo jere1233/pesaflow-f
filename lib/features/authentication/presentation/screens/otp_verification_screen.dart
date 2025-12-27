@@ -1,4 +1,5 @@
 ///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/otp_verification_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -10,11 +11,10 @@ import '../../../../shared/routes/route_names.dart';
 import '../widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
 
-// ============================================================================
-// 🚀 UNIFIED OTP VERIFICATION - Supports BOTH Email and Phone
-// ============================================================================
+/// ⚠️ DEPRECATED - Use LoginOtpVerificationScreen instead
+/// This is kept for backward compatibility only
 class OtpVerificationScreen extends StatefulWidget {
-  final String identifier; // Can be email OR phone number
+  final String identifier;
   final String verificationType;
 
   const OtpVerificationScreen({
@@ -38,7 +38,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   Timer? _timer;
   bool _canResend = false;
 
-  // Detect if identifier is email or phone
   bool get _isEmail => widget.identifier.contains('@');
   String get _identifierType => _isEmail ? 'email' : 'phone';
   IconData get _identifierIcon => _isEmail ? Icons.email_outlined : Icons.sms_outlined;
@@ -96,12 +95,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
     final authProvider = context.read<AuthProvider>();
     
-    // Use unified OTP verification (works for both email and phone)
-    final success = await authProvider.verifyOtp(
-      widget.identifier,
-      otp,
-      widget.verificationType,
-    );
+    // 🔧 FIXED: Use verifyLoginOtp instead of deprecated verifyOtp
+    final success = await authProvider.verifyLoginOtp(otp);
 
     if (success && mounted) {
       Fluttertoast.showToast(
@@ -135,32 +130,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
     final authProvider = context.read<AuthProvider>();
     
-    // Use unified send OTP (works for both email and phone)
-    final success = await authProvider.sendOtp(widget.identifier);
-
-    if (success && mounted) {
-      Fluttertoast.showToast(
-        msg: "OTP sent to your $_identifierLabel!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: AppColors.success,
-        textColor: Colors.white,
-      );
-      _startCountdown();
-      
-      for (var controller in _otpControllers) {
-        controller.clear();
-      }
-      _focusNodes[0].requestFocus();
-    } else if (mounted) {
-      Fluttertoast.showToast(
-        msg: authProvider.errorMessage ?? "Failed to send OTP",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: AppColors.error,
-        textColor: Colors.white,
-      );
-    }
+    // 🔧 FIXED: Use initiateLogin to resend OTP (requires password - not ideal)
+    // This screen should be deprecated in favor of login_otp_verification_screen
+    Fluttertoast.showToast(
+      msg: "Please use the login screen to resend OTP",
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: AppColors.warning,
+      textColor: Colors.white,
+    );
   }
 
   @override
@@ -195,7 +173,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   children: [
                     SizedBox(height: screenHeight * 0.03),
                     
-                    // Icon - Dynamic based on email or phone
                     Center(
                       child: Container(
                         width: 80,
@@ -214,7 +191,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     
                     const SizedBox(height: 32),
                     
-                    // Title - Dynamic based on email or phone
                     Text(
                       'Verify Your $_identifierLabel',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -226,7 +202,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     
                     const SizedBox(height: 12),
                     
-                    // Subtitle showing identifier
                     Text(
                       'Enter the 6-digit code sent to\n${widget.identifier}',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -287,7 +262,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                 _focusNodes[index - 1].requestFocus();
                               }
                               
-                              // Auto-verify when all 6 digits entered
                               if (index == 5 && value.isNotEmpty) {
                                 _handleVerifyOtp();
                               }
@@ -299,7 +273,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     
                     const SizedBox(height: 32),
                     
-                    // Verify Button
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) {
                         return CustomButton(
@@ -312,7 +285,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     
                     const SizedBox(height: 24),
                     
-                    // Resend OTP
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

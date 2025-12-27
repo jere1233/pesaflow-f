@@ -1,54 +1,55 @@
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/forgot_password_screen.dart
+///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/reset_pin_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/routes/route_names.dart';
 import '../widgets/custom_text_field.dart';
-import '../widgets/password_text_field.dart';
+import '../widgets/phone_text_field.dart';
 import '../widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+class ResetPinScreen extends StatefulWidget {
+  const ResetPinScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  State<ResetPinScreen> createState() => _ResetPinScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final _emailFormKey = GlobalKey<FormState>();
+class _ResetPinScreenState extends State<ResetPinScreen> {
+  final _phoneFormKey = GlobalKey<FormState>();
   final _otpFormKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _otpController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  final _newPinController = TextEditingController();
+  final _confirmPinController = TextEditingController();
 
   bool _otpSent = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _phoneController.dispose();
     _otpController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
+    _newPinController.dispose();
+    _confirmPinController.dispose();
     super.dispose();
   }
 
   Future<void> _handleSendOtp() async {
-    if (_emailFormKey.currentState!.validate()) {
+    if (_phoneFormKey.currentState!.validate()) {
       final authProvider = context.read<AuthProvider>();
       
-      final success = await authProvider.forgotPassword(
-        _emailController.text.trim(),
+      final success = await authProvider.resetPin(
+        _phoneController.text.trim(),
       );
 
       if (success && mounted) {
         setState(() => _otpSent = true);
         Fluttertoast.showToast(
-          msg: "OTP sent to your email!",
+          msg: "OTP sent to your phone via SMS!",
           toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: AppColors.info,
@@ -60,19 +61,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
   }
 
-  Future<void> _handleResetPassword() async {
+  Future<void> _handleResetPin() async {
     if (_otpFormKey.currentState!.validate()) {
       final authProvider = context.read<AuthProvider>();
       
-      final success = await authProvider.forgotPasswordVerify(
-        email: _emailController.text.trim(),
+      final success = await authProvider.resetPinVerify(
+        phone: _phoneController.text.trim(),
         otp: _otpController.text.trim(),
-        newPassword: _newPasswordController.text,
+        newPin: _newPinController.text,
       );
 
       if (success && mounted) {
         Fluttertoast.showToast(
-          msg: "Password reset successfully! Please login.",
+          msg: "PIN reset successfully! You can now login with your new PIN.",
           toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: AppColors.success,
@@ -80,7 +81,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         );
         context.go(RouteNames.login);
       } else if (mounted) {
-        _showErrorDialog(authProvider.errorMessage ?? 'Failed to reset password');
+        _showErrorDialog(authProvider.errorMessage ?? 'Failed to reset PIN');
       }
     }
   }
@@ -161,7 +162,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   ],
                                 ),
                                 child: const Icon(
-                                  Icons.lock_reset_rounded,
+                                  Icons.pin_outlined,
                                   size: 40,
                                   color: AppColors.primary,
                                 ),
@@ -172,7 +173,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             
                             // Title
                             Text(
-                              _otpSent ? 'Reset Password' : 'Forgot Password?',
+                              _otpSent ? 'Reset PIN' : 'Forgot PIN?',
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -186,8 +187,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             // Subtitle
                             Text(
                               _otpSent
-                                  ? 'Enter the OTP sent to your email and your new password'
-                                  : 'Enter your email address and we\'ll send you an OTP to reset your password',
+                                  ? 'Enter the OTP sent to your phone via SMS and your new 4-digit PIN'
+                                  : 'Enter your phone number and we\'ll send you an OTP via SMS to reset your PIN',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Colors.white.withOpacity(0.9),
                                 height: 1.5,
@@ -200,7 +201,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             
                             // Form
                             if (!_otpSent)
-                              _buildEmailForm()
+                              _buildPhoneForm()
                             else
                               _buildOtpForm(),
                             
@@ -252,25 +253,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  Widget _buildEmailForm() {
+  Widget _buildPhoneForm() {
     return Form(
-      key: _emailFormKey,
+      key: _phoneFormKey,
       child: Column(
         children: [
-          CustomTextField(
-            controller: _emailController,
-            labelText: 'Email Address',
-            hintText: 'Enter your email',
-            prefixIcon: Icons.email_outlined,
-            keyboardType: TextInputType.emailAddress,
+          PhoneTextField(
+            controller: _phoneController,
+            labelText: 'Phone Number',
+            hintText: '+254712345678',
             textInputAction: TextInputAction.done,
             onFieldSubmitted: (_) => _handleSendOtp(),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your email';
+                return 'Please enter your phone number';
               }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                return 'Please enter a valid email';
+              if (!RegExp(r'^\+254[17]\d{8}$').hasMatch(value)) {
+                return 'Enter valid Kenyan number (+254...)';
               }
               return null;
             },
@@ -307,6 +306,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             keyboardType: TextInputType.number,
             textInputAction: TextInputAction.next,
             maxLength: 6,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Please enter OTP';
@@ -320,17 +322,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           
           const SizedBox(height: 16),
           
-          PasswordTextField(
-            controller: _newPasswordController,
-            labelText: 'New Password',
-            hintText: 'Enter new password',
+          CustomTextField(
+            controller: _newPinController,
+            labelText: 'New PIN',
+            hintText: 'Enter new 4-digit PIN',
+            prefixIcon: Icons.pin_outlined,
+            keyboardType: TextInputType.number,
             textInputAction: TextInputAction.next,
+            maxLength: 4,
+            obscureText: true,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter new password';
+                return 'Please enter new PIN';
               }
-              if (value.length < 6) {
-                return 'Password must be at least 6 characters';
+              if (value.length != 4) {
+                return 'PIN must be 4 digits';
+              }
+              if (value == '0000' || value == '1234' || value == '1111') {
+                return 'Please choose a more secure PIN';
               }
               return null;
             },
@@ -338,18 +350,25 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           
           const SizedBox(height: 16),
           
-          PasswordTextField(
-            controller: _confirmPasswordController,
-            labelText: 'Confirm Password',
-            hintText: 'Confirm new password',
+          CustomTextField(
+            controller: _confirmPinController,
+            labelText: 'Confirm PIN',
+            hintText: 'Re-enter new PIN',
+            prefixIcon: Icons.pin_outlined,
+            keyboardType: TextInputType.number,
             textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) => _handleResetPassword(),
+            maxLength: 4,
+            obscureText: true,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            onFieldSubmitted: (_) => _handleResetPin(),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please confirm password';
+                return 'Please confirm PIN';
               }
-              if (value != _newPasswordController.text) {
-                return 'Passwords do not match';
+              if (value != _newPinController.text) {
+                return 'PINs do not match';
               }
               return null;
             },
@@ -360,8 +379,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           Consumer<AuthProvider>(
             builder: (context, authProvider, _) {
               return CustomButton(
-                text: 'Reset Password',
-                onPressed: _handleResetPassword,
+                text: 'Reset PIN',
+                onPressed: _handleResetPin,
                 isLoading: authProvider.isLoading,
                 backgroundColor: Colors.white,
                 textColor: AppColors.primary,
