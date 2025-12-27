@@ -1,6 +1,6 @@
 // lib/core/constants/api_constants.dart
 class ApiConstants {
-  static const String baseUrl = 'https://pension-backend-rs4h.onrender.com';
+  static const String baseUrl = 'http://10.0.2.2:5000';
   
   // Timeouts
   static const int connectionTimeout = 30000; 

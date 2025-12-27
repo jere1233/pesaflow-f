@@ -1,7 +1,10 @@
-// lib/features/dashboard/presentation/widgets/balance_cards.dart
+// lib/features/dashboard/presentation/widgets/balance_cards.dart - UPDATED
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../authentication/domain/entities/user.dart';
+import '../../../accounts/presentation/providers/account_provider.dart'; 
+import '../../../accounts/domain/entities/account.dart'; 
 import '../../domain/entities/dashboard_stats.dart';
 
 class BalanceCards extends StatelessWidget {
@@ -14,31 +17,37 @@ class BalanceCards extends StatelessWidget {
     this.user,
   });
 
-  int _calculateMonthlyContribution() {
-    // You'll need to add these fields to your User entity
-    // For now, using stats data
-    return (stats?.totalContributions ?? 0).toInt();
+  int _calculateMonthlyContribution(Account? account) {
+    if (account == null) return 0;
+    // Calculate based on employee + employer contributions
+    return (account.employeeContributions + account.employerContributions).toInt();
   }
 
   int _calculateYearsToRetirement() {
-    // Calculate based on user's date of birth and retirement age
-    // This would need dateOfBirth and retirementAge in User entity
-    return 35; // Placeholder
+    // Calculate based on user's date of birth and retirement age (65)
+    // This would need dateOfBirth in User entity
+    return 35; 
   }
 
-  int _calculateProjectedRetirement() {
-    final balance = stats?.balance ?? 0;
+  int _calculateProjectedRetirement(double currentBalance) {
     final years = _calculateYearsToRetirement();
     // Simple 8% annual growth calculation
-    return (balance * (1 + 0.08 * years)).toInt();
+    return (currentBalance * (1 + 0.08 * years)).toInt();
   }
 
   @override
   Widget build(BuildContext context) {
-    final balance = stats?.balance ?? 0;
-    final monthlyContrib = _calculateMonthlyContribution();
+    // 🆕 Get account data from AccountProvider
+    final accountProvider = context.watch<AccountProvider>();
+    final account = accountProvider.defaultAccount;
+
+    // Use real account data if available, fallback to stats
+    final balance = account?.currentBalance ?? stats?.balance ?? 0;
+    final monthlyContrib = account != null 
+        ? _calculateMonthlyContribution(account)
+        : (stats?.totalContributions ?? 0).toInt();
     final yearsToRetirement = _calculateYearsToRetirement();
-    final projectedAt65 = _calculateProjectedRetirement();
+    final projectedAt65 = _calculateProjectedRetirement(balance);
 
     return GridView.count(
       crossAxisCount: 2,
@@ -51,7 +60,7 @@ class BalanceCards extends StatelessWidget {
         _BalanceCard(
           title: 'Total Balance',
           amount: 'KES ${_formatAmount(balance)}',
-          subtitle: 'Across all plans',
+          subtitle: account?.accountNumber ?? 'Across all plans',
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -60,9 +69,11 @@ class BalanceCards extends StatelessWidget {
           icon: Icons.account_balance_wallet,
         ),
         _BalanceCard(
-          title: 'Monthly Contribution',
-          amount: 'KES ${_formatAmount(monthlyContrib.toDouble())}',
-          subtitle: 'Total allocated',
+          title: 'Total Contributions',
+          amount: 'KES ${_formatAmount(account?.totalContributions ?? monthlyContrib.toDouble())}',
+          subtitle: account != null 
+              ? '${_formatAmount(account.employeeContributions)} Employee\n${_formatAmount(account.employerContributions)} Employer'
+              : 'Total allocated',
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -71,9 +82,11 @@ class BalanceCards extends StatelessWidget {
           icon: Icons.arrow_downward,
         ),
         _BalanceCard(
-          title: 'Projected @ 65',
-          amount: 'KES ${_formatAmount(projectedAt65.toDouble())}',
-          subtitle: '8% annual growth',
+          title: 'Total Earnings',
+          amount: 'KES ${_formatAmount(account?.totalEarnings ?? 0)}',
+          subtitle: account != null 
+              ? 'Interest: ${_formatAmount(account.interestEarned)}\nReturns: ${_formatAmount(account.investmentReturns)}'
+              : '8% annual growth',
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -82,9 +95,11 @@ class BalanceCards extends StatelessWidget {
           icon: Icons.trending_up,
         ),
         _BalanceCard(
-          title: 'Years to Retirement',
-          amount: yearsToRetirement.toString(),
-          subtitle: 'Target age: 65',
+          title: 'Available Balance',
+          amount: 'KES ${_formatAmount(account?.availableBalance ?? balance)}',
+          subtitle: account != null && account.lockedBalance > 0
+              ? 'Locked: ${_formatAmount(account.lockedBalance)}'
+              : 'Ready to withdraw',
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -177,6 +192,8 @@ class _BalanceCard extends StatelessWidget {
               fontSize: 10,
               color: Colors.white70,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

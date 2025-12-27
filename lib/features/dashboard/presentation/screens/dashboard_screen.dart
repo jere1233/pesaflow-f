@@ -1,4 +1,4 @@
-// lib/features/dashboard/presentation/screens/dashboard_screen.dart
+// lib/features/dashboard/presentation/screens/dashboard_screen.dart - UPDATED
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/routes/route_names.dart';
 import '../../../authentication/presentation/providers/auth_provider.dart';
+import '../../../accounts/presentation/providers/account_provider.dart'; // 🆕 NEW
 import '../../../authentication/presentation/widgets/logout_button.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/balance_cards.dart';
@@ -27,17 +28,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      try {
-        context.read<DashboardProvider>().loadDashboardData();
-      } catch (e) {
-        // Provider might not be available yet
-      }
+      _loadData();
     });
+  }
+
+  // 🆕 Load all dashboard data including accounts
+  Future<void> _loadData() async {
+    try {
+      final dashboardProvider = context.read<DashboardProvider>();
+      final accountProvider = context.read<AccountProvider>();
+      
+      // Load dashboard and account data in parallel
+      await Future.wait([
+        dashboardProvider.loadDashboardData(),
+        accountProvider.fetchAccounts(),
+      ]);
+    } catch (e) {
+      // Provider might not be available yet
+      debugPrint('Error loading dashboard data: $e');
+    }
+  }
+
+  Future<void> _onRefresh() async {
+    await _loadData();
   }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final accountProvider = context.watch<AccountProvider>(); // 🆕 NEW
 
     DashboardProvider? dashboardProvider;
     try {
@@ -55,7 +74,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       backgroundColor: Colors.grey[50],
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () => dashboardProvider?.refresh() ?? Future.value(),
+          onRefresh: _onRefresh,
           child: CustomScrollView(
             slivers: [
               // App Bar
@@ -110,18 +129,47 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(height: 24),
                       
                       // Balance Cards
-                      const Text(
-                        'Account Overview',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Account Overview',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          // 🆕 Show account type badge if available
+                          if (accountProvider.defaultAccount != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppColors.primary.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Text(
+                                accountProvider.defaultAccount!.accountType,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       
                       const SizedBox(height: 16),
                       
-                      dashboardProvider?.isLoadingStats == true
+                      // 🆕 Show loading state for accounts
+                      (dashboardProvider?.isLoadingStats == true || accountProvider.isLoading)
                           ? const Center(
                               child: Padding(
                                 padding: EdgeInsets.all(40),

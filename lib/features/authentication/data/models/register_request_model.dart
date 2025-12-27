@@ -2,7 +2,6 @@
 
 class RegisterRequestModel {
   final String email;
-  final String password;
   final String phone;
   final String username; 
   final String firstName;
@@ -25,7 +24,6 @@ class RegisterRequestModel {
 
   const RegisterRequestModel({
     required this.email,
-    required this.password,
     required this.phone,
     required this.username, 
     required this.firstName,
@@ -57,7 +55,6 @@ class RegisterRequestModel {
 
     return RegisterRequestModel(
       email: json['email']?.toString() ?? '',
-      password: json['password']?.toString() ?? '',
       phone: json['phone']?.toString() ?? json['phone_number']?.toString() ?? '',
       username: json['username']?.toString() ?? '', 
       firstName: json['firstName']?.toString() ?? json['first_name']?.toString() ?? '',
@@ -83,7 +80,6 @@ class RegisterRequestModel {
   Map<String, dynamic> toJson() {
     return {
       'email': email,
-      'password': password,
       'phone': phone,
       'username': username, 
       'firstName': firstName,

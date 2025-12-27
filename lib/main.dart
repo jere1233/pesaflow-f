@@ -1,4 +1,3 @@
-
 ///home/hp/JERE/pension-frontend/lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,6 +20,8 @@ import 'features/transactions/data/repositories/transaction_repository_impl.dart
 import 'features/transactions/domain/usecases/get_all_transactions_usecase.dart';
 import 'features/transactions/domain/usecases/get_transaction_detail_usecase.dart';
 import 'features/transactions/presentation/providers/transaction_provider.dart';
+import 'features/accounts/data/services/account_service.dart'; 
+import 'features/accounts/presentation/providers/account_provider.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -80,6 +81,7 @@ class pension extends StatelessWidget {
             ),
           ),
         ),
+        
         // Transactions Provider
         ChangeNotifierProvider(
           create: (_) {
@@ -92,6 +94,13 @@ class pension extends StatelessWidget {
               getTransactionDetailUseCase: getDetail,
             );
           },
+        ),
+        
+        // 🆕 NEW: Account Provider
+        ChangeNotifierProvider(
+          create: (_) => AccountProvider(
+            accountService: AccountService(),
+          ),
         ),
       ],
       child: ScreenUtilInit(

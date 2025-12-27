@@ -1,4 +1,4 @@
-// lib/features/dashboard/presentation/widgets/quick_actions.dart
+// lib/features/dashboard/presentation/widgets/quick_actions.dart - UPDATED
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -27,7 +27,7 @@ class QuickActions extends StatelessWidget {
             colors: [Color(0xFF4F46E5), Color(0xFF2563EB)],
           ),
           onTap: () {
-            // TODO: Navigate to add pension plan
+            context.push(RouteNames.pensionPlans);
           },
         ),
         _QuickActionCard(
@@ -39,7 +39,7 @@ class QuickActions extends StatelessWidget {
             colors: [Color(0xFF059669), Color(0xFF10B981)],
           ),
           onTap: () {
-            // TODO: Download statement
+            context.push(RouteNames.downloadStatement);
           },
         ),
         _QuickActionCard(
@@ -75,7 +75,7 @@ class QuickActions extends StatelessWidget {
             colors: [Color(0xFF0891B2), Color(0xFF06B6D4)],
           ),
           onTap: () {
-            // TODO: Retirement goals
+            context.push(RouteNames.retirementGoals);
           },
         ),
         _QuickActionCard(
@@ -116,11 +116,15 @@ class _QuickActionCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withOpacity(0.8),
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.grey.shade200,
+            width: 1,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withOpacity(0.08),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -136,7 +140,7 @@ class _QuickActionCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: gradient.colors.first.withOpacity(0.3),
+                    color: gradient.colors.first.withOpacity(0.4),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),

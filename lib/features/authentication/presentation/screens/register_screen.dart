@@ -6,7 +6,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/routes/route_names.dart';
 import '../widgets/custom_text_field.dart';
-import '../widgets/password_text_field.dart';
 import '../widgets/phone_text_field.dart';
 import '../widgets/date_picker_field.dart';
 import '../widgets/dropdown_field.dart';
@@ -36,7 +35,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _passwordController = TextEditingController();
   
   // Step 2: Personal Details
   final _dateOfBirthController = TextEditingController();
@@ -61,7 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _contributionRate;
   final _retirementAgeController = TextEditingController();
 
-  // 🆕 Terms and Conditions acceptance
+  // Terms and Conditions acceptance
   bool _acceptedTerms = false;
   String? _termsError;
 
@@ -89,7 +87,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _usernameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-    _passwordController.dispose();
     _dateOfBirthController.dispose();
     _nationalIdController.dispose();
     _spouseNameController.dispose();
@@ -165,7 +162,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final request = RegisterRequestModel(
       // Basic Info
       email: _emailController.text.trim(),
-      password: _passwordController.text,
       phone: _phoneController.text.trim(),
       username: _usernameController.text.trim(),
       firstName: _firstNameController.text.trim(),
@@ -470,7 +466,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             controller: _phoneController,
             labelText: 'Phone Number',
             hintText: '+254712345678',
-            textInputAction: TextInputAction.next,
+            textInputAction: TextInputAction.done,
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Please enter your phone number';
@@ -482,26 +478,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
             },
           ),
           
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           
-          PasswordTextField(
-            controller: _passwordController,
-            textInputAction: TextInputAction.done,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a password';
-              }
-              if (value.length < 8) {
-                return 'Password must be at least 8 characters';
-              }
-              if (!value.contains(RegExp(r'[A-Z]'))) {
-                return 'Password must contain at least one uppercase letter';
-              }
-              if (!value.contains(RegExp(r'[0-9]'))) {
-                return 'Password must contain at least one number';
-              }
-              return null;
-            },
+          // Info box about temporary password
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: Colors.white.withOpacity(0.9),
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'A temporary password will be sent to your email and phone after payment',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withOpacity(0.9),
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -884,7 +890,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           
           const SizedBox(height: 24),
           
-          // 🆕 NEW: Terms and Conditions Checkbox
+          // Terms and Conditions Checkbox
           TermsAcceptanceCheckbox(
             value: _acceptedTerms,
             onChanged: (value) {
@@ -917,7 +923,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Upon registration, you\'ll receive an M-Pesa prompt to pay the registration fee.',
+                  'Upon registration, you\'ll receive an M-Pesa prompt to pay the registration fee. After successful payment, a temporary password will be sent to your email and phone number.',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.white.withOpacity(0.9),

@@ -1,4 +1,4 @@
-// lib/shared/routes/app_router.dart
+// lib/shared/routes/app_router.dart - COMPLETE UPDATED VERSION
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/presentation/screens/login_screen.dart';
@@ -7,7 +7,7 @@ import '../../features/authentication/presentation/screens/forgot_password_scree
 import '../../features/authentication/presentation/screens/otp_verification_screen.dart';
 import '../../features/authentication/presentation/screens/login_otp_verification_screen.dart';
 import '../../features/authentication/presentation/screens/payment_status_screen.dart';
-import '../../features/authentication/presentation/screens/terms_and_conditions_screen.dart'; // 🆕 NEW
+import '../../features/authentication/presentation/screens/terms_and_conditions_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart'; 
 import '../../features/transactions/presentation/screens/transactions_screen.dart';
 import '../../features/transactions/presentation/screens/transaction_detail_screen.dart';
@@ -15,13 +15,18 @@ import '../../features/transfer/presentation/screens/transfer_screen.dart';
 import '../../features/payments/presentation/screens/payments_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/pension_plans/presentation/screens/pension_plans_screen.dart';
+import '../../features/statements/presentation/screens/download_statement_screen.dart';
+import '../../features/retirement/presentation/screens/retirement_goals_screen.dart';
 import 'route_names.dart';
 
 class AppRouter {
   static final router = GoRouter(
     initialLocation: RouteNames.login,
     routes: [
-      // Authentication Routes
+      // ============================================================================
+      // AUTHENTICATION ROUTES
+      // ============================================================================
       GoRoute(
         path: RouteNames.login,
         name: RouteNames.login,
@@ -39,7 +44,7 @@ class AppRouter {
       ),
       
       // ============================================================================
-      // 🆕 NEW: Terms and Conditions Screen
+      // 🆕 Terms and Conditions Screen
       // ============================================================================
       GoRoute(
         path: RouteNames.termsAndConditions,
@@ -55,7 +60,7 @@ class AppRouter {
       ),
       
       // ============================================================================
-      // 🆕 NEW: Login OTP Verification (with optional password setting)
+      // 🆕 Login OTP Verification (with optional password setting)
       // ============================================================================
       GoRoute(
         path: RouteNames.loginOtpVerification,
@@ -70,7 +75,7 @@ class AppRouter {
       ),
       
       // ============================================================================
-      // 🔧 EXISTING: OTP Verification (for registration, forgot password, etc.)
+      // 🔧 OTP Verification (for registration, forgot password, etc.)
       // ============================================================================
       GoRoute(
         path: RouteNames.otpVerification,
@@ -95,7 +100,7 @@ class AppRouter {
       ),
       
       // ============================================================================
-      // 🎯 Dashboard (Home)
+      // 🎯 DASHBOARD (HOME)
       // ============================================================================
       GoRoute(
         path: RouteNames.home,
@@ -103,7 +108,9 @@ class AppRouter {
         builder: (context, state) => const DashboardScreen(),
       ),
       
-      // Transaction Routes
+      // ============================================================================
+      // TRANSACTION ROUTES
+      // ============================================================================
       GoRoute(
         path: RouteNames.transactions,
         name: RouteNames.transactions,
@@ -118,32 +125,57 @@ class AppRouter {
         },
       ),
       
-      // Transfer Routes
+      // ============================================================================
+      // TRANSFER & PAYMENT ROUTES
+      // ============================================================================
       GoRoute(
         path: RouteNames.transfer,
         name: RouteNames.transfer,
         builder: (context, state) => const TransferScreen(),
       ),
-      
-      // Payment Routes
       GoRoute(
         path: RouteNames.payments,
         name: RouteNames.payments,
         builder: (context, state) => const PaymentsScreen(),
       ),
       
-      // Profile Routes
+      // ============================================================================
+      // PROFILE & NOTIFICATIONS
+      // ============================================================================
       GoRoute(
         path: RouteNames.profile,
         name: RouteNames.profile,
         builder: (context, state) => const ProfileScreen(),
       ),
-      
-      // Notification Routes
       GoRoute(
         path: RouteNames.notifications,
         name: RouteNames.notifications,
         builder: (context, state) => const NotificationsScreen(),
+      ),
+      
+      // ============================================================================
+      // 🆕 NEW ROUTES - PENSION MANAGEMENT FEATURES
+      // ============================================================================
+      
+      // 🆕 Pension Plans Screen
+      GoRoute(
+        path: RouteNames.pensionPlans,
+        name: RouteNames.pensionPlans,
+        builder: (context, state) => const PensionPlansScreen(),
+      ),
+      
+      // 🆕 Download Statement Screen
+      GoRoute(
+        path: RouteNames.downloadStatement,
+        name: RouteNames.downloadStatement,
+        builder: (context, state) => const DownloadStatementScreen(),
+      ),
+      
+      // 🆕 Retirement Goals Screen
+      GoRoute(
+        path: RouteNames.retirementGoals,
+        name: RouteNames.retirementGoals,
+        builder: (context, state) => const RetirementGoalsScreen(),
       ),
     ],
     

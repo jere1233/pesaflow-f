@@ -1,4 +1,5 @@
-// lib/shared/routes/route_names.dart
+// lib/shared/routes/route_names.dart - COMPLETE UPDATED VERSION
+
 class RouteNames {
   // Authentication Routes
   static const String login = '/login';
@@ -7,7 +8,7 @@ class RouteNames {
   static const String otpVerification = '/otp-verification';
   static const String loginOtpVerification = '/login-otp-verification'; 
   static const String paymentStatus = '/payment-status';
-  static const String termsAndConditions = '/terms-and-conditions'; // 🆕 NEW
+  static const String termsAndConditions = '/terms-and-conditions'; 
   
   // Main App Routes
   static const String home = '/home';
@@ -17,6 +18,11 @@ class RouteNames {
   static const String payments = '/payments';
   static const String profile = '/profile';
   static const String notifications = '/notifications';
+  
+  // 🆕 NEW ROUTES - Pension Management Features
+  static const String pensionPlans = '/pension-plans';
+  static const String downloadStatement = '/download-statement';
+  static const String retirementGoals = '/retirement-goals';
   
   // Settings Routes
   static const String settings = '/settings';
