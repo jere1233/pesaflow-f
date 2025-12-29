@@ -87,7 +87,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Pension Dashboard',
+                      'AutoNest Dashboard',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,

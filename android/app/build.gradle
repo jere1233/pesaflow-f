@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.pension"
+    namespace "com.example.AutoNest"
     compileSdk 34 
     ndkVersion flutter.ndkVersion
 
@@ -41,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.pension"
+        applicationId "com.example.AutoNest"
         minSdkVersion 21  
         targetSdkVersion 34 
         versionCode flutterVersionCode.toInteger()

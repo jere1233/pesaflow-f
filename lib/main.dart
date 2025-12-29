@@ -1,4 +1,4 @@
-///home/hp/JERE/pension-frontend/lib/main.dart
+///home/hp/JERE/AutoNest-frontend/lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -42,11 +42,11 @@ void main() async {
     ),
   );
   
-  runApp(const pension());
+  runApp(const AutoNest());
 }
 
-class pension extends StatelessWidget {
-  const pension({super.key});
+class AutoNest extends StatelessWidget {
+  const AutoNest({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +110,7 @@ class pension extends StatelessWidget {
         builder: (context, child) {
           return MaterialApp.router(
             debugShowCheckedModeBanner: false,
-            title: 'Pension',
+            title: 'AutoNest',
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: ThemeMode.system,
