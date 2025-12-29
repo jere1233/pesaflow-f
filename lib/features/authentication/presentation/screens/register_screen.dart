@@ -1,4 +1,4 @@
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/register_screen.dart
+// lib/features/authentication/presentation/screens/register_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +16,7 @@ import '../widgets/custom_button.dart';
 import '../widgets/step_indicator.dart';
 import '../widgets/link_text.dart';
 import '../widgets/terms_acceptance_checkbox.dart';
+import '../widgets/country_dropdown_field.dart'; 
 import '../providers/auth_provider.dart';
 import '../../data/models/register_request_model.dart';
 
@@ -50,7 +51,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // Step 4: Address & Employment
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
-  final _countryController = TextEditingController();
+  String? _country = 'Kenya'; // 🆕 Default to Kenya
   final _occupationController = TextEditingController();
   final _employerController = TextEditingController();
   
@@ -91,7 +92,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _spouseDobController.dispose();
     _addressController.dispose();
     _cityController.dispose();
-    _countryController.dispose();
+    // 🆕 Removed _countryController.dispose()
     _occupationController.dispose();
     _employerController.dispose();
     _salaryController.dispose();
@@ -188,9 +189,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       city: _cityController.text.isNotEmpty 
           ? _cityController.text.trim() 
           : null,
-      country: _countryController.text.isNotEmpty 
-          ? _countryController.text.trim() 
-          : null,
+      country: _country, // 🆕 Now uses _country directly
       occupation: _occupationController.text.isNotEmpty 
           ? _occupationController.text.trim() 
           : null,
@@ -209,14 +208,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ? int.tryParse(_retirementAgeController.text) 
           : null,
       
-      // 🆕 Account Configuration (optional - backend uses defaults)
-      accountType: 'MANDATORY', // Default account type
-      riskProfile: 'MEDIUM', // Default risk profile
-      currency: 'KES', // Default currency
-      accountStatus: 'ACTIVE', // Default status
-      kycVerified: false, // Not verified yet
-      complianceStatus: 'PENDING', // Pending approval
-      // pin: null, // Optional 4-digit PIN - can be set later
+      // Account Configuration
+      accountType: 'MANDATORY',
+      riskProfile: 'MEDIUM',
+      currency: 'KES',
+      accountStatus: 'ACTIVE',
+      kycVerified: false,
+      complianceStatus: 'PENDING',
     );
 
     final initiation = await authProvider.register(request);
@@ -350,7 +348,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  // ✅ UPDATED: Step 1 - Removed username field
   Widget _buildStep1BasicInfo() {
     return Form(
       key: _formKeys[0],
@@ -491,7 +488,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // Step 2: Personal Details
   Widget _buildStep2PersonalDetails() {
     return Form(
       key: _formKeys[1],
@@ -594,7 +590,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // Step 3: Family Info
   Widget _buildStep3FamilyInfo() {
     return Form(
       key: _formKeys[2],
@@ -658,7 +653,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // Step 4: Address & Employment
+  // 🆕 UPDATED: Step 4 with Country Dropdown
   Widget _buildStep4AddressEmployment() {
     return Form(
       key: _formKeys[3],
@@ -723,16 +718,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
           
           const SizedBox(height: 16),
           
-          CustomTextField(
-            controller: _countryController,
+          CountryDropdownField(
+            value: _country,
             labelText: 'Country',
-            hintText: 'Enter your country',
+            hintText: 'Select your country',
             prefixIcon: Icons.flag_outlined,
-            textCapitalization: TextCapitalization.words,
-            textInputAction: TextInputAction.next,
+            onChanged: (value) => setState(() => _country = value),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your country';
+                return 'Please select your country';
               }
               return null;
             },
@@ -776,7 +770,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // Step 5: Financial Info
   Widget _buildStep5FinancialInfo() {
     return Form(
       key: _formKeys[4],
