@@ -26,10 +26,10 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   @override
   Future<UserModel> getUserProfile() async {
     try {
-      logger.info('DataSource: Fetching user profile from /dashboard/user');
+      logger.info('DataSource: Fetching user profile from ${ApiConstants.dashboardUser}');
       
       final response = await dio.get(
-        '${ApiConstants.baseUrl}/dashboard/user',
+        '${ApiConstants.baseUrl}${ApiConstants.dashboardUser}',
       );
 
       logger.info('DataSource: User profile response - ${response.statusCode}');
@@ -73,10 +73,10 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   @override
   Future<List<DashboardTransactionModel>> getTransactions() async {
     try {
-      logger.info('DataSource: Fetching transactions from /dashboard/transactions');
+      logger.info('DataSource: Fetching transactions from ${ApiConstants.dashboardTransactions}');
       
       final response = await dio.get(
-        '${ApiConstants.baseUrl}/dashboard/transactions',
+        '${ApiConstants.baseUrl}${ApiConstants.dashboardTransactions}',
       );
 
       logger.info('DataSource: Transactions response - ${response.statusCode}');
@@ -123,10 +123,11 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   @override
   Future<DashboardStatsModel> getStats() async {
     try {
-      logger.info('DataSource: Fetching stats from /dashboard/stats');
+      logger.info('DataSource: Fetching stats from ${ApiConstants.dashboardStats}');
       
+      // ✅ FIXED: Now using the constant that includes /api prefix
       final response = await dio.get(
-        '${ApiConstants.baseUrl}/dashboard/stats',
+        '${ApiConstants.baseUrl}${ApiConstants.dashboardStats}',
       );
 
       logger.info('DataSource: Stats response - ${response.statusCode}');

@@ -1,4 +1,5 @@
-///home/hp/JERE/AutoNest-frontend/lib/core/constants/api_constants.dart
+// lib/core/constants/api_constants.dart - DASHBOARD SECTION
+
 class ApiConstants {
   static const String baseUrl = 'https://pension-backend-rs4h.onrender.com';
   
@@ -6,6 +7,9 @@ class ApiConstants {
   static const int connectionTimeout = 30000; 
   static const int receiveTimeout = 30000; 
 
+  // ============================================================================
+  // AUTHENTICATION ENDPOINTS
+  // ============================================================================
   static const String login = '/api/auth/login';
   static const String loginOtp = '/api/auth/login/otp';
   static const String register = '/api/auth/register';
@@ -14,15 +18,15 @@ class ApiConstants {
   static const String verifyToken = '/api/auth/verify';
   static const String setPassword = '/api/auth/set-password';
   
-  // 🆕 OTP Management
+  // OTP Management
   static const String resendOtp = '/api/auth/resend-otp';
   
-  // 🆕 Password Management
+  // Password Management
   static const String changePassword = '/api/auth/change-password';
   static const String forgotPassword = '/api/auth/forgot-password';
   static const String forgotPasswordVerify = '/api/auth/forgot-password/verify';
   
-  // 🆕 PIN Management
+  // PIN Management
   static const String changePin = '/api/auth/change-pin';
   static const String resetPin = '/api/auth/reset-pin';
   static const String resetPinVerify = '/api/auth/reset-pin/verify';
@@ -40,17 +44,17 @@ class ApiConstants {
   static const String ussdLogin = '/api/auth/ussd-login';
   
   // ============================================================================
-  // ACCOUNT ENDPOINTS (🆕 UPDATED)
+  // ACCOUNT ENDPOINTS
   // ============================================================================
   static const String accounts = '/api/accounts';
   static const String accountTypes = '/api/account-types';
   
   // ============================================================================
-  // DASHBOARD ENDPOINTS
+  // DASHBOARD ENDPOINTS - ✅ VERIFIED CORRECT
   // ============================================================================
   static const String dashboardUser = '/api/dashboard/user';
   static const String dashboardTransactions = '/api/dashboard/transactions';
-  static const String dashboardStats = '/api/dashboard/stats';
+  static const String dashboardStats = '/api/dashboard/stats';  // ✅ CORRECT with /api prefix
   
   // ============================================================================
   // USER ENDPOINTS
@@ -78,6 +82,13 @@ class ApiConstants {
   static const String termsAndConditions = '/api/terms-and-conditions';
   
   // ============================================================================
+  // REPORTS
+  // ============================================================================
+  static const String reports = '/api/reports';
+  static const String generateTransactionReport = '/api/reports/generate-transaction';
+  static const String generateCustomerReport = '/api/reports/generate-customer';
+  
+  // ============================================================================
   // HEALTH CHECK
   // ============================================================================
   static const String health = '/api/health';
@@ -87,6 +98,10 @@ class ApiConstants {
   // ============================================================================
   static const String notifications = '/api/notifications';
    
+  // ============================================================================
+  // HELPER METHODS - ACCOUNTS
+  // ============================================================================
+  
   /// Get account by ID: GET /api/accounts/:id
   static String getAccountUrl(String accountId) => '$accounts/$accountId';
   
@@ -115,7 +130,7 @@ class ApiConstants {
       '$accounts/$accountId/summary';
   
   // ============================================================================
-  // HELPER METHODS - ACCOUNT TYPES (🆕 NEW)
+  // HELPER METHODS - ACCOUNT TYPES
   // ============================================================================
   
   /// Get account type by ID: GET /api/account-types/:id
@@ -141,6 +156,9 @@ class ApiConstants {
   static String getRegisterStatusUrl(String transactionId) => 
       '$checkRegisterStatus/$transactionId';
   
+  /// Get report by ID
+  static String getReportUrl(String reportId) => '$reports/$reportId';
+  
   /// Get full URL
   static String getFullUrl(String endpoint) => baseUrl + endpoint;
-}
+}  
