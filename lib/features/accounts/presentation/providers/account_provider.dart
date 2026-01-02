@@ -49,6 +49,21 @@ class AccountProvider extends ChangeNotifier {
     }
   }
 
+  // Calculate total balance across all accounts
+  double get totalBalance {
+    return _accounts.fold(0.0, (sum, account) => sum + account.currentBalance);
+  }
+
+  // Calculate total contributions
+  double get totalContributions {
+    return _accounts.fold(0.0, (sum, account) => sum + account.totalContributions);
+  }
+
+  // Calculate total earnings
+  double get totalEarnings {
+    return _accounts.fold(0.0, (sum, account) => sum + account.totalEarnings);
+  }
+
   /// Fetch all accounts
   Future<void> fetchAccounts() async {
     try {
@@ -136,6 +151,37 @@ class AccountProvider extends ChangeNotifier {
       _errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
       return false;
+    }
+  }
+
+  /// 🆕 Deposit funds (M-Pesa STK Push)
+  Future<Map<String, dynamic>?> depositFunds({
+    required int accountId,
+    required double amount,
+    String? phone,
+    String? description,
+  }) async {
+    try {
+      _status = AccountStatus.loading;
+      _errorMessage = null;
+      notifyListeners();
+
+      final result = await _accountService.depositFunds(
+        accountId: accountId,
+        amount: amount,
+        phone: phone,
+        description: description,
+      );
+
+      _status = AccountStatus.loaded;
+      notifyListeners();
+      
+      return result;
+    } catch (e) {
+      _status = AccountStatus.error;
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return null;
     }
   }
 

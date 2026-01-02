@@ -1,13 +1,17 @@
-// lib/features/transactions/presentation/providers/transaction_provider.dart
-
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import '../../domain/entities/transaction_detail.dart';
 import '../../domain/usecases/get_all_transactions_usecase.dart';
 import '../../domain/usecases/get_transaction_detail_usecase.dart';
 
-enum TransactionStatus { initial, loading, loaded, error }
+enum TransactionStatus {
+  initial,
+  loading,
+  loaded,
+  error,
+}
 
-class TransactionProvider with ChangeNotifier {
+class TransactionProvider extends ChangeNotifier {
   final GetAllTransactionsUseCase getAllTransactionsUseCase;
   final GetTransactionDetailUseCase getTransactionDetailUseCase;
 
@@ -21,6 +25,12 @@ class TransactionProvider with ChangeNotifier {
   List<TransactionDetail> _transactions = [];
   TransactionDetail? _selectedTransaction;
   String? _errorMessage;
+  
+  // Pagination
+  int _currentPage = 1;
+  final int _limit = 20;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
 
   // Filters
   String? _selectedType;
@@ -30,77 +40,89 @@ class TransactionProvider with ChangeNotifier {
   DateTime? _endDate;
   String _searchQuery = '';
 
-  // Pagination
-  int _currentPage = 1;
-  bool _hasMoreData = true;
-  bool _isLoadingMore = false;
-
   // Getters
   TransactionStatus get status => _status;
   List<TransactionDetail> get transactions => _transactions;
   TransactionDetail? get selectedTransaction => _selectedTransaction;
   String? get errorMessage => _errorMessage;
+  bool get isLoadingMore => _isLoadingMore;
+  bool get hasMore => _hasMore;
+
+  // Filter getters
   String? get selectedType => _selectedType;
   String? get selectedStatus => _selectedStatus;
   String? get selectedCategory => _selectedCategory;
   DateTime? get startDate => _startDate;
   DateTime? get endDate => _endDate;
-  String get searchQuery => _searchQuery;
-  bool get hasMoreData => _hasMoreData;
-  bool get isLoadingMore => _isLoadingMore;
 
-  // Filtered transactions (client-side filtering for better UX)
+  // Filtered transactions
   List<TransactionDetail> get filteredTransactions {
-    var filtered = _transactions;
+    return _transactions.where((transaction) {
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final searchLower = _searchQuery.toLowerCase();
+        final matchesSearch = (transaction.description?.toLowerCase().contains(searchLower) ?? false) ||
+            (transaction.referenceNumber?.toLowerCase().contains(searchLower) ?? false) ||
+            (transaction.recipientName?.toLowerCase().contains(searchLower) ?? false) ||
+            (transaction.senderName?.toLowerCase().contains(searchLower) ?? false);
+        if (!matchesSearch) return false;
+      }
 
-    // Apply search filter
-    if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((transaction) {
-        final query = _searchQuery.toLowerCase();
-        return transaction.description.toLowerCase().contains(query) ||
-            transaction.recipientName?.toLowerCase().contains(query) == true ||
-            transaction.referenceNumber?.toLowerCase().contains(query) == true;
-      }).toList();
-    }
+      // Type filter
+      if (_selectedType != null && transaction.type != _selectedType) {
+        return false;
+      }
 
-    return filtered;
+      // Status filter
+      if (_selectedStatus != null && transaction.status != _selectedStatus) {
+        return false;
+      }
+
+      // Category filter
+      if (_selectedCategory != null && transaction.category != _selectedCategory) {
+        return false;
+      }
+
+      return true;
+    }).toList();
   }
 
-  // Get grouped transactions by date
+  // Grouped transactions by date
   Map<String, List<TransactionDetail>> get groupedTransactions {
-    final Map<String, List<TransactionDetail>> grouped = {};
+    final grouped = <String, List<TransactionDetail>>{};
+    final dateFormat = DateFormat('MMMM dd, yyyy');
 
     for (var transaction in filteredTransactions) {
-      final date = _formatDate(transaction.timestamp);
-      if (!grouped.containsKey(date)) {
-        grouped[date] = [];
+      final transactionDate = transaction.timestamp ?? transaction.createdAt;
+      final dateKey = dateFormat.format(transactionDate);
+      if (!grouped.containsKey(dateKey)) {
+        grouped[dateKey] = [];
       }
-      grouped[date]!.add(transaction);
+      grouped[dateKey]!.add(transaction);
     }
 
     return grouped;
   }
 
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final transactionDate = DateTime(date.year, date.month, date.day);
-
-    if (transactionDate == today) {
-      return 'Today';
-    } else if (transactionDate == yesterday) {
-      return 'Yesterday';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
-    }
+  // Calculate total income
+  double get totalIncome {
+    return filteredTransactions
+        .where((t) => t.isCredit)
+        .fold(0.0, (sum, t) => sum + t.amount);
   }
 
-  // Load transactions
+  // Calculate total expense
+  double get totalExpense {
+    return filteredTransactions
+        .where((t) => t.isDebit)
+        .fold(0.0, (sum, t) => sum + t.amount);
+  }
+
+  /// Load transactions (with optional refresh)
   Future<void> loadTransactions({bool refresh = false}) async {
     if (refresh) {
       _currentPage = 1;
-      _hasMoreData = true;
+      _hasMore = true;
       _transactions.clear();
     }
 
@@ -110,7 +132,7 @@ class TransactionProvider with ChangeNotifier {
 
     final result = await getAllTransactionsUseCase(
       page: _currentPage,
-      limit: 20,
+      limit: _limit,
       type: _selectedType,
       status: _selectedStatus,
       startDate: _startDate,
@@ -121,32 +143,38 @@ class TransactionProvider with ChangeNotifier {
       (failure) {
         _status = TransactionStatus.error;
         _errorMessage = failure.message;
+        notifyListeners();
       },
       (transactions) {
+        if (transactions.length < _limit) {
+          _hasMore = false;
+        }
+        
         if (refresh) {
           _transactions = transactions;
         } else {
           _transactions.addAll(transactions);
         }
-        _hasMoreData = transactions.length >= 20;
+        
         _status = TransactionStatus.loaded;
+        notifyListeners();
       },
     );
-
-    notifyListeners();
   }
 
-  // Load more transactions (pagination)
+  /// Load more transactions (pagination)
   Future<void> loadMoreTransactions() async {
-    if (_isLoadingMore || !_hasMoreData) return;
+    if (_isLoadingMore || !_hasMore || _status == TransactionStatus.loading) {
+      return;
+    }
 
     _isLoadingMore = true;
+    _currentPage++;
     notifyListeners();
 
-    _currentPage++;
     final result = await getAllTransactionsUseCase(
       page: _currentPage,
-      limit: 20,
+      limit: _limit,
       type: _selectedType,
       status: _selectedStatus,
       startDate: _startDate,
@@ -156,19 +184,21 @@ class TransactionProvider with ChangeNotifier {
     result.fold(
       (failure) {
         _currentPage--; // Revert page increment on error
-        _errorMessage = failure.message;
+        _isLoadingMore = false;
+        notifyListeners();
       },
       (transactions) {
+        if (transactions.length < _limit) {
+          _hasMore = false;
+        }
         _transactions.addAll(transactions);
-        _hasMoreData = transactions.length >= 20;
+        _isLoadingMore = false;
+        notifyListeners();
       },
     );
-
-    _isLoadingMore = false;
-    notifyListeners();
   }
 
-  // Load transaction detail
+  /// Load single transaction detail
   Future<void> loadTransactionDetail(String transactionId) async {
     _status = TransactionStatus.loading;
     _errorMessage = null;
@@ -180,43 +210,48 @@ class TransactionProvider with ChangeNotifier {
       (failure) {
         _status = TransactionStatus.error;
         _errorMessage = failure.message;
+        notifyListeners();
       },
       (transaction) {
         _selectedTransaction = transaction;
         _status = TransactionStatus.loaded;
+        notifyListeners();
       },
     );
-
-    notifyListeners();
   }
 
-  // Set filters
-  void setTypeFilter(String? type) {
-    _selectedType = type;
-    loadTransactions(refresh: true);
-  }
-
-  void setStatusFilter(String? status) {
-    _selectedStatus = status;
-    loadTransactions(refresh: true);
-  }
-
-  void setCategoryFilter(String? category) {
-    _selectedCategory = category;
-    loadTransactions(refresh: true);
-  }
-
-  void setDateRange(DateTime? start, DateTime? end) {
-    _startDate = start;
-    _endDate = end;
-    loadTransactions(refresh: true);
-  }
-
+  /// Set search query
   void setSearchQuery(String query) {
     _searchQuery = query;
     notifyListeners();
   }
 
+  /// Set type filter
+  void setTypeFilter(String? type) {
+    _selectedType = type;
+    notifyListeners();
+  }
+
+  /// Set status filter
+  void setStatusFilter(String? status) {
+    _selectedStatus = status;
+    notifyListeners();
+  }
+
+  /// Set category filter
+  void setCategoryFilter(String? category) {
+    _selectedCategory = category;
+    notifyListeners();
+  }
+
+  /// Set date range filter
+  void setDateRange(DateTime? start, DateTime? end) {
+    _startDate = start;
+    _endDate = end;
+    notifyListeners();
+  }
+
+  /// Clear all filters
   void clearFilters() {
     _selectedType = null;
     _selectedStatus = null;
@@ -224,27 +259,24 @@ class TransactionProvider with ChangeNotifier {
     _startDate = null;
     _endDate = null;
     _searchQuery = '';
-    loadTransactions(refresh: true);
-  }
-
-  // Clear selected transaction
-  void clearSelectedTransaction() {
-    _selectedTransaction = null;
     notifyListeners();
   }
 
-  // Statistics
-  double get totalIncome {
-    return _transactions
-        .where((t) => t.isCredit && t.isCompleted)
-        .fold(0, (sum, t) => sum + t.amount);
+  /// Clear error
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
 
-  double get totalExpense {
-    return _transactions
-        .where((t) => t.isDebit && t.isCompleted)
-        .fold(0, (sum, t) => sum + t.amount);
+  /// Clear all data
+  void clearData() {
+    _transactions = [];
+    _selectedTransaction = null;
+    _errorMessage = null;
+    _status = TransactionStatus.initial;
+    _currentPage = 1;
+    _hasMore = true;
+    clearFilters();
+    notifyListeners();
   }
-
-  int get transactionCount => _transactions.length;
 }

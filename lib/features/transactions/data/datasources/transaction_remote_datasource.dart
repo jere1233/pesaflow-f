@@ -1,11 +1,9 @@
-// lib/features/transactions/data/datasources/transaction_remote_datasource.dart
-
 import 'package:dio/dio.dart';
-import '../../../../core/errors/exceptions.dart';
-import '../models/transaction_detail_model.dart';
+import '../../../../core/constants/api_constants.dart';
+import '../models/transaction_model.dart';
 
 abstract class TransactionRemoteDataSource {
-  Future<List<TransactionDetailModel>> getAllTransactions({
+  Future<List<TransactionModel>> getAllTransactions({
     int page = 1,
     int limit = 20,
     String? type,
@@ -13,10 +11,12 @@ abstract class TransactionRemoteDataSource {
     DateTime? startDate,
     DateTime? endDate,
   });
-
-  Future<TransactionDetailModel> getTransactionById(String id);
-  Future<List<TransactionDetailModel>> searchTransactions(String query);
-  Future<List<TransactionDetailModel>> getTransactionsByCategory(String category);
+  
+  Future<TransactionModel> getTransactionById(String transactionId);
+  
+  Future<List<TransactionModel>> searchTransactions(String query);
+  
+  Future<List<TransactionModel>> getTransactionsByCategory(String category);
 }
 
 class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
@@ -25,7 +25,7 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
   TransactionRemoteDataSourceImpl({required this.dio});
 
   @override
-  Future<List<TransactionDetailModel>> getAllTransactions({
+  Future<List<TransactionModel>> getAllTransactions({
     int page = 1,
     int limit = 20,
     String? type,
@@ -34,145 +34,160 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
     DateTime? endDate,
   }) async {
     try {
-      final queryParams = {
+      final queryParams = <String, dynamic>{
         'page': page,
         'limit': limit,
-        if (type != null) 'type': type,
-        if (status != null) 'status': status,
-        if (startDate != null) 'start_date': startDate.toIso8601String(),
-        if (endDate != null) 'end_date': endDate.toIso8601String(),
       };
 
+      if (type != null) queryParams['type'] = type;
+      if (status != null) queryParams['status'] = status;
+      if (startDate != null) {
+        queryParams['startDate'] = startDate.toIso8601String();
+      }
+      if (endDate != null) {
+        queryParams['endDate'] = endDate.toIso8601String();
+      }
+
       final response = await dio.get(
-        '/transactions',
+        ApiConstants.userTransactions,
         queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {
         final data = response.data;
         
-        // Handle different response structures
         List<dynamic> transactionsList;
-        if (data is Map && data.containsKey('data')) {
-          transactionsList = data['data'] as List;
+        if (data is Map<String, dynamic>) {
+          transactionsList = data['transactions'] ?? data['data'] ?? [];
         } else if (data is List) {
           transactionsList = data;
         } else {
-          throw ServerException('Invalid response format');
+          transactionsList = [];
         }
 
         return transactionsList
-            .map((json) => TransactionDetailModel.fromJson(json))
+            .map((json) => TransactionModel.fromJson(json))
             .toList();
       } else {
-        throw ServerException('Failed to load transactions');
+        throw Exception('Failed to load transactions');
       }
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw UnauthorizedException('Session expired');
-      } else if (e.response?.statusCode == 404) {
-        throw NotFoundException('Transactions not found');
+      if (e.response?.statusCode == 404) {
+        return [];
       }
-      throw ServerException(e.message ?? 'Network error occurred');
+      throw Exception(
+        e.response?.data['message'] ?? 'Failed to load transactions',
+      );
     } catch (e) {
-      throw ServerException('An unexpected error occurred: ${e.toString()}');
+      throw Exception('Failed to load transactions: $e');
     }
   }
 
   @override
-  Future<TransactionDetailModel> getTransactionById(String id) async {
+  Future<TransactionModel> getTransactionById(String transactionId) async {
     try {
-      final response = await dio.get('/transactions/$id');
+      final response = await dio.get(
+        ApiConstants.getTransactionUrl(transactionId),
+      );
 
       if (response.statusCode == 200) {
         final data = response.data;
         
-        // Handle different response structures
         Map<String, dynamic> transactionData;
-        if (data is Map && data.containsKey('data')) {
-          transactionData = Map<String, dynamic>.from(data['data']);
-        } else if (data is Map) {
-          transactionData = Map<String, dynamic>.from(data);
+        if (data is Map<String, dynamic>) {
+          transactionData = data['transaction'] ?? data['data'] ?? data;
         } else {
-          throw ServerException('Invalid response format');
+          throw Exception('Invalid response format');
         }
 
-        return TransactionDetailModel.fromJson(transactionData);
+        return TransactionModel.fromJson(transactionData);
       } else {
-        throw ServerException('Failed to load transaction details');
+        throw Exception('Failed to load transaction details');
       }
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw UnauthorizedException('Session expired');
-      } else if (e.response?.statusCode == 404) {
-        throw NotFoundException('Transaction not found');
-      }
-      throw ServerException(e.message ?? 'Network error occurred');
+      throw Exception(
+        e.response?.data['message'] ?? 'Failed to load transaction details',
+      );
     } catch (e) {
-      throw ServerException('An unexpected error occurred: ${e.toString()}');
+      throw Exception('Failed to load transaction details: $e');
     }
   }
 
   @override
-  Future<List<TransactionDetailModel>> searchTransactions(String query) async {
+  Future<List<TransactionModel>> searchTransactions(String query) async {
     try {
       final response = await dio.get(
-        '/transactions/search',
-        queryParameters: {'q': query},
+        ApiConstants.userTransactions,
+        queryParameters: {'search': query},
       );
 
       if (response.statusCode == 200) {
         final data = response.data;
         
         List<dynamic> transactionsList;
-        if (data is Map && data.containsKey('data')) {
-          transactionsList = data['data'] as List;
+        if (data is Map<String, dynamic>) {
+          transactionsList = data['transactions'] ?? data['data'] ?? [];
         } else if (data is List) {
           transactionsList = data;
         } else {
-          throw ServerException('Invalid response format');
+          transactionsList = [];
         }
 
         return transactionsList
-            .map((json) => TransactionDetailModel.fromJson(json))
+            .map((json) => TransactionModel.fromJson(json))
             .toList();
       } else {
-        throw ServerException('Failed to search transactions');
+        throw Exception('Failed to search transactions');
       }
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Network error occurred');
+      if (e.response?.statusCode == 404) {
+        return [];
+      }
+      throw Exception(
+        e.response?.data['message'] ?? 'Failed to search transactions',
+      );
+    } catch (e) {
+      throw Exception('Failed to search transactions: $e');
     }
   }
 
   @override
-  Future<List<TransactionDetailModel>> getTransactionsByCategory(
+  Future<List<TransactionModel>> getTransactionsByCategory(
     String category,
   ) async {
     try {
       final response = await dio.get(
-        '/transactions/category/$category',
+        ApiConstants.userTransactions,
+        queryParameters: {'category': category},
       );
 
       if (response.statusCode == 200) {
         final data = response.data;
         
         List<dynamic> transactionsList;
-        if (data is Map && data.containsKey('data')) {
-          transactionsList = data['data'] as List;
+        if (data is Map<String, dynamic>) {
+          transactionsList = data['transactions'] ?? data['data'] ?? [];
         } else if (data is List) {
           transactionsList = data;
         } else {
-          throw ServerException('Invalid response format');
+          transactionsList = [];
         }
 
         return transactionsList
-            .map((json) => TransactionDetailModel.fromJson(json))
+            .map((json) => TransactionModel.fromJson(json))
             .toList();
       } else {
-        throw ServerException('Failed to load transactions by category');
+        throw Exception('Failed to load transactions by category');
       }
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Network error occurred');
+      if (e.response?.statusCode == 404) {
+        return [];
+      }
+      throw Exception(
+        e.response?.data['message'] ?? 'Failed to load transactions by category',
+      );
+    } catch (e) {
+      throw Exception('Failed to load transactions by category: $e');
     }
   }
 }

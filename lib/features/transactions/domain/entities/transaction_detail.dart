@@ -1,45 +1,94 @@
-// lib/features/transactions/domain/entities/transaction_detail.dart
+import 'package:equatable/equatable.dart';
 
-class TransactionDetail {
+class TransactionDetail extends Equatable {
   final String id;
-  final String type; // 'credit', 'debit', 'transfer'
+  final String type;
   final double amount;
   final String currency;
-  final String description;
-  final DateTime timestamp;
-  final String status; // 'completed', 'pending', 'failed'
-  final String category;
+  final String status;
+  final String? description;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  final String? referenceNumber;
+  final Map<String, dynamic>? metadata;
+  
+  // Related entities
+  final String? userId;
+  final String? vehicleId;
+  final String? bookingId;
+  
+  // Payment details
+  final String? paymentMethod;
+  final String? paymentProvider;
+  final String? paymentReference;
+  
+  // Additional properties needed by UI
+  final String? category;
+  final DateTime? timestamp;
   final String? recipientName;
   final String? recipientAccount;
   final String? senderName;
   final String? senderAccount;
-  final String? referenceNumber;
   final double? balanceAfter;
   final String? notes;
-  final Map<String, dynamic>? metadata;
 
-  TransactionDetail({
+  const TransactionDetail({
     required this.id,
     required this.type,
     required this.amount,
     required this.currency,
-    required this.description,
-    required this.timestamp,
     required this.status,
-    required this.category,
+    this.description,
+    required this.createdAt,
+    this.updatedAt,
+    this.referenceNumber,
+    this.metadata,
+    this.userId,
+    this.vehicleId,
+    this.bookingId,
+    this.paymentMethod,
+    this.paymentProvider,
+    this.paymentReference,
+    this.category,
+    this.timestamp,
     this.recipientName,
     this.recipientAccount,
     this.senderName,
     this.senderAccount,
-    this.referenceNumber,
     this.balanceAfter,
     this.notes,
-    this.metadata,
   });
 
-  bool get isCredit => type.toLowerCase() == 'credit';
-  bool get isDebit => type.toLowerCase() == 'debit';
-  bool get isPending => status.toLowerCase() == 'pending';
-  bool get isCompleted => status.toLowerCase() == 'completed';
-  bool get isFailed => status.toLowerCase() == 'failed';
+  // Computed properties
+  bool get isCredit => type.toLowerCase() == 'credit' || type.toLowerCase() == 'deposit' || type.toLowerCase() == 'income';
+  bool get isDebit => type.toLowerCase() == 'debit' || type.toLowerCase() == 'withdrawal' || type.toLowerCase() == 'expense';
+  bool get isCompleted => status.toLowerCase() == 'completed' || status.toLowerCase() == 'success';
+
+  @override
+  List<Object?> get props => [
+        id,
+        type,
+        amount,
+        currency,
+        status,
+        description,
+        createdAt,
+        updatedAt,
+        referenceNumber,
+        metadata,
+        userId,
+        vehicleId,
+        bookingId,
+        paymentMethod,
+        paymentProvider,
+        paymentReference,
+        category,
+        timestamp,
+        recipientName,
+        recipientAccount,
+        senderName,
+        senderAccount,
+        balanceAfter,
+        notes,
+      ];
 }

@@ -1,5 +1,3 @@
-// lib/features/transactions/presentation/widgets/transaction_list_item.dart
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/transaction_detail.dart';
@@ -14,7 +12,9 @@ class TransactionListItem extends StatelessWidget {
     required this.onTap,
   });
 
-  IconData _getCategoryIcon(String category) {
+  IconData _getCategoryIcon(String? category) {
+    if (category == null) return Icons.category;
+    
     switch (category.toLowerCase()) {
       case 'food':
         return Icons.restaurant;
@@ -39,7 +39,9 @@ class TransactionListItem extends StatelessWidget {
     }
   }
 
-  Color _getCategoryColor(String category) {
+  Color _getCategoryColor(String? category) {
+    if (category == null) return Colors.grey;
+    
     switch (category.toLowerCase()) {
       case 'food':
         return Colors.orange;
@@ -121,7 +123,7 @@ class TransactionListItem extends StatelessWidget {
                   children: [
                     // Description
                     Text(
-                      transaction.description,
+                      transaction.description ?? 'No description',
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -135,7 +137,8 @@ class TransactionListItem extends StatelessWidget {
                     Text(
                       transaction.recipientName ??
                           transaction.senderName ??
-                          transaction.category,
+                          transaction.category ?? 
+                          'Transaction',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey[600],
@@ -155,7 +158,9 @@ class TransactionListItem extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          DateFormat('hh:mm a').format(transaction.timestamp),
+                          DateFormat('hh:mm a').format(
+                            transaction.timestamp ?? transaction.createdAt,
+                          ),
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[500],

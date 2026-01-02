@@ -1,7 +1,4 @@
-// lib/features/transactions/data/repositories/transaction_repository_impl.dart
-
 import 'package:dartz/dartz.dart';
-import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/transaction_detail.dart';
 import '../../domain/repositories/transaction_repository.dart';
@@ -22,7 +19,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
     DateTime? endDate,
   }) async {
     try {
-      final transactions = await remoteDataSource.getAllTransactions(
+      final transactionModels = await remoteDataSource.getAllTransactions(
         page: page,
         limit: limit,
         type: type,
@@ -30,33 +27,29 @@ class TransactionRepositoryImpl implements TransactionRepository {
         startDate: startDate,
         endDate: endDate,
       );
+
+      final transactions = transactionModels
+          .map((model) => model.toEntity())
+          .toList();
+
       return Right(transactions);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } on UnauthorizedException catch (e) {
-      return Left(AuthenticationFailure(e.message));
-    } on NotFoundException catch (e) {
-      return Left(NotFoundFailure(e.message));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 
   @override
   Future<Either<Failure, TransactionDetail>> getTransactionById(
-    String id,
+    String transactionId,
   ) async {
     try {
-      final transaction = await remoteDataSource.getTransactionById(id);
-      return Right(transaction);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } on UnauthorizedException catch (e) {
-      return Left(AuthenticationFailure(e.message));
-    } on NotFoundException catch (e) {
-      return Left(NotFoundFailure(e.message));
+      final transactionModel = await remoteDataSource.getTransactionById(
+        transactionId,
+      );
+
+      return Right(transactionModel.toEntity());
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 
@@ -65,12 +58,15 @@ class TransactionRepositoryImpl implements TransactionRepository {
     String query,
   ) async {
     try {
-      final transactions = await remoteDataSource.searchTransactions(query);
+      final transactionModels = await remoteDataSource.searchTransactions(query);
+
+      final transactions = transactionModels
+          .map((model) => model.toEntity())
+          .toList();
+
       return Right(transactions);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 
@@ -79,13 +75,17 @@ class TransactionRepositoryImpl implements TransactionRepository {
     String category,
   ) async {
     try {
-      final transactions =
-          await remoteDataSource.getTransactionsByCategory(category);
+      final transactionModels = await remoteDataSource.getTransactionsByCategory(
+        category,
+      );
+
+      final transactions = transactionModels
+          .map((model) => model.toEntity())
+          .toList();
+
       return Right(transactions);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 }

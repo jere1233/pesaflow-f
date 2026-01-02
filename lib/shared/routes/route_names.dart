@@ -1,4 +1,4 @@
-///home/hp/JERE/pension-frontend/lib/shared/routes/route_names.dart
+///lib/shared/routes/route_names.dart
 
 class RouteNames {
   // ============================================================================
@@ -27,6 +27,16 @@ class RouteNames {
   static const String payments = '/payments';
   static const String profile = '/profile';
   static const String notifications = '/notifications';
+  
+  // ============================================================================
+  // 🆕 ACCOUNT MANAGEMENT ROUTES (NEW)
+  // ============================================================================
+  static const String accounts = '/accounts';
+  static const String accountDetail = '/account-detail';
+  static const String addContribution = '/add-contribution';
+  static const String depositFunds = '/deposit-funds';
+  static const String withdrawFunds = '/withdraw-funds';
+  static const String portfolio = '/portfolio';
   
   // ============================================================================
   // PENSION MANAGEMENT FEATURES

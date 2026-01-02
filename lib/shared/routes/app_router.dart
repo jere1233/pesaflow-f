@@ -1,4 +1,4 @@
-///home/hp/JERE/pension-frontend/lib/shared/routes/app_router.dart
+///lib/shared/routes/app_router.dart
 
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +22,11 @@ import '../../features/notifications/presentation/screens/notifications_screen.d
 import '../../features/pension_plans/presentation/screens/pension_plans_screen.dart';
 import '../../features/statements/presentation/screens/download_statement_screen.dart';
 import '../../features/retirement/presentation/screens/retirement_goals_screen.dart';
+import '../../features/accounts/presentation/screens/accounts_list_screen.dart';
+import '../../features/accounts/presentation/screens/account_detail_screen.dart';
+import '../../features/accounts/presentation/screens/contribution_screen.dart';
+import '../../features/accounts/presentation/screens/deposit_screen.dart';
+import '../../features/accounts/presentation/screens/portfolio_screen.dart';
 import 'route_names.dart';
 
 class AppRouter {
@@ -123,6 +128,44 @@ class AppRouter {
         path: RouteNames.home,
         name: RouteNames.home,
         builder: (context, state) => const DashboardScreen(),
+      ),
+      
+      // ============================================================================
+      // 🆕 ACCOUNT MANAGEMENT ROUTES (NEW)
+      // ============================================================================
+      GoRoute(
+        path: RouteNames.accounts,
+        name: RouteNames.accounts,
+        builder: (context, state) => const AccountsListScreen(),
+      ),
+      GoRoute(
+        path: '${RouteNames.accountDetail}/:id',
+        name: RouteNames.accountDetail,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return AccountDetailScreen(accountId: id);
+        },
+      ),
+      GoRoute(
+        path: '${RouteNames.addContribution}/:id',
+        name: RouteNames.addContribution,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return ContributionScreen(accountId: id);
+        },
+      ),
+      GoRoute(
+        path: '${RouteNames.depositFunds}/:id',
+        name: RouteNames.depositFunds,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return DepositScreen(accountId: id);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.portfolio,
+        name: RouteNames.portfolio,
+        builder: (context, state) => const PortfolioScreen(),
       ),
       
       // ============================================================================

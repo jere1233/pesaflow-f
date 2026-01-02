@@ -1,5 +1,3 @@
-// lib/features/transactions/presentation/screens/transaction_detail_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -53,7 +51,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     }
   }
 
-  IconData _getCategoryIcon(String category) {
+  IconData _getCategoryIcon(String? category) {
+    if (category == null) return Icons.category;
+    
     switch (category.toLowerCase()) {
       case 'food':
         return Icons.restaurant;
@@ -167,7 +167,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                       // Amount
                       Text(
                         '$amountPrefix${transaction.currency} ${transaction.amount.toStringAsFixed(2)}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
@@ -177,7 +177,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
                       // Description
                       Text(
-                        transaction.description,
+                        transaction.description ?? 'No description',
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 16,
@@ -208,16 +208,17 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                               'Transaction ID',
                             ),
                           ),
-                          _InfoRow(
-                            icon: _getCategoryIcon(transaction.category),
-                            label: 'Category',
-                            value: transaction.category,
-                          ),
+                          if (transaction.category != null)
+                            _InfoRow(
+                              icon: _getCategoryIcon(transaction.category),
+                              label: 'Category',
+                              value: transaction.category ?? 'N/A',
+                            ),
                           _InfoRow(
                             icon: Icons.calendar_today,
                             label: 'Date & Time',
                             value: DateFormat('MMM dd, yyyy • hh:mm a')
-                                .format(transaction.timestamp),
+                                .format(transaction.timestamp ?? transaction.createdAt),
                           ),
                           if (transaction.referenceNumber != null)
                             _InfoRow(
