@@ -1,5 +1,3 @@
-///lib/shared/routes/app_router.dart
-
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/presentation/screens/login_screen.dart';
@@ -12,6 +10,7 @@ import '../../features/authentication/presentation/screens/terms_and_conditions_
 import '../../features/authentication/presentation/screens/change_password_screen.dart';
 import '../../features/authentication/presentation/screens/change_pin_screen.dart';
 import '../../features/authentication/presentation/screens/reset_pin_screen.dart';
+import '../../features/authentication/presentation/screens/set_pin_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/transactions/presentation/screens/transactions_screen.dart';
 import '../../features/transactions/presentation/screens/transaction_detail_screen.dart';
@@ -52,7 +51,9 @@ class AppRouter {
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
       
-      // 🆕 Password & PIN Management (Authenticated)
+      // ============================================================================
+      // 🆕 PASSWORD & PIN MANAGEMENT (AUTHENTICATED)
+      // ============================================================================
       GoRoute(
         path: RouteNames.changePassword,
         name: RouteNames.changePassword,
@@ -63,15 +64,24 @@ class AppRouter {
         name: RouteNames.changePin,
         builder: (context, state) => const ChangePinScreen(),
       ),
+      GoRoute(
+        path: '/set-pin',
+        name: 'setPin',
+        builder: (context, state) => const SetPinScreen(),
+      ),
       
-      // 🆕 Reset PIN (Unauthenticated)
+      // ============================================================================
+      // 🆕 RESET PIN (UNAUTHENTICATED)
+      // ============================================================================
       GoRoute(
         path: RouteNames.resetPin,
         name: RouteNames.resetPin,
         builder: (context, state) => const ResetPinScreen(),
       ),
       
-      // Terms and Conditions Screen
+      // ============================================================================
+      // TERMS AND CONDITIONS
+      // ============================================================================
       GoRoute(
         path: RouteNames.termsAndConditions,
         name: RouteNames.termsAndConditions,
@@ -84,6 +94,10 @@ class AppRouter {
           );
         },
       ),
+      
+      // ============================================================================
+      // OTP VERIFICATION SCREENS
+      // ============================================================================
       
       // Login OTP Verification (with optional password setting)
       GoRoute(
@@ -111,7 +125,9 @@ class AppRouter {
         },
       ),
       
-      // Payment Status Route
+      // ============================================================================
+      // PAYMENT STATUS
+      // ============================================================================
       GoRoute(
         path: '${RouteNames.paymentStatus}/:transactionId',
         name: RouteNames.paymentStatus,
@@ -131,7 +147,7 @@ class AppRouter {
       ),
       
       // ============================================================================
-      // 🆕 ACCOUNT MANAGEMENT ROUTES (NEW)
+      // ACCOUNT MANAGEMENT ROUTES
       // ============================================================================
       GoRoute(
         path: RouteNames.accounts,

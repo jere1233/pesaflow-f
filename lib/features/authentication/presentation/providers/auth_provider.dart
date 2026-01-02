@@ -1,8 +1,8 @@
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/providers/auth_provider.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 import '../../../../core/storage/secure_storage_helper.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/models/auth_response_model.dart';
 import '../../data/models/login_request_model.dart';
@@ -22,10 +22,13 @@ enum AuthStatus {
 
 class AuthProvider extends ChangeNotifier {
   final AuthRemoteDataSource _authDataSource;
+  final Dio _dio;
 
   AuthProvider({
     required AuthRemoteDataSource authDataSource,
-  }) : _authDataSource = authDataSource;
+    required Dio dio,
+  })  : _authDataSource = authDataSource,
+        _dio = dio;
 
   AuthStatus _status = AuthStatus.initial;
   User? _user;
@@ -149,6 +152,39 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Resend OTP to user's email
+  Future<bool> resendOtp(String identifier) async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      final response = await _dio.post(
+        ApiConstants.getFullUrl(ApiConstants.resendOtp),
+        data: {
+          'identifier': identifier, // email or phone
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _setLoading(false);
+        return true;
+      } else {
+        _errorMessage = response.data['message'] ?? 'Failed to resend OTP';
+        _setLoading(false);
+        return false;
+      }
+    } on DioException catch (e) {
+      _errorMessage = e.response?.data['message'] ?? 
+          'Failed to resend OTP. Please try again.';
+      _setLoading(false);
+      return false;
+    } catch (e) {
+      _errorMessage = 'An unexpected error occurred';
+      _setLoading(false);
+      return false;
+    }
+  }
+
   // ============================================================================
   // REGISTRATION FLOW
   // ============================================================================
@@ -209,14 +245,14 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // ============================================================================
-  // PASSWORD MANAGEMENT (🆕 NEW)
+  // PASSWORD MANAGEMENT
   // ============================================================================
 
-  /// Change password (authenticated)
-  Future<bool> changePassword({
-    required String currentPassword,
-    required String newPassword,
-  }) async {
+  /// Change password (authenticated) - Returns Map for compatibility
+  Future<Map<String, dynamic>> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
     try {
       _setLoading(true);
       _errorMessage = null;
@@ -227,12 +263,18 @@ class AuthProvider extends ChangeNotifier {
       );
 
       _setLoading(false);
-      return true;
+      return {
+        'success': true,
+        'message': 'Password changed successfully',
+      };
     } catch (e) {
       _setLoading(false);
       _errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
-      return false;
+      return {
+        'success': false,
+        'message': _errorMessage ?? 'Failed to change password',
+      };
     }
   }
 
@@ -281,14 +323,101 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // ============================================================================
-  // PIN MANAGEMENT (🆕 NEW)
+  // PIN MANAGEMENT (🆕 NEW METHODS FOR SCREENS)
   // ============================================================================
 
-  /// Change PIN (authenticated)
-  Future<bool> changePin({
-    required String currentPin,
-    required String newPin,
-  }) async {
+  /// Request OTP to set PIN - Returns Map for screen compatibility
+  Future<Map<String, dynamic>> requestSetPin(String pin) async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      final response = await _dio.post(
+        ApiConstants.getFullUrl(ApiConstants.setPin),
+        data: {'pin': pin},
+      );
+
+      _setLoading(false);
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': 'OTP sent to your phone',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': response.data['message'] ?? 'Failed to request OTP',
+        };
+      }
+    } on DioException catch (e) {
+      _setLoading(false);
+      _errorMessage = e.response?.data['message'] ?? 'Failed to request OTP';
+      notifyListeners();
+      return {
+        'success': false,
+        'message': _errorMessage,
+      };
+    } catch (e) {
+      _setLoading(false);
+      _errorMessage = 'An unexpected error occurred';
+      notifyListeners();
+      return {
+        'success': false,
+        'message': _errorMessage,
+      };
+    }
+  }
+
+  /// Verify OTP and set PIN - Returns Map for screen compatibility
+  Future<Map<String, dynamic>> verifySetPin(String pin, String otp) async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      final response = await _dio.post(
+        ApiConstants.getFullUrl(ApiConstants.setPinVerify),
+        data: {
+          'pin': pin,
+          'otp': otp,
+        },
+      );
+
+      _setLoading(false);
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': 'PIN set successfully',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': response.data['message'] ?? 'Failed to set PIN',
+        };
+      }
+    } on DioException catch (e) {
+      _setLoading(false);
+      _errorMessage = e.response?.data['message'] ?? 'Failed to set PIN';
+      notifyListeners();
+      return {
+        'success': false,
+        'message': _errorMessage,
+      };
+    } catch (e) {
+      _setLoading(false);
+      _errorMessage = 'An unexpected error occurred';
+      notifyListeners();
+      return {
+        'success': false,
+        'message': _errorMessage,
+      };
+    }
+  }
+
+  /// Change PIN (authenticated) - Returns Map for screen compatibility
+  Future<Map<String, dynamic>> changePin(
+    String currentPin,
+    String newPin,
+  ) async {
     try {
       _setLoading(true);
       _errorMessage = null;
@@ -299,16 +428,145 @@ class AuthProvider extends ChangeNotifier {
       );
 
       _setLoading(false);
-      return true;
+      return {
+        'success': true,
+        'message': 'PIN changed successfully',
+      };
     } catch (e) {
       _setLoading(false);
       _errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
+      return {
+        'success': false,
+        'message': _errorMessage ?? 'Failed to change PIN',
+      };
+    }
+  }
+
+  /// Request PIN reset OTP - Returns Map for screen compatibility
+  Future<Map<String, dynamic>> requestResetPin(String phoneNumber) async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      await _authDataSource.resetPin(phoneNumber);
+
+      _setLoading(false);
+      return {
+        'success': true,
+        'message': 'OTP sent to your phone',
+      };
+    } catch (e) {
+      _setLoading(false);
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return {
+        'success': false,
+        'message': _errorMessage ?? 'Failed to send OTP',
+      };
+    }
+  }
+
+  /// Verify OTP and reset PIN - Returns Map for screen compatibility
+  Future<Map<String, dynamic>> verifyResetPin(
+    String phoneNumber,
+    String otp,
+    String newPin,
+  ) async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      await _authDataSource.resetPinVerify(
+        phone: phoneNumber,
+        otp: otp,
+        newPin: newPin,
+      );
+
+      _setLoading(false);
+      return {
+        'success': true,
+        'message': 'PIN reset successfully',
+      };
+    } catch (e) {
+      _setLoading(false);
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return {
+        'success': false,
+        'message': _errorMessage ?? 'Failed to reset PIN',
+      };
+    }
+  }
+
+  /// Original PIN management methods (keep for backward compatibility)
+  
+  /// Request OTP to set PIN (authenticated)
+  Future<bool> requestSetPinOtp() async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      final response = await _dio.post(
+        ApiConstants.getFullUrl(ApiConstants.setPin),
+      );
+
+      if (response.statusCode == 200) {
+        _setLoading(false);
+        return true;
+      } else {
+        _errorMessage = response.data['message'] ?? 'Failed to request OTP';
+        _setLoading(false);
+        return false;
+      }
+    } on DioException catch (e) {
+      _errorMessage = e.response?.data['message'] ?? 'Failed to request OTP';
+      _setLoading(false);
+      return false;
+    } catch (e) {
+      _errorMessage = 'An unexpected error occurred';
+      _setLoading(false);
       return false;
     }
   }
 
-  /// Request PIN reset OTP
+  /// Verify OTP and set PIN (authenticated)
+  Future<bool> setPin({
+    required String otp,
+    required String pin,
+  }) async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      final response = await _dio.post(
+        ApiConstants.getFullUrl(ApiConstants.setPinVerify),
+        data: {
+          'otp': otp,
+          'pin': pin,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _setLoading(false);
+        return true;
+      } else {
+        _errorMessage = response.data['message'] ?? 'Failed to set PIN';
+        _setLoading(false);
+        return false;
+      }
+    } on DioException catch (e) {
+      _errorMessage = e.response?.data['message'] ?? 'Failed to set PIN';
+      _setLoading(false);
+      return false;
+    } catch (e) {
+      _errorMessage = 'An unexpected error occurred';
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  /// Reset PIN (original method)
   Future<bool> resetPin(String phone) async {
     try {
       _setLoading(true);
@@ -326,7 +584,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Verify OTP and reset PIN
+  /// Verify OTP and reset PIN (original method)
   Future<bool> resetPinVerify({
     required String phone,
     required String otp,

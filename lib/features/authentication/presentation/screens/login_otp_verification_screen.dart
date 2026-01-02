@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'dart:async';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/routes/route_names.dart';
 import '../widgets/custom_button.dart';
@@ -29,9 +30,21 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
   final _newPasswordController = TextEditingController();
   
   bool _showPasswordField = false;
+  
+  // Timer variables for resend OTP
+  Timer? _resendTimer;
+  int _resendCountdown = 60;
+  bool _canResend = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startResendTimer();
+  }
 
   @override
   void dispose() {
+    _resendTimer?.cancel();
     for (var controller in _otpControllers) {
       controller.dispose();
     }
@@ -40,6 +53,62 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
     }
     _newPasswordController.dispose();
     super.dispose();
+  }
+
+  void _startResendTimer() {
+    setState(() {
+      _canResend = false;
+      _resendCountdown = 60;
+    });
+    
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendCountdown > 0) {
+        setState(() {
+          _resendCountdown--;
+        });
+      } else {
+        setState(() {
+          _canResend = true;
+        });
+        timer.cancel();
+      }
+    });
+  }
+
+  Future<void> _handleResendOtp() async {
+    if (!_canResend) return;
+
+    final authProvider = context.read<AuthProvider>();
+    
+    final success = await authProvider.resendOtp(widget.identifier);
+    
+    if (success && mounted) {
+      Fluttertoast.showToast(
+        msg: "OTP has been resent to ${widget.identifier}",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: AppColors.success,
+        textColor: Colors.white,
+      );
+      
+      // Clear OTP fields
+      for (var controller in _otpControllers) {
+        controller.clear();
+      }
+      _focusNodes[0].requestFocus();
+      
+      // Restart timer
+      _startResendTimer();
+    } else if (mounted) {
+      Fluttertoast.showToast(
+        msg: authProvider.errorMessage ?? "Failed to resend OTP",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    }
   }
 
   Future<void> _handleVerifyOtp() async {
@@ -276,6 +345,48 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                           isLoading: authProvider.isLoading,
                         );
                       },
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Resend OTP Section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Didn't receive the code? ",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        Consumer<AuthProvider>(
+                          builder: (context, authProvider, _) {
+                            return TextButton(
+                              onPressed: _canResend && !authProvider.isLoading
+                                  ? _handleResendOtp
+                                  : null,
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: Text(
+                                _canResend 
+                                    ? 'Resend' 
+                                    : 'Resend in ${_resendCountdown}s',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: _canResend && !authProvider.isLoading
+                                      ? AppColors.primary 
+                                      : AppColors.textSecondary,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                     
                     const SizedBox(height: 20),

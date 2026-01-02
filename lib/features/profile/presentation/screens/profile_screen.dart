@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/routes/route_names.dart';
 import '../../../authentication/presentation/providers/auth_provider.dart';
 import '../../../authentication/presentation/widgets/logout_button.dart';
 
@@ -162,6 +164,7 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   _buildMenuItem(
+                    context: context,
                     icon: Icons.person_outline,
                     title: 'Edit Profile',
                     iconColor: AppColors.primary,
@@ -171,47 +174,62 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   _buildDivider(),
                   _buildMenuItem(
+                    context: context,
                     icon: Icons.lock_outline,
                     title: 'Change Password',
                     iconColor: AppColors.secondary,
                     onTap: () {
-                      // TODO: Navigate to change password
+                      context.push(RouteNames.changePassword);
                     },
                   ),
                   _buildDivider(),
                   _buildMenuItem(
-                    icon: Icons.notifications_outlined,
-                    title: 'Notifications',
+                    context: context,
+                    icon: Icons.pin_outlined,
+                    title: 'Manage PIN',
                     iconColor: AppColors.accentGold,
                     onTap: () {
-                      // TODO: Navigate to notifications settings
+                      _showPinManagementDialog(context);
                     },
                   ),
                   _buildDivider(),
                   _buildMenuItem(
+                    context: context,
+                    icon: Icons.notifications_outlined,
+                    title: 'Notifications',
+                    iconColor: AppColors.accentEmerald,
+                    onTap: () {
+                      context.push(RouteNames.notifications);
+                    },
+                  ),
+                  _buildDivider(),
+                  _buildMenuItem(
+                    context: context,
                     icon: Icons.security_outlined,
                     title: 'Privacy & Security',
-                    iconColor: AppColors.accentEmerald,
+                    iconColor: AppColors.info,
                     onTap: () {
                       // TODO: Navigate to privacy settings
                     },
                   ),
                   _buildDivider(),
                   _buildMenuItem(
+                    context: context,
                     icon: Icons.help_outline,
                     title: 'Help & Support',
-                    iconColor: AppColors.info,
+                    iconColor: AppColors.secondary,
                     onTap: () {
                       // TODO: Navigate to help
                     },
                   ),
                   _buildDivider(),
                   _buildMenuItem(
+                    context: context,
                     icon: Icons.info_outline,
                     title: 'About',
                     iconColor: AppColors.textSecondary,
                     onTap: () {
-                      // TODO: Show about dialog
+                      _showAboutDialog(context);
                     },
                   ),
                 ],
@@ -257,6 +275,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildMenuItem({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required Color iconColor,
@@ -309,6 +328,184 @@ class ProfileScreen extends StatelessWidget {
         height: 1,
         thickness: 1,
         color: Colors.grey.withOpacity(0.1),
+      ),
+    );
+  }
+
+  void _showPinManagementDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Title
+            const Text(
+              'PIN Management',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Set/Change PIN Option
+            ListTile(
+              leading: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.pin_outlined,
+                  color: AppColors.primary,
+                ),
+              ),
+              title: const Text(
+                'Set/Change PIN',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: const Text(
+                'Create or update your 4-digit PIN',
+                style: TextStyle(fontSize: 13),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.pop(context);
+                context.push('/set-pin');
+              },
+            ),
+            
+            const Divider(),
+            
+            // Reset PIN Option
+            ListTile(
+              leading: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.secondary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.lock_reset,
+                  color: AppColors.secondary,
+                ),
+              ),
+              title: const Text(
+                'Reset PIN',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: const Text(
+                'Forgot your PIN? Reset it here',
+                style: TextStyle(fontSize: 13),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.pop(context);
+                context.push(RouteNames.resetPin);
+              },
+            ),
+            
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                gradient: AppColors.cardGradient1,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.info_outline,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('About'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Pension Management System',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Version 1.0.0',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Secure and convenient pension management at your fingertips.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[700],
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }

@@ -1,4 +1,3 @@
-///home/hp/JERE/AutoNest-frontend/lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -64,10 +63,11 @@ class AutoNest extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        // Auth Provider
+        // Auth Provider - FIXED: Added dio parameter
         ChangeNotifierProvider(
           create: (_) => AuthProvider(
             authDataSource: authDataSource,
+            dio: apiClient.dio, // 🔧 FIXED: Added required dio parameter
           )..checkAuthStatus(),
         ),
         
@@ -96,7 +96,7 @@ class AutoNest extends StatelessWidget {
           },
         ),
         
-        // 🆕 NEW: Account Provider
+        // Account Provider
         ChangeNotifierProvider(
           create: (_) => AccountProvider(
             accountService: AccountService(),

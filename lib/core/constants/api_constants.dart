@@ -1,12 +1,10 @@
-///home/hp/JERE/pension-frontend/lib/core/constants/api_constants.dart
-
+///home/hp/JERE/AutoNest-frontend/lib/core/constants/api_constants.dart
 class ApiConstants {
   static const String baseUrl = 'https://pension-backend-rs4h.onrender.com';
   
   // Timeouts
   static const int connectionTimeout = 30000; 
   static const int receiveTimeout = 30000; 
-
 
   static const String login = '/api/auth/login';
   static const String loginOtp = '/api/auth/login/otp';
@@ -15,6 +13,9 @@ class ApiConstants {
   static const String refreshToken = '/api/auth/refresh';
   static const String verifyToken = '/api/auth/verify';
   static const String setPassword = '/api/auth/set-password';
+  
+  // 🆕 OTP Management
+  static const String resendOtp = '/api/auth/resend-otp';
   
   // 🆕 Password Management
   static const String changePassword = '/api/auth/change-password';
@@ -25,13 +26,18 @@ class ApiConstants {
   static const String changePin = '/api/auth/change-pin';
   static const String resetPin = '/api/auth/reset-pin';
   static const String resetPinVerify = '/api/auth/reset-pin/verify';
+  static const String setPin = '/api/auth/set-pin';
+  static const String setPinVerify = '/api/auth/set-pin/verify';
   
   // Registration Status
   static const String checkRegisterStatus = '/api/auth/register/status';
   
   // Admin
-  static const String promote = '/api/auth/promote';
+  static const String promote = '/api/auth/makeadmin';
   static const String demote = '/api/auth/demote';
+  
+  // USSD
+  static const String ussdLogin = '/api/auth/ussd-login';
   
   // ============================================================================
   // ACCOUNT ENDPOINTS (🆕 UPDATED)
@@ -57,7 +63,7 @@ class ApiConstants {
   // TRANSACTION ENDPOINTS
   // ============================================================================
   static const String transactions = '/api/transactions';
-  static const String userTransactions = '/api/transactions/user';
+  static const String userTransactions = '/api/dashboard/transactions';
   
   // ============================================================================
   // PAYMENT ENDPOINTS

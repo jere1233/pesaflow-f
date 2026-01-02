@@ -1,5 +1,3 @@
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/change_pin_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -35,12 +33,14 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
     if (_formKey.currentState!.validate()) {
       final authProvider = context.read<AuthProvider>();
       
-      final success = await authProvider.changePin(
-        currentPin: _currentPinController.text,
-        newPin: _newPinController.text,
+      // 🔧 FIXED: Changed from named parameters to positional parameters
+      final response = await authProvider.changePin(
+        _currentPinController.text,  // currentPin
+        _newPinController.text,       // newPin
       );
 
-      if (success && mounted) {
+      // 🔧 FIXED: Check response map instead of bool
+      if (response['success'] == true && mounted) {
         Fluttertoast.showToast(
           msg: "PIN changed successfully!",
           toastLength: Toast.LENGTH_LONG,
@@ -50,7 +50,7 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
         );
         context.pop();
       } else if (mounted) {
-        _showErrorDialog(authProvider.errorMessage ?? 'Failed to change PIN');
+        _showErrorDialog(response['message'] ?? 'Failed to change PIN');
       }
     }
   }

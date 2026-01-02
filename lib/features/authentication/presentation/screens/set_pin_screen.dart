@@ -7,22 +7,21 @@ import 'dart:async';
 import '../../../../core/constants/app_colors.dart';
 import '../providers/auth_provider.dart';
 
-class ResetPinScreen extends StatefulWidget {
-  const ResetPinScreen({super.key});
+class SetPinScreen extends StatefulWidget {
+  const SetPinScreen({super.key});
 
   @override
-  State<ResetPinScreen> createState() => _ResetPinScreenState();
+  State<SetPinScreen> createState() => _SetPinScreenState();
 }
 
-class _ResetPinScreenState extends State<ResetPinScreen> {
-  final _phoneController = TextEditingController();
-  final _otpController = TextEditingController();
-  final _newPinController = TextEditingController();
+class _SetPinScreenState extends State<SetPinScreen> {
+  final _pinController = TextEditingController();
   final _confirmPinController = TextEditingController();
+  final _otpController = TextEditingController();
   
   bool _isLoading = false;
   bool _otpSent = false;
-  bool _obscureNewPin = true;
+  bool _obscurePin = true;
   bool _obscureConfirmPin = true;
   
   int _resendCountdown = 0;
@@ -30,10 +29,9 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
 
   @override
   void dispose() {
-    _phoneController.dispose();
-    _otpController.dispose();
-    _newPinController.dispose();
+    _pinController.dispose();
     _confirmPinController.dispose();
+    _otpController.dispose();
     _timer?.cancel();
     super.dispose();
   }
@@ -53,8 +51,13 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
   }
 
   Future<void> _requestOtp() async {
-    if (_phoneController.text.isEmpty) {
-      Fluttertoast.showToast(msg: 'Please enter phone number');
+    if (_pinController.text.length != 4) {
+      Fluttertoast.showToast(msg: 'PIN must be 4 digits');
+      return;
+    }
+    
+    if (_pinController.text != _confirmPinController.text) {
+      Fluttertoast.showToast(msg: 'PINs do not match');
       return;
     }
 
@@ -62,7 +65,7 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
 
     try {
       final authProvider = context.read<AuthProvider>();
-      final response = await authProvider.requestResetPin(_phoneController.text);
+      final response = await authProvider.requestSetPin(_pinController.text);
       
       if (response['success'] == true) {
         setState(() => _otpSent = true);
@@ -87,19 +90,9 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
     }
   }
 
-  Future<void> _verifyAndResetPin() async {
+  Future<void> _verifyAndSetPin() async {
     if (_otpController.text.length != 6) {
       Fluttertoast.showToast(msg: 'OTP must be 6 digits');
-      return;
-    }
-    
-    if (_newPinController.text.length != 4) {
-      Fluttertoast.showToast(msg: 'PIN must be 4 digits');
-      return;
-    }
-    
-    if (_newPinController.text != _confirmPinController.text) {
-      Fluttertoast.showToast(msg: 'PINs do not match');
       return;
     }
 
@@ -107,21 +100,20 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
 
     try {
       final authProvider = context.read<AuthProvider>();
-      final response = await authProvider.verifyResetPin(
-        _phoneController.text,
+      final response = await authProvider.verifySetPin(
+        _pinController.text,
         _otpController.text,
-        _newPinController.text,
       );
       
       if (response['success'] == true) {
         Fluttertoast.showToast(
-          msg: 'PIN reset successfully',
+          msg: 'PIN set successfully',
           backgroundColor: AppColors.success,
         );
-        if (mounted) context.go('/login');
+        if (mounted) context.pop();
       } else {
         Fluttertoast.showToast(
-          msg: response['message'] ?? 'Failed to reset PIN',
+          msg: response['message'] ?? 'Failed to set PIN',
           backgroundColor: AppColors.error,
         );
       }
@@ -142,7 +134,7 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
 
     try {
       final authProvider = context.read<AuthProvider>();
-      final response = await authProvider.requestResetPin(_phoneController.text);
+      final response = await authProvider.requestSetPin(_pinController.text);
       
       if (response['success'] == true) {
         _startResendCountdown();
@@ -172,7 +164,7 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          _otpSent ? 'Reset PIN' : 'Forgot PIN',
+          _otpSent ? 'Verify OTP' : 'Set PIN',
           style: const TextStyle(
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -203,7 +195,7 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
                 ],
               ),
               child: const Icon(
-                Icons.lock_open,
+                Icons.pin_outlined,
                 size: 50,
                 color: Colors.white,
               ),
@@ -213,7 +205,7 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
             
             // Title & Description
             Text(
-              _otpSent ? 'Create New PIN' : 'Reset Your PIN',
+              _otpSent ? 'Enter Verification Code' : 'Create Your PIN',
               style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -226,8 +218,8 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
             
             Text(
               _otpSent
-                  ? 'Enter the OTP and set your new PIN'
-                  : 'Enter your phone number to receive a verification code',
+                  ? 'Enter the 6-digit OTP sent to your phone'
+                  : 'Set a 4-digit PIN for quick access',
               style: TextStyle(
                 fontSize: 15,
                 color: AppColors.textSecondary,
@@ -239,35 +231,27 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
             const SizedBox(height: 40),
             
             if (!_otpSent) ...[
-              // Phone Number Input
-              TextField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(
-                  labelText: 'Phone Number',
-                  hintText: '0712345678',
-                  prefixIcon: const Icon(Icons.phone_outlined),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                  ),
-                ),
+              // PIN Input
+              _buildPinField(
+                controller: _pinController,
+                label: 'Enter PIN',
+                obscureText: _obscurePin,
+                onToggleVisibility: () => setState(() => _obscurePin = !_obscurePin),
+              ),
+              
+              const SizedBox(height: 20),
+              
+              // Confirm PIN Input
+              _buildPinField(
+                controller: _confirmPinController,
+                label: 'Confirm PIN',
+                obscureText: _obscureConfirmPin,
+                onToggleVisibility: () => setState(() => _obscureConfirmPin = !_obscureConfirmPin),
               ),
               
               const SizedBox(height: 32),
               
-              // Send OTP Button
+              // Request OTP Button
               SizedBox(
                 height: 56,
                 child: ElevatedButton(
@@ -290,7 +274,7 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
                           ),
                         )
                       : const Text(
-                          'Send OTP',
+                          'Request OTP',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -337,26 +321,6 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
               
               const SizedBox(height: 24),
               
-              // New PIN
-              _buildPinField(
-                controller: _newPinController,
-                label: 'New PIN',
-                obscureText: _obscureNewPin,
-                onToggleVisibility: () => setState(() => _obscureNewPin = !_obscureNewPin),
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // Confirm PIN
-              _buildPinField(
-                controller: _confirmPinController,
-                label: 'Confirm PIN',
-                obscureText: _obscureConfirmPin,
-                onToggleVisibility: () => setState(() => _obscureConfirmPin = !_obscureConfirmPin),
-              ),
-              
-              const SizedBox(height: 24),
-              
               // Resend OTP
               Center(
                 child: TextButton(
@@ -376,11 +340,11 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
               
               const SizedBox(height: 32),
               
-              // Reset PIN Button
+              // Verify Button
               SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _verifyAndResetPin,
+                  onPressed: _isLoading ? null : _verifyAndSetPin,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -399,7 +363,7 @@ class _ResetPinScreenState extends State<ResetPinScreen> {
                           ),
                         )
                       : const Text(
-                          'Reset PIN',
+                          'Verify & Set PIN',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
