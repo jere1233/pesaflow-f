@@ -1,6 +1,3 @@
-
-
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/widgets/custom_text_field.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -65,47 +62,82 @@ class CustomTextField extends StatelessWidget {
       readOnly: readOnly,
       style: const TextStyle(
         fontSize: 15,
-        color: Colors.black87,
+        color: Color(0xFF1B2B4D), // Deep navy for text
+        fontWeight: FontWeight.w500,
       ),
       decoration: InputDecoration(
         labelText: labelText,
-        labelStyle: const TextStyle(color: Colors.black54),
+        labelStyle: TextStyle(
+          color: Colors.black.withOpacity(0.65),
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
         hintText: hintText,
-        hintStyle: const TextStyle(color: Colors.black38),
-        prefixIcon: Icon(prefixIcon, size: 20, color: Colors.black54),
+        hintStyle: TextStyle(
+          color: Colors.black.withOpacity(0.35),
+          fontSize: 14,
+        ),
+        prefixIcon: Icon(
+          prefixIcon,
+          size: 22,
+          color: AppColors.primary.withOpacity(0.7),
+        ),
         suffixIcon: suffixIcon,
         prefixText: prefixText,
-        prefixStyle: const TextStyle(color: Colors.black87, fontSize: 15),
+        prefixStyle: const TextStyle(
+          color: Color(0xFF1B2B4D),
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
         filled: true,
-        fillColor: Colors.grey[50],
+        fillColor: Colors.white.withOpacity(0.95),
         counterText: maxLength != null ? null : '',
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.border, width: 1),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: Colors.white.withOpacity(0.3),
+            width: 1.5,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: AppColors.highlightGold,
+            width: 2,
+          ),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(
+            color: Color(0xFF8B2E2E),
+            width: 1.5,
+          ),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 2),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(
+            color: Color(0xFF8B2E2E),
+            width: 2,
+          ),
         ),
         disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: Colors.grey.withOpacity(0.3),
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
+          horizontal: 18,
+          vertical: 16,
+        ),
+        errorStyle: const TextStyle(
+          fontSize: 12,
+          color: Color(0xFF8B2E2E),
+          fontWeight: FontWeight.w500,
         ),
       ),
     );

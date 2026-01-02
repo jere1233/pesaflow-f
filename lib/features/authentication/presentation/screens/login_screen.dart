@@ -1,4 +1,3 @@
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -51,7 +50,6 @@ class _LoginScreenState extends State<LoginScreen> {
           textColor: Colors.white,
         );
         
-        // ✅ FIXED: Use context.go() instead of context.push()
         context.go(
           RouteNames.loginOtpVerification,
           extra: {
@@ -69,6 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Login Failed'),
         content: Text(message),
         actions: [
@@ -111,109 +110,138 @@ class _LoginScreenState extends State<LoginScreen> {
                         SizedBox(height: screenHeight * 0.05),
                         
                         const AuthHeader(
-                          title: 'Welcome Back!',
-                          subtitle: 'Sign in to manage your pension',
+                          title: 'Welcome Back',
+                          subtitle: 'Sign in to manage your pension account',
                         ),
                         
                         const SizedBox(height: 40),
                         
-                        CustomTextField(
-                          controller: _identifierController,
-                          labelText: 'Email, Username, or Phone',
-                          hintText: 'Enter email, username, or phone number',
-                          prefixIcon: Icons.person_outline,
-                          keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.next,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email, username, or phone';
-                            }
-                            return null;
-                          },
-                        ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        PasswordTextField(
-                          controller: _passwordController,
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) => _handleLogin(),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            }
-                            if (value.length < 6) {
-                              return 'Password must be at least 6 characters';
-                            }
-                            return null;
-                          },
-                        ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: Checkbox(
-                                    value: _rememberMe,
-                                    onChanged: (value) {
-                                      setState(() => _rememberMe = value ?? false);
-                                    },
-                                    activeColor: Colors.white,
-                                    checkColor: AppColors.primary,
-                                    side: const BorderSide(color: Colors.white, width: 2),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Text(
-                                  'Remember me',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                        // Glass-morphism card effect for form
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.2),
+                              width: 1.5,
                             ),
-                            TextButton(
-                              onPressed: () => context.push(RouteNames.forgotPassword),
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
                               ),
-                              child: const Text(
-                                'Forgot Password?',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: Colors.white,
-                                ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              CustomTextField(
+                                controller: _identifierController,
+                                labelText: 'Email, Username, or Phone',
+                                hintText: 'Enter your credentials',
+                                prefixIcon: Icons.person_outline,
+                                keyboardType: TextInputType.text,
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your email, username, or phone';
+                                  }
+                                  return null;
+                                },
                               ),
-                            ),
-                          ],
-                        ),
-                        
-                        const SizedBox(height: 32),
-                        
-                        Consumer<AuthProvider>(
-                          builder: (context, authProvider, _) {
-                            return CustomButton(
-                              text: 'Login',
-                              onPressed: _handleLogin,
-                              isLoading: authProvider.isLoading,
-                              backgroundColor: Colors.white,
-                              textColor: AppColors.primary,
-                              height: 52,
-                            );
-                          },
+                              
+                              const SizedBox(height: 20),
+                              
+                              PasswordTextField(
+                                controller: _passwordController,
+                                textInputAction: TextInputAction.done,
+                                onFieldSubmitted: (_) => _handleLogin(),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your password';
+                                  }
+                                  if (value.length < 6) {
+                                    return 'Password must be at least 6 characters';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              
+                              const SizedBox(height: 20),
+                              
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: Checkbox(
+                                          value: _rememberMe,
+                                          onChanged: (value) {
+                                            setState(() => _rememberMe = value ?? false);
+                                          },
+                                          activeColor: AppColors.highlightGold,
+                                          checkColor: AppColors.primary,
+                                          side: BorderSide(
+                                            color: Colors.white.withOpacity(0.7),
+                                            width: 2,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Remember me',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.white.withOpacity(0.9),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  TextButton(
+                                    onPressed: () => context.push(RouteNames.forgotPassword),
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: Size.zero,
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: Text(
+                                      'Forgot Password?',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.highlightGold,
+                                        decoration: TextDecoration.underline,
+                                        decorationColor: AppColors.highlightGold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              
+                              const SizedBox(height: 28),
+                              
+                              Consumer<AuthProvider>(
+                                builder: (context, authProvider, _) {
+                                  return CustomButton(
+                                    text: 'Login',
+                                    onPressed: _handleLogin,
+                                    isLoading: authProvider.isLoading,
+                                    backgroundColor: Colors.white,
+                                    textColor: AppColors.primary,
+                                    height: 54,
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                         
                         const SizedBox(height: 32),
@@ -222,8 +250,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           normalText: "Don't have an account? ",
                           linkText: 'Sign Up',
                           onTap: () => context.push(RouteNames.register),
-                          normalTextColor: Colors.white,
-                          linkTextColor: Colors.white,
+                          normalTextColor: Colors.white.withOpacity(0.9),
+                          linkTextColor: AppColors.highlightGold,
                         ),
                         
                         const SizedBox(height: 20),

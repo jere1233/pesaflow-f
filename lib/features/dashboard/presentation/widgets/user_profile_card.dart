@@ -23,30 +23,34 @@ class UserProfileCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        gradient: AppColors.cardGradient1,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: AppColors.primary.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Row(
         children: [
-          // Avatar
+          // Avatar with glass effect
           Container(
-            width: 64,
-            height: 64,
+            width: 70,
+            height: 70,
             decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
+              color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 2,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 15,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
@@ -56,9 +60,10 @@ class UserProfileCard extends StatelessWidget {
                     ? '${user!.firstName[0]}${user!.lastName[0]}'.toUpperCase()
                     : 'U',
                 style: const TextStyle(
-                  fontSize: 24,
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
+                  letterSpacing: 1,
                 ),
               ),
             ),
@@ -75,24 +80,45 @@ class UserProfileCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: Colors.white,
+                    letterSpacing: 0.3,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  user?.email ?? 'user@example.com',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    user?.email ?? 'user@example.com',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withOpacity(0.95),
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Member Since: ${_formatDate(user?.createdAt)}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey[500],
-                  ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 12,
+                      color: Colors.white.withOpacity(0.8),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Since ${_formatDate(user?.createdAt)}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.white.withOpacity(0.8),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -100,17 +126,25 @@ class UserProfileCard extends StatelessWidget {
           
           // Status Badge
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.green.shade50,
+              color: AppColors.highlightGold,
               borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.highlightGold.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Text(
               'Active',
               style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Colors.green.shade700,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+                letterSpacing: 0.5,
               ),
             ),
           ),

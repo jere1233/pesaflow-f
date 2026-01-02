@@ -1,4 +1,3 @@
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/widgets/auth_header.dart
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 
@@ -17,28 +16,58 @@ class AuthHeader extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Logo
+        // Sophisticated Logo with Glass Effect
         Center(
           child: Hero(
             tag: 'app_logo',
             child: Container(
-              width: 80,
-              height: 80,
+              width: 90,
+              height: 90,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: AppColors.highlightGold.withOpacity(0.3),
+                  width: 2,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
+                    blurRadius: 30,
+                    offset: const Offset(0, 15),
+                    spreadRadius: 2,
+                  ),
+                  BoxShadow(
+                    color: AppColors.highlightGold.withOpacity(0.1),
                     blurRadius: 20,
-                    offset: const Offset(0, 10),
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
-              child: Icon(
-                Icons.account_balance_wallet_rounded,
-                size: 40,
-                color: AppColors.primary,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Gradient overlay for depth
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withOpacity(0.3),
+                          Colors.transparent,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                  ),
+                  // Icon
+                  Icon(
+                    Icons.account_balance_wallet_rounded,
+                    size: 44,
+                    color: AppColors.primary,
+                  ),
+                ],
               ),
             ),
           ),
@@ -46,28 +75,49 @@ class AuthHeader extends StatelessWidget {
         
         const SizedBox(height: 32),
         
-        // Title - WHITE TEXT
+        // Title with elegant styling
         Text(
           title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
-            fontSize: 28,
+            fontSize: 32,
+            letterSpacing: 0.5,
+            height: 1.2,
+            shadows: [
+              Shadow(
+                color: Color(0x40000000),
+                offset: Offset(0, 2),
+                blurRadius: 8,
+              ),
+            ],
           ),
           textAlign: TextAlign.center,
         ),
         
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         
-        // Subtitle - WHITE TEXT
-        Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Colors.white.withOpacity(0.9),
-            fontSize: 15,
-            height: 1.4,
+        // Subtitle with refined styling
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            subtitle,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 15,
+              height: 1.5,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0.2,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withOpacity(0.3),
+                  offset: const Offset(0, 1),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
       ],
     );

@@ -1,5 +1,3 @@
-
-///home/hp/JERE/pension-frontend/lib/features/authentication/presentation/widgets/custom_button.dart
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 
@@ -29,7 +27,7 @@ class CustomButton extends StatelessWidget {
     this.icon,
     this.backgroundColor,
     this.textColor,
-    this.borderRadius = 12,
+    this.borderRadius = 14,
     this.padding,
   });
 
@@ -39,54 +37,87 @@ class CustomButton extends StatelessWidget {
       return SizedBox(
         height: height,
         width: width ?? double.infinity,
-        child: icon != null
-            ? OutlinedButton.icon(
-                onPressed: isLoading ? null : onPressed,
-                icon: Icon(
-                  icon,
-                  size: 24,
-                  color: textColor ?? AppColors.primary,
-                ),
-                label: _buildButtonContent(),
-                style: _outlineButtonStyle(),
-              )
-            : OutlinedButton(
-                onPressed: isLoading ? null : onPressed,
-                style: _outlineButtonStyle(),
-                child: _buildButtonContent(),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
+            ],
+          ),
+          child: icon != null
+              ? OutlinedButton.icon(
+                  onPressed: isLoading ? null : onPressed,
+                  icon: Icon(
+                    icon,
+                    size: 22,
+                    color: textColor ?? Colors.white,
+                  ),
+                  label: _buildButtonContent(),
+                  style: _outlineButtonStyle(),
+                )
+              : OutlinedButton(
+                  onPressed: isLoading ? null : onPressed,
+                  style: _outlineButtonStyle(),
+                  child: _buildButtonContent(),
+                ),
+        ),
       );
     }
 
     return SizedBox(
       height: height,
       width: width ?? double.infinity,
-      child: icon != null
-          ? ElevatedButton.icon(
-              onPressed: isLoading ? null : onPressed,
-              icon: Icon(icon, color: textColor ?? Colors.white),
-              label: _buildButtonContent(),
-              style: _elevatedButtonStyle(),
-            )
-          : ElevatedButton(
-              onPressed: isLoading ? null : onPressed,
-              style: _elevatedButtonStyle(),
-              child: _buildButtonContent(),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(borderRadius),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
+            BoxShadow(
+              color: (backgroundColor ?? Colors.white).withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: icon != null
+            ? ElevatedButton.icon(
+                onPressed: isLoading ? null : onPressed,
+                icon: Icon(
+                  icon,
+                  color: textColor ?? AppColors.primary,
+                  size: 22,
+                ),
+                label: _buildButtonContent(),
+                style: _elevatedButtonStyle(),
+              )
+            : ElevatedButton(
+                onPressed: isLoading ? null : onPressed,
+                style: _elevatedButtonStyle(),
+                child: _buildButtonContent(),
+              ),
+      ),
     );
   }
 
   Widget _buildButtonContent() {
     if (isLoading) {
       return SizedBox(
-        width: 22,
-        height: 22,
+        width: 24,
+        height: 24,
         child: CircularProgressIndicator(
           strokeWidth: 2.5,
           valueColor: AlwaysStoppedAnimation<Color>(
             buttonType == ButtonType.outline
-                ? (textColor ?? AppColors.primary)
-                : (textColor ?? Colors.white),
+                ? (textColor ?? Colors.white)
+                : (textColor ?? AppColors.primary),
           ),
         ),
       );
@@ -96,10 +127,11 @@ class CustomButton extends StatelessWidget {
       text,
       style: TextStyle(
         fontSize: 16,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.5,
         color: buttonType == ButtonType.outline
-            ? (textColor ?? AppColors.primary)
-            : (textColor ?? Colors.white),
+            ? (textColor ?? Colors.white)
+            : (textColor ?? AppColors.primary),
       ),
     );
   }
@@ -108,36 +140,39 @@ class CustomButton extends StatelessWidget {
     Color bgColor;
     switch (buttonType) {
       case ButtonType.primary:
-        bgColor = backgroundColor ?? AppColors.primary;
+        bgColor = backgroundColor ?? Colors.white;
         break;
       case ButtonType.secondary:
-        bgColor = backgroundColor ?? AppColors.secondary;
+        bgColor = backgroundColor ?? AppColors.highlightGold;
         break;
       default:
-        bgColor = backgroundColor ?? AppColors.primary;
+        bgColor = backgroundColor ?? Colors.white;
     }
 
     return ElevatedButton.styleFrom(
       backgroundColor: bgColor,
       disabledBackgroundColor: bgColor.withOpacity(0.6),
+      foregroundColor: textColor ?? AppColors.primary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      elevation: 2,
-      padding: padding,
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      padding: padding ?? const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
     );
   }
 
   ButtonStyle _outlineButtonStyle() {
     return OutlinedButton.styleFrom(
+      backgroundColor: backgroundColor ?? Colors.white.withOpacity(0.1),
       side: BorderSide(
-        color: backgroundColor ?? AppColors.border,
-        width: 1.5,
+        color: (backgroundColor ?? Colors.white).withOpacity(0.4),
+        width: 2,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      padding: padding,
+      padding: padding ?? const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
     );
   }
 }
