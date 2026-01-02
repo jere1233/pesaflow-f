@@ -1,3 +1,5 @@
+// lib/shared/routes/app_router.dart
+
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import '../../features/authentication/presentation/screens/login_screen.dart';
@@ -26,6 +28,8 @@ import '../../features/accounts/presentation/screens/account_detail_screen.dart'
 import '../../features/accounts/presentation/screens/contribution_screen.dart';
 import '../../features/accounts/presentation/screens/deposit_screen.dart';
 import '../../features/accounts/presentation/screens/portfolio_screen.dart';
+import '../../features/reports/presentation/screens/reports_list_screen.dart';
+import '../../features/reports/presentation/screens/report_detail_screen.dart';
 import 'route_names.dart';
 
 class AppRouter {
@@ -52,7 +56,7 @@ class AppRouter {
       ),
       
       // ============================================================================
-      // 🆕 PASSWORD & PIN MANAGEMENT (AUTHENTICATED)
+      // PASSWORD & PIN MANAGEMENT (AUTHENTICATED)
       // ============================================================================
       GoRoute(
         path: RouteNames.changePassword,
@@ -71,7 +75,7 @@ class AppRouter {
       ),
       
       // ============================================================================
-      // 🆕 RESET PIN (UNAUTHENTICATED)
+      // RESET PIN (UNAUTHENTICATED)
       // ============================================================================
       GoRoute(
         path: RouteNames.resetPin,
@@ -182,6 +186,23 @@ class AppRouter {
         path: RouteNames.portfolio,
         name: RouteNames.portfolio,
         builder: (context, state) => const PortfolioScreen(),
+      ),
+      
+      // ============================================================================
+      // 🆕 REPORTS ROUTES (NEW)
+      // ============================================================================
+      GoRoute(
+        path: RouteNames.reports,
+        name: RouteNames.reports,
+        builder: (context, state) => const ReportsListScreen(),
+      ),
+      GoRoute(
+        path: '${RouteNames.reportDetail}/:id',
+        name: RouteNames.reportDetail,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ReportDetailScreen(reportId: id);
+        },
       ),
       
       // ============================================================================

@@ -1,4 +1,4 @@
-///lib/shared/routes/route_names.dart
+// lib/shared/routes/route_names.dart
 
 class RouteNames {
   // ============================================================================
@@ -12,7 +12,7 @@ class RouteNames {
   static const String paymentStatus = '/payment-status';
   static const String termsAndConditions = '/terms-and-conditions';
   
-  // 🆕 Password & PIN Management
+  // Password & PIN Management
   static const String changePassword = '/change-password';
   static const String changePin = '/change-pin';
   static const String resetPin = '/reset-pin';
@@ -29,7 +29,7 @@ class RouteNames {
   static const String notifications = '/notifications';
   
   // ============================================================================
-  // 🆕 ACCOUNT MANAGEMENT ROUTES (NEW)
+  // ACCOUNT MANAGEMENT ROUTES
   // ============================================================================
   static const String accounts = '/accounts';
   static const String accountDetail = '/account-detail';
@@ -37,6 +37,13 @@ class RouteNames {
   static const String depositFunds = '/deposit-funds';
   static const String withdrawFunds = '/withdraw-funds';
   static const String portfolio = '/portfolio';
+  
+  // ============================================================================
+  // 🆕 REPORTS ROUTES (NEW)
+  // ============================================================================
+  static const String reports = '/reports';
+  static const String reportDetail = '/report-detail';
+  static const String generateReport = '/generate-report';
   
   // ============================================================================
   // PENSION MANAGEMENT FEATURES

@@ -1,4 +1,4 @@
-// lib/features/dashboard/presentation/widgets/quick_actions.dart - UPDATED
+// lib/features/dashboard/presentation/widgets/quick_actions.dart - UPDATED WITH REPORTS
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -78,16 +78,17 @@ class QuickActions extends StatelessWidget {
             context.push(RouteNames.retirementGoals);
           },
         ),
+        // 🆕 NEW: Reports button
         _QuickActionCard(
-          icon: Icons.support_agent,
-          title: 'Support',
+          icon: Icons.description,
+          title: 'Reports',
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFDC2626), Color(0xFFF87171)],
+            colors: [Color(0xFF7C3AED), Color(0xFF8B5CF6)],
           ),
           onTap: () {
-            context.push(RouteNames.support);
+            context.push(RouteNames.reports);
           },
         ),
       ],
