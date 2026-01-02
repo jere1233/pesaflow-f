@@ -16,7 +16,7 @@ class PinTextField extends StatefulWidget {
     this.hintText,
     this.validator,
     this.textInputAction,
-    this.obscureText = false, // Numbers visible by default
+    this.obscureText = true, // Always obscured
   });
 
   @override
@@ -24,14 +24,6 @@ class PinTextField extends StatefulWidget {
 }
 
 class _PinTextFieldState extends State<PinTextField> {
-  bool _isObscured = false; // Start with numbers VISIBLE
-
-  @override
-  void initState() {
-    super.initState();
-    _isObscured = widget.obscureText;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -49,7 +41,7 @@ class _PinTextFieldState extends State<PinTextField> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            // Light background so BLACK dots are visible
+            // Solid white background
             color: Colors.white.withOpacity(0.95),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
@@ -66,7 +58,7 @@ class _PinTextFieldState extends State<PinTextField> {
           ),
           child: TextFormField(
             controller: widget.controller,
-            obscureText: _isObscured,
+            obscureText: true, // Always obscured
             obscuringCharacter: '●', // Black dot
             keyboardType: TextInputType.number,
             textInputAction: widget.textInputAction,
@@ -75,16 +67,15 @@ class _PinTextFieldState extends State<PinTextField> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(4),
             ],
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 28,
-              // Black text for numbers AND dots
-              color: Colors.black87,
+              color: Colors.black87, // Black dots
               fontWeight: FontWeight.w700,
               letterSpacing: 12.0,
               height: 1.5,
             ),
             decoration: InputDecoration(
-              hintText: widget.hintText ?? (_isObscured ? '● ● ● ●' : '1  2  3  4'),
+              hintText: widget.hintText ?? '● ● ● ●',
               hintStyle: TextStyle(
                 color: Colors.black26, // Light grey hint
                 letterSpacing: 12.0,
@@ -95,28 +86,8 @@ class _PinTextFieldState extends State<PinTextField> {
                 padding: const EdgeInsets.only(left: 12, right: 8),
                 child: Icon(
                   Icons.pin_outlined,
-                  color: Colors.black54, // Dark grey icon
+                  color: Colors.black54,
                   size: 26,
-                ),
-              ),
-              suffixIcon: Container(
-                margin: const EdgeInsets.only(right: 4),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: IconButton(
-                  icon: Icon(
-                    _isObscured ? Icons.visibility : Icons.visibility_off,
-                    color: Colors.black87, // BLACK icon - very visible
-                    size: 24,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isObscured = !_isObscured;
-                    });
-                  },
-                  tooltip: _isObscured ? 'Show PIN' : 'Hide PIN',
                 ),
               ),
               counterText: '',
