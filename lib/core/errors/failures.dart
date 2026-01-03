@@ -62,3 +62,6 @@ class NotFoundFailure extends Failure {
 class TimeoutFailure extends Failure {
   const TimeoutFailure(super.message);
 }
+class UnauthorizedFailure extends Failure {
+  const UnauthorizedFailure(super.message);
+}

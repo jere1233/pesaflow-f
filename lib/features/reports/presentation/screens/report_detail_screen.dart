@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../providers/report_provider.dart';
@@ -53,10 +52,11 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
           SnackBar(
             content: Text('Report saved to ${file.path}'),
             backgroundColor: Colors.green,
+            duration: const Duration(seconds: 5),
             action: SnackBarAction(
-              label: 'Share',
+              label: 'OK',
               textColor: Colors.white,
-              onPressed: () => _shareReport(file.path),
+              onPressed: () {},
             ),
           ),
         );
@@ -66,24 +66,6 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error downloading report: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _shareReport(String filePath) async {
-    try {
-      await Share.shareXFiles(
-        [XFile(filePath)],
-        text: 'Sharing report',
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error sharing report: $e'),
             backgroundColor: Colors.red,
           ),
         );

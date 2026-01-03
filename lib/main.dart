@@ -1,3 +1,5 @@
+///home/hp/JERE/AutoNest-frontend/lib/main.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,7 +22,17 @@ import 'features/transactions/domain/usecases/get_all_transactions_usecase.dart'
 import 'features/transactions/domain/usecases/get_transaction_detail_usecase.dart';
 import 'features/transactions/presentation/providers/transaction_provider.dart';
 import 'features/accounts/data/services/account_service.dart'; 
-import 'features/accounts/presentation/providers/account_provider.dart'; 
+import 'features/accounts/presentation/providers/account_provider.dart';
+
+// 🆕 REPORTS IMPORTS
+import 'features/reports/data/datasources/report_remote_datasource.dart';
+import 'features/reports/data/repositories/report_repository_impl.dart';
+import 'features/reports/domain/usecases/generate_transaction_report.dart';
+import 'features/reports/domain/usecases/generate_customer_report.dart';
+import 'features/reports/domain/usecases/get_reports.dart';
+import 'features/reports/domain/usecases/get_report_by_id.dart';
+import 'features/reports/domain/usecases/delete_report.dart';
+import 'features/reports/presentation/providers/report_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,14 +72,20 @@ class AutoNest extends StatelessWidget {
       dio: apiClient.dio,
       logger: logger,
     );
+    
+    // 🆕 Initialize Reports data source
+    final reportDataSource = ReportRemoteDataSourceImpl(
+      dio: apiClient.dio,
+      logger: logger,
+    );
 
     return MultiProvider(
       providers: [
-        // Auth Provider - FIXED: Added dio parameter
+        // Auth Provider
         ChangeNotifierProvider(
           create: (_) => AuthProvider(
             authDataSource: authDataSource,
-            dio: apiClient.dio, // 🔧 FIXED: Added required dio parameter
+            dio: apiClient.dio,
           )..checkAuthStatus(),
         ),
         
@@ -101,6 +119,24 @@ class AutoNest extends StatelessWidget {
           create: (_) => AccountProvider(
             accountService: AccountService(),
           ),
+        ),
+        
+        // 🆕 REPORTS PROVIDER (NEW) - Fixed to match your repository structure
+        ChangeNotifierProvider(
+          create: (_) {
+            final reportRepository = ReportRepositoryImpl(
+              remoteDataSource: reportDataSource,
+              logger: logger,
+            );
+            
+            return ReportProvider(
+              generateTransactionReportUseCase: GenerateTransactionReport(reportRepository),
+              generateCustomerReportUseCase: GenerateCustomerReport(reportRepository),
+              getReportsUseCase: GetReports(reportRepository),
+              getReportByIdUseCase: GetReportById(reportRepository),
+              deleteReportUseCase: DeleteReport(reportRepository),
+            );
+          },
         ),
       ],
       child: ScreenUtilInit(
