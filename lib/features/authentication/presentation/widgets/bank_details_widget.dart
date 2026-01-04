@@ -1,3 +1,4 @@
+///home/hp/JERE/AutoNest-frontend/lib/features/authentication/presentation/widgets/bank_details_widget.dart
 import 'package:flutter/material.dart';
 import '../widgets/custom_text_field.dart';
 

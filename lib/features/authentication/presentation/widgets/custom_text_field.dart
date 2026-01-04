@@ -1,3 +1,5 @@
+// lib/features/authentication/presentation/widgets/custom_text_field.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -62,83 +64,120 @@ class CustomTextField extends StatelessWidget {
       readOnly: readOnly,
       style: const TextStyle(
         fontSize: 15,
-        color: Color(0xFF1B2B4D), // Deep navy for text
-        fontWeight: FontWeight.w500,
+        color: Color(0xFF2D3748), // Dark gray for text
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.2,
       ),
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: TextStyle(
-          color: Colors.black.withOpacity(0.65),
+          color: Colors.grey.shade600,
           fontSize: 14,
           fontWeight: FontWeight.w500,
+          letterSpacing: 0.2,
+        ),
+        floatingLabelStyle: TextStyle(
+          color: const Color(0xFF667eea),
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.3,
+          height: 1.5, // ✅ FIXES LABEL CUT-OFF - Gives space for label to float
         ),
         hintText: hintText,
         hintStyle: TextStyle(
-          color: Colors.black.withOpacity(0.35),
-          fontSize: 14,
+          color: Colors.grey.shade400,
+          fontSize: 15,
+          fontWeight: FontWeight.w400,
         ),
-        prefixIcon: Icon(
-          prefixIcon,
-          size: 22,
-          color: AppColors.primary.withOpacity(0.7),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 12),
+          child: Icon(
+            prefixIcon,
+            size: 22,
+            color: Colors.grey.shade600,
+          ),
         ),
         suffixIcon: suffixIcon,
         prefixText: prefixText,
         prefixStyle: const TextStyle(
-          color: Color(0xFF1B2B4D),
+          color: Color(0xFF2D3748),
           fontSize: 15,
           fontWeight: FontWeight.w600,
         ),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.95),
+        fillColor: Colors.grey.shade50,
         counterText: maxLength != null ? null : '',
+        
+        // ✅ FIXED BORDER - More padding to prevent label cut-off
+        contentPadding: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 20, // ✅ Extra top padding for floating label
+          bottom: 16,
+        ),
+        
+        // Default border
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Colors.grey.shade300,
+            width: 1.5,
+          ),
         ),
+        
+        // Enabled border
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.grey.shade300,
             width: 1.5,
           ),
         ),
+        
+        // Focused border
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(
-            color: AppColors.highlightGold,
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(
+            color: Color(0xFF667eea),
             width: 2,
           ),
         ),
+        
+        // Error border
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: Color(0xFF8B2E2E),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Colors.red.shade400,
             width: 1.5,
           ),
         ),
+        
+        // Focused error border
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: Color(0xFF8B2E2E),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Colors.red.shade600,
             width: 2,
           ),
         ),
+        
+        // Disabled border
         disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.shade200,
+            width: 1.5,
           ),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 16,
-        ),
-        errorStyle: const TextStyle(
+        
+        errorStyle: TextStyle(
           fontSize: 12,
-          color: Color(0xFF8B2E2E),
+          color: Colors.red.shade600,
           fontWeight: FontWeight.w500,
+          height: 1.3,
         ),
+        
+        errorMaxLines: 2,
       ),
     );
   }
