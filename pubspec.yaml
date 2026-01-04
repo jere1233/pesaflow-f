@@ -76,6 +76,25 @@ dependencies:
   # Icons
   cupertino_icons: ^1.0.6
   font_awesome_flutter: ^10.7.0
+  
+  # ============================================================================
+  # 🆕 REPORTS FEATURE DEPENDENCIES
+  # ============================================================================
+  
+  # PDF Handling
+  path_provider: ^2.1.1
+  
+  # Sharing
+  share_plus: ^7.2.2
+  
+  # PDF Rendering (Native PDF Viewer)
+  syncfusion_flutter_pdfviewer: ^24.1.41
+  
+  # Alternative: Open PDF with external apps
+  open_filex: ^4.3.4
+  
+  # URL Launcher (for opening files)
+  url_launcher: ^6.2.2
 
 dev_dependencies:
   flutter_test:
