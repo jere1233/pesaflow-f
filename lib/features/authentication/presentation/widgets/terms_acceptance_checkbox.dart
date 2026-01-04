@@ -23,100 +23,110 @@ class TermsAcceptanceCheckbox extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: errorText != null
-                  ? Colors.red.shade300
-                  : Colors.white.withOpacity(0.2),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: Checkbox(
-                  value: value,
-                  onChanged: onChanged,
-                  activeColor: Colors.white,
-                  checkColor: AppColors.primary,
-                  side: BorderSide(
-                    color: errorText != null 
-                        ? Colors.red.shade300 
-                        : Colors.white,
-                    width: 2,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
+        InkWell(
+          onTap: () => onChanged(!value),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: errorText != null 
+                  ? Colors.red.shade50 
+                  : Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: errorText != null 
+                    ? Colors.red.shade300 
+                    : Colors.grey.shade300,
+                width: 1.5,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: RichText(
-                    text: TextSpan(
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                        height: 1.4,
-                      ),
-                      children: [
-                        const TextSpan(
-                          text: 'I have read and agree to the ',
-                        ),
-                        TextSpan(
-                          text: 'Terms and Conditions',
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Custom Checkbox
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    gradient: value
+                        ? const LinearGradient(
+                            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                          )
+                        : null,
+                    color: value ? null : Colors.white,
+                    border: Border.all(
+                      color: value 
+                          ? Colors.transparent 
+                          : (errorText != null ? Colors.red.shade400 : Colors.grey.shade400),
+                      width: 2,
+                    ),
+                  ),
+                  child: value
+                      ? const Icon(
+                          Icons.check,
+                          size: 16,
+                          color: Colors.white,
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: TextSpan(
                           style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline,
-                            decorationColor: Colors.white,
-                            color: Colors.white,
+                            fontSize: 14,
+                            color: Colors.grey.shade800,
+                            height: 1.5,
                           ),
-                          recognizer: TapGestureRecognizer()..onTap = onTermsTap,
+                          children: [
+                            const TextSpan(text: 'I agree to the '),
+                            TextSpan(
+                              text: 'Terms and Conditions',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF667eea),
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()..onTap = onTermsTap,
+                            ),
+                          ],
                         ),
-                        const TextSpan(
-                          text: ' of this pension management system.',
+                      ),
+                      if (errorText != null) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 16,
+                              color: Colors.red.shade600,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                errorText!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.red.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (errorText != null)
-          Padding(
-            padding: const EdgeInsets.only(left: 16, top: 8),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 16,
-                  color: Colors.red.shade300,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    errorText!,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.red.shade300,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
+        ),
       ],
     );
   }

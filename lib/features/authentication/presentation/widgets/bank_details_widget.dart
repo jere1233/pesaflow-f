@@ -1,4 +1,5 @@
-///home/hp/JERE/AutoNest-frontend/lib/features/authentication/presentation/widgets/bank_details_widget.dart
+// lib/features/authentication/presentation/widgets/bank_details_widget.dart
+
 import 'package:flutter/material.dart';
 import '../widgets/custom_text_field.dart';
 
@@ -21,21 +22,37 @@ class BankDetailsWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Bank Account Details',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white.withOpacity(0.95),
-            letterSpacing: 0.5,
-          ),
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF667eea).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.account_balance,
+                color: const Color(0xFF667eea),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Bank Account Details',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 4),
         Text(
           'Required for pension disbursements',
           style: TextStyle(
             fontSize: 13,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.grey.shade600,
           ),
         ),
         const SizedBox(height: 20),
@@ -43,8 +60,8 @@ class BankDetailsWidget extends StatelessWidget {
         CustomTextField(
           controller: accountNameController,
           labelText: 'Account Holder Name',
-          hintText: 'Enter account holder name',
-          prefixIcon: Icons.account_balance_outlined,
+          hintText: 'John Doe',
+          prefixIcon: Icons.person_outline_rounded,
           textCapitalization: TextCapitalization.words,
           textInputAction: TextInputAction.next,
           validator: (value) {
@@ -63,8 +80,8 @@ class BankDetailsWidget extends StatelessWidget {
         CustomTextField(
           controller: accountNumberController,
           labelText: 'Account Number',
-          hintText: 'Enter account number',
-          prefixIcon: Icons.credit_card_outlined,
+          hintText: '1234567890',
+          prefixIcon: Icons.numbers_rounded,
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.next,
           validator: (value) {
@@ -80,47 +97,39 @@ class BankDetailsWidget extends StatelessWidget {
         
         const SizedBox(height: 16),
         
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: CustomTextField(
-                controller: branchNameController,
-                labelText: 'Branch Name',
-                hintText: 'e.g., Nairobi - West',
-                prefixIcon: Icons.business_outlined,
-                textCapitalization: TextCapitalization.words,
-                textInputAction: TextInputAction.next,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter branch name';
-                  }
-                  return null;
-                },
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 1,
-              child: CustomTextField(
-                controller: branchCodeController,
-                labelText: 'Branch Code',
-                hintText: 'e.g., 011',
-                prefixIcon: Icons.numbers_outlined,
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.done,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Required';
-                  }
-                  if (value.length < 2) {
-                    return 'Invalid';
-                  }
-                  return null;
-                },
-              ),
-            ),
-          ],
+        CustomTextField(
+          controller: branchNameController,
+          labelText: 'Branch Name',
+          hintText: 'Nairobi West',
+          prefixIcon: Icons.location_on_outlined,
+          textCapitalization: TextCapitalization.words,
+          textInputAction: TextInputAction.next,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter branch name';
+            }
+            return null;
+          },
+        ),
+        
+        const SizedBox(height: 16),
+        
+        CustomTextField(
+          controller: branchCodeController,
+          labelText: 'Branch Code',
+          hintText: '001',
+          prefixIcon: Icons.tag_rounded,
+          keyboardType: TextInputType.text,
+          textInputAction: TextInputAction.done,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter branch code';
+            }
+            if (value.length < 2) {
+              return 'Branch code too short';
+            }
+            return null;
+          },
         ),
         
         const SizedBox(height: 16),
@@ -128,19 +137,24 @@ class BankDetailsWidget extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.15),
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFF667eea).withOpacity(0.1),
+                const Color(0xFFF093FB).withOpacity(0.1),
+              ],
+            ),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: Colors.blue.withOpacity(0.3),
+              color: const Color(0xFF667eea).withOpacity(0.3),
               width: 1,
             ),
           ),
           child: Row(
             children: [
               Icon(
-                Icons.info_outline,
-                color: Colors.blue[300],
-                size: 20,
+                Icons.info_outline_rounded,
+                color: const Color(0xFF667eea),
+                size: 18,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -148,7 +162,7 @@ class BankDetailsWidget extends StatelessWidget {
                   'Your pension benefits will be deposited to this account',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.85),
+                    color: Colors.grey.shade700,
                     height: 1.4,
                   ),
                 ),
