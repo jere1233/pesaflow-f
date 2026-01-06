@@ -2,13 +2,14 @@ class RegisterRequestModel {
   // Required fields
   final String email;
   final String phone;
-  final String pin;
+  final String? pin; // NOW OPTIONAL
   
   // Bank account details (REQUIRED)
   final String bankAccountName;
   final String bankAccountNumber;
   final String bankBranchName;
   final String bankBranchCode;
+  final String bankName; 
   
   // Personal information
   final String? firstName;
@@ -44,11 +45,12 @@ class RegisterRequestModel {
   const RegisterRequestModel({
     required this.email,
     required this.phone,
-    required this.pin,
+    this.pin, // NOW OPTIONAL
     required this.bankAccountName,
     required this.bankAccountNumber,
     required this.bankBranchName,
     required this.bankBranchCode,
+    required this.bankName, // 🆕 NEW FIELD
     this.firstName,
     this.lastName,
     this.dateOfBirth,
@@ -85,11 +87,12 @@ class RegisterRequestModel {
     return RegisterRequestModel(
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
-      pin: json['pin']?.toString() ?? '',
+      pin: json['pin']?.toString(), // NOW OPTIONAL
       bankAccountName: json['bankAccountName']?.toString() ?? '',
       bankAccountNumber: json['bankAccountNumber']?.toString() ?? '',
       bankBranchName: json['bankBranchName']?.toString() ?? '',
       bankBranchCode: json['bankBranchCode']?.toString() ?? '',
+      bankName: json['bankName']?.toString() ?? '', // 🆕 NEW FIELD
       firstName: json['firstName']?.toString(),
       lastName: json['lastName']?.toString(),
       dateOfBirth: json['dateOfBirth']?.toString(),
@@ -120,11 +123,12 @@ class RegisterRequestModel {
     return {
       'email': email,
       'phone': phone,
-      'pin': pin,
+      if (pin != null && pin!.isNotEmpty) 'pin': pin, // ONLY SEND IF PROVIDED
       'bankAccountName': bankAccountName,
       'bankAccountNumber': bankAccountNumber,
       'bankBranchName': bankBranchName,
       'bankBranchCode': bankBranchCode,
+      'bankName': bankName, // 🆕 NEW FIELD
       if (firstName != null) 'firstName': firstName,
       if (lastName != null) 'lastName': lastName,
       if (dateOfBirth != null) 'dateOfBirth': dateOfBirth,

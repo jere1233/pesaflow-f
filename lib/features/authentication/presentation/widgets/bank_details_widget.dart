@@ -1,13 +1,14 @@
-// lib/features/authentication/presentation/widgets/bank_details_widget.dart
-
 import 'package:flutter/material.dart';
 import '../widgets/custom_text_field.dart';
+import '../widgets/dropdown_field.dart';
 
 class BankDetailsWidget extends StatelessWidget {
   final TextEditingController accountNameController;
   final TextEditingController accountNumberController;
   final TextEditingController branchNameController;
   final TextEditingController branchCodeController;
+  final String? selectedBankName; // 🆕 For dropdown
+  final Function(String?)? onBankNameChanged; // 🆕 For dropdown
 
   const BankDetailsWidget({
     super.key,
@@ -15,6 +16,8 @@ class BankDetailsWidget extends StatelessWidget {
     required this.accountNumberController,
     required this.branchNameController,
     required this.branchCodeController,
+    this.selectedBankName, // 🆕 NEW FIELD
+    this.onBankNameChanged, // 🆕 For dropdown
   });
 
   @override
@@ -56,6 +59,39 @@ class BankDetailsWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
+        
+        // 🆕 Bank Name Dropdown - FIXED NULL SAFETY
+        DropdownField(
+          value: selectedBankName,
+          labelText: 'Bank Name',
+          hintText: 'Select your bank',
+          prefixIcon: Icons.account_balance_rounded,
+          items: const [
+            'Equity Bank',
+            'KCB Bank',
+            'Co-operative Bank',
+            'NCBA Bank',
+            'Standard Chartered',
+            'Absa Bank',
+            'DTB Bank',
+            'Stanbic Bank',
+            'I&M Bank',
+            'Family Bank',
+            'Barclays Bank',
+            'Other',
+          ],
+          onChanged: onBankNameChanged != null 
+              ? (value) => onBankNameChanged!(value) // 🔥 FIXED: Handle nullable callback
+              : (value) {}, // 🔥 FIXED: Provide empty callback if null
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please select your bank';
+            }
+            return null;
+          },
+        ),
+        
+        const SizedBox(height: 16),
         
         CustomTextField(
           controller: accountNameController,

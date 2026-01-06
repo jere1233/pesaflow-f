@@ -1,6 +1,3 @@
-// lib/features/authentication/presentation/screens/register_screen.dart
-// ✅ COMPLETE VERSION - Uses actual widgets, modern design, nothing missing!
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -66,6 +63,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
   final _bankAccountNumberController = TextEditingController();
   final _bankBranchNameController = TextEditingController();
   final _bankBranchCodeController = TextEditingController();
+  String? _selectedBankName; // 🆕 NEW FIELD
   
   // Pension settings
   String _accountType = 'MANDATORY';
@@ -195,17 +193,21 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
   Future<void> _handleRegister() async {
     final authProvider = context.read<AuthProvider>();
     
+    // 🔥 PIN IS NOW OPTIONAL - only include if filled
+    final pinText = _pinController.text.trim();
+    
     final request = RegisterRequestModel(
       // Account credentials (REQUIRED)
       email: _emailController.text.trim(),
       phone: _phoneController.text.trim(),
-      pin: _pinController.text.trim(),
+      pin: pinText.isNotEmpty ? pinText : null, // 🔥 OPTIONAL NOW
       
       // Bank account details (REQUIRED)
       bankAccountName: _bankAccountNameController.text.trim(),
       bankAccountNumber: _bankAccountNumberController.text.trim(),
       bankBranchName: _bankBranchNameController.text.trim(),
       bankBranchCode: _bankBranchCodeController.text.trim(),
+      bankName: _selectedBankName ?? '', // 🆕 NEW FIELD
       
       // Personal Details
       firstName: _firstNameController.text.isNotEmpty 
@@ -519,7 +521,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     }
   }
 
-  // STEP 1: Account Credentials
+  // STEP 1: Account Credentials - 🔥 PIN NOW OPTIONAL
   Widget _buildStep1AccountCredentials() {
     return Form(
       key: _formKeys[0],
@@ -609,16 +611,15 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           
           const SizedBox(height: 20),
           
+          // 🔥 PIN IS NOW OPTIONAL
           PinTextField(
             controller: _pinController,
-            labelText: '4-Digit PIN',
+            labelText: '4-Digit PIN (Optional)',
             hintText: '••••',
             textInputAction: TextInputAction.done,
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a PIN';
-              }
-              if (value.length != 4) {
+              // 🔥 Only validate if PIN is provided
+              if (value != null && value.isNotEmpty && value.length != 4) {
                 return 'PIN must be exactly 4 digits';
               }
               return null;
@@ -659,7 +660,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'A temporary password will be sent to your email and phone after payment',
+                    'PIN is optional. A temporary password will be sent to your email and phone after payment',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey.shade700,
@@ -796,7 +797,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     );
   }
 
-  // STEP 3: Family Info - ✅ USES ACTUAL WIDGET
+  // STEP 3: Family Info
   Widget _buildStep3FamilyInfo() {
     return Form(
       key: _formKeys[2],
@@ -871,7 +872,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             const SizedBox(height: 24),
           ],
           
-          // ✅ USING ACTUAL CHILDREN INPUT WIDGET
           ChildrenInputWidget(
             children: _children,
             onChildrenChanged: (children) {
@@ -1109,7 +1109,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     );
   }
 
-  // STEP 6: Bank & Terms - ✅ USES ACTUAL WIDGETS
+  // STEP 6: Bank & Terms - 🆕 WITH BANK NAME
   Widget _buildStep6BankAndTerms() {
     return Form(
       key: _formKeys[5],
@@ -1161,17 +1161,20 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           
           const SizedBox(height: 32),
           
-          // ✅ USING ACTUAL BANK DETAILS WIDGET
+          // 🆕 UPDATED BANK DETAILS WIDGET WITH BANK NAME
           BankDetailsWidget(
             accountNameController: _bankAccountNameController,
             accountNumberController: _bankAccountNumberController,
             branchNameController: _bankBranchNameController,
             branchCodeController: _bankBranchCodeController,
+            selectedBankName: _selectedBankName, // 🆕 NEW
+            onBankNameChanged: (value) { // 🆕 NEW
+              setState(() => _selectedBankName = value);
+            },
           ),
           
           const SizedBox(height: 24),
           
-          // ✅ USING ACTUAL TERMS ACCEPTANCE CHECKBOX WIDGET
           TermsAcceptanceCheckbox(
             value: _acceptedTerms,
             onChanged: (value) {

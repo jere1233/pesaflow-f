@@ -1,8 +1,5 @@
-
-///home/hp/JERE/pesaflow/lib/features/authentication/domain/entities/user.dart
-
-
 import 'package:equatable/equatable.dart';
+import '../../data/models/user_model.dart';
 
 class User extends Equatable {
   final String id;
@@ -15,6 +12,12 @@ class User extends Equatable {
   final double? balance;
   final bool? isVerified;
   final DateTime? createdAt;
+  final BankAccount? bankAccount; 
+  final String? occupation;
+  final String? employer;
+  final double? salary;
+  final double? contributionRate;
+  final int? retirementAge;
 
   const User({
     required this.id,
@@ -27,6 +30,12 @@ class User extends Equatable {
     this.balance,
     this.isVerified,
     this.createdAt,
+    this.bankAccount, // 🆕 NEW FIELD
+    this.occupation,
+    this.employer,
+    this.salary,
+    this.contributionRate,
+    this.retirementAge,
   });
 
   String get fullName => '$firstName $lastName';
@@ -43,6 +52,12 @@ class User extends Equatable {
         balance,
         isVerified,
         createdAt,
+        bankAccount,
+        occupation,
+        employer,
+        salary,
+        contributionRate,
+        retirementAge,
       ];
 
   User copyWith({
@@ -56,6 +71,12 @@ class User extends Equatable {
     double? balance,
     bool? isVerified,
     DateTime? createdAt,
+    BankAccount? bankAccount,
+    String? occupation,
+    String? employer,
+    double? salary,
+    double? contributionRate,
+    int? retirementAge,
   }) {
     return User(
       id: id ?? this.id,
@@ -68,6 +89,12 @@ class User extends Equatable {
       balance: balance ?? this.balance,
       isVerified: isVerified ?? this.isVerified,
       createdAt: createdAt ?? this.createdAt,
+      bankAccount: bankAccount ?? this.bankAccount,
+      occupation: occupation ?? this.occupation,
+      employer: employer ?? this.employer,
+      salary: salary ?? this.salary,
+      contributionRate: contributionRate ?? this.contributionRate,
+      retirementAge: retirementAge ?? this.retirementAge,
     );
   }
 }
