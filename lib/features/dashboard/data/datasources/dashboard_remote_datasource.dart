@@ -38,7 +38,45 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
         final data = response.data;
         
         if (data['success'] == true && data['user'] != null) {
-          return UserModel.fromJson(data['user']);
+          // Ensure bank details are populated: some backends return bank info via /api/accounts
+            final Map<String, dynamic> userJson = (data['user'] is Map)
+              ? Map<String, dynamic>.from(data['user'] as Map)
+              : <String, dynamic>{};
+
+          try {
+            // If user has no bank info, try to fetch accounts and merge the first account's bank fields
+            final hasBank = (userJson['bankAccount'] != null) ||
+                (userJson['bankDetails'] != null) ||
+                (userJson['bank_name'] != null) ||
+                (userJson['bankName'] != null);
+
+            if (!hasBank) {
+              final accountsResp = await dio.get('${ApiConstants.baseUrl}${ApiConstants.accounts}');
+              if (accountsResp.statusCode == 200) {
+                final accountsData = accountsResp.data;
+                final accountsList = accountsData['accounts'];
+                if (accountsList is List && accountsList.isNotEmpty) {
+                  final firstAcc = accountsList.first;
+                  if (firstAcc is Map) {
+                    // Map account fields to bankAccount shape our model expects
+                    final bankMap = <String, dynamic>{
+                      'bankName': firstAcc['bankName'] ?? firstAcc['bank_name'] ?? firstAcc['bankName'] ?? firstAcc['bankName'],
+                      'accountNumber': firstAcc['bankAccountNumber'] ?? firstAcc['bank_account_number'] ?? firstAcc['bankAccountNumber'] ?? firstAcc['bankAccountNumber'],
+                      'accountName': firstAcc['bankAccountName'] ?? firstAcc['bankAccountName'] ?? firstAcc['bankAccountName'],
+                      'branchName': firstAcc['bankBranchName'] ?? firstAcc['bank_branch_name'] ?? firstAcc['bankBranchName'],
+                      'branchCode': firstAcc['bankBranchCode'] ?? firstAcc['bank_branch_code'] ?? firstAcc['bankBranchCode'],
+                    };
+
+                    userJson['bankAccount'] = bankMap;
+                  }
+                }
+              }
+            }
+          } catch (_) {
+            // ignore account fetch errors; return user as-is
+          }
+
+          return UserModel.fromJson(userJson);
         } else {
           throw ServerException(data['message'] ?? 'Failed to fetch user profile');
         }

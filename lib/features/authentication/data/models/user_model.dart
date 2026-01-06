@@ -16,12 +16,19 @@ class BankAccount {
   });
 
   factory BankAccount.fromJson(Map<String, dynamic> json) {
+    // Support multiple possible key names coming from different API responses
+    String? bankName = json['bankName']?.toString() ?? json['bank_name']?.toString() ?? json['bank']?.toString();
+    String? accountNumber = json['accountNumber']?.toString() ?? json['account_number']?.toString() ?? json['acct_number']?.toString();
+    String? accountName = json['accountName']?.toString() ?? json['bankAccountName']?.toString() ?? json['bankAccountName']?.toString() ?? json['bank_account_name']?.toString();
+    String? branchCode = json['branchCode']?.toString() ?? json['branch_code']?.toString();
+    String? branchName = json['branchName']?.toString() ?? json['branch']?.toString();
+
     return BankAccount(
-      bankName: json['bankName']?.toString(),
-      accountNumber: json['accountNumber']?.toString(),
-      accountName: json['accountName']?.toString(),
-      branchCode: json['branchCode']?.toString(),
-      branchName: json['branchName']?.toString(),
+      bankName: bankName,
+      accountNumber: accountNumber,
+      accountName: accountName,
+      branchCode: branchCode,
+      branchName: branchName,
     );
   }
 
@@ -58,8 +65,37 @@ class UserModel extends User {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     BankAccount? bankAccount;
-    if (json['bankAccount'] != null) {
-      bankAccount = BankAccount.fromJson(json['bankAccount'] as Map<String, dynamic>);
+    // Prefer a single `bankAccount` object if provided. Support many possible shapes:
+    // - `bankAccount` as Map
+    // - `bankAccount` as List (take first)
+    // - `bankDetails` / `bank_details` as List (take first)
+    // - `bank_details` or `bank_accounts` variations
+    try {
+      final dynamicBank = json['bankAccount'] ?? json['bank_account'];
+      if (dynamicBank != null) {
+        if (dynamicBank is Map<String, dynamic>) {
+          bankAccount = BankAccount.fromJson(dynamicBank);
+        } else if (dynamicBank is List && dynamicBank.isNotEmpty) {
+          final first = dynamicBank.first;
+          if (first is Map<String, dynamic>) {
+            bankAccount = BankAccount.fromJson(first);
+          } else if (first is Map) {
+            bankAccount = BankAccount.fromJson(Map<String, dynamic>.from(first));
+          }
+        }
+      } else {
+        final details = json['bankDetails'] ?? json['bank_details'] ?? json['bankAccounts'] ?? json['bank_accounts'];
+        if (details != null && details is List && details.isNotEmpty) {
+          final first = details.first;
+          if (first is Map<String, dynamic>) {
+            bankAccount = BankAccount.fromJson(first);
+          } else if (first is Map) {
+            bankAccount = BankAccount.fromJson(Map<String, dynamic>.from(first));
+          }
+        }
+      }
+    } catch (_) {
+      // ignore parsing errors and leave bankAccount null
     }
 
     return UserModel(
