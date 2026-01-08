@@ -55,7 +55,7 @@ class UserModel extends User {
     super.balance,
     super.isVerified,
     super.createdAt,
-    super.bankAccount, // 🆕 NEW FIELD
+    super.bankAccount, 
     super.occupation,
     super.employer,
     super.salary,

@@ -23,8 +23,6 @@ import 'features/transactions/domain/usecases/get_transaction_detail_usecase.dar
 import 'features/transactions/presentation/providers/transaction_provider.dart';
 import 'features/accounts/data/services/account_service.dart'; 
 import 'features/accounts/presentation/providers/account_provider.dart';
-
-// 🆕 REPORTS IMPORTS
 import 'features/reports/data/datasources/report_remote_datasource.dart';
 import 'features/reports/data/repositories/report_repository_impl.dart';
 import 'features/reports/domain/usecases/generate_transaction_report.dart';
@@ -44,12 +42,21 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
   
+  // 🔥 NUCLEAR OPTION: Completely remove ALL system overlays
+  await SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
+    overlays: [], // ← EMPTY = NO OVERLAYS AT ALL
+  );
+  
+  // 🔥 Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
-      systemNavigationBarColor: Colors.white,
+      statusBarBrightness: Brightness.light,
+      systemNavigationBarColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.dark,
+      systemNavigationBarDividerColor: Colors.transparent,
     ),
   );
   
@@ -145,12 +152,34 @@ class AutoNest extends StatelessWidget {
         splitScreenMode: true,
         builder: (context, child) {
           return MaterialApp.router(
+            // 🔥🔥🔥 ALL DEBUG REMOVALS 🔥🔥🔥
             debugShowCheckedModeBanner: false,
+            showPerformanceOverlay: false,
+            showSemanticsDebugger: false,
+            checkerboardRasterCacheImages: false,
+            checkerboardOffscreenLayers: false,
+            
             title: 'AutoNest',
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: ThemeMode.system,
             routerConfig: AppRouter.router,
+            
+            // 🔥 Custom builder to ensure no debug overlays
+            builder: (context, child) {
+              // Remove text scaling
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaleFactor: 1.0,
+                ),
+                child: Banner(
+                  message: '', // Empty message
+                  location: BannerLocation.topEnd,
+                  color: Colors.transparent, // Transparent
+                  child: child ?? const SizedBox.shrink(),
+                ),
+              );
+            },
           );
         },
       ),

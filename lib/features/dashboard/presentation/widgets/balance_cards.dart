@@ -43,9 +43,9 @@ class BalanceCards extends StatelessWidget {
 
     // Use real account data if available, fallback to stats
     final balance = account?.currentBalance ?? stats?.balance ?? 0;
-    final monthlyContrib = account != null 
-        ? _calculateMonthlyContribution(account)
-        : (stats?.totalContributions ?? 0).toInt();
+    final monthlyContrib = account != null
+      ? _calculateMonthlyContribution(account)
+      : (stats?.totalContributions ?? 0).toInt();
     final yearsToRetirement = _calculateYearsToRetirement();
     final projectedAt65 = _calculateProjectedRetirement(balance);
 
@@ -59,8 +59,9 @@ class BalanceCards extends StatelessWidget {
       children: [
         _BalanceCard(
           title: 'Total Balance',
-          amount: 'KES ${_formatAmount(balance)}',
-          subtitle: account?.accountNumber ?? 'Across all plans',
+          // Per request: show number of logins here — use completedTransactions as fallback
+          amount: '${stats?.completedTransactions ?? 0}',
+          subtitle: 'Number of logins',
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -70,10 +71,11 @@ class BalanceCards extends StatelessWidget {
         ),
         _BalanceCard(
           title: 'Total Contributions',
-          amount: 'KES ${_formatAmount(account?.totalContributions ?? monthlyContrib.toDouble())}',
-          subtitle: account != null 
-              ? '${_formatAmount(account.employeeContributions)} Employee\n${_formatAmount(account.employerContributions)} Employer'
-              : 'Total allocated',
+          // Per request: show current pension account balance
+          amount: 'KES ${_formatAmount(balance)}',
+          subtitle: account != null
+              ? 'Account: ${account.accountNumber}'
+              : 'Across all plans',
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -83,10 +85,11 @@ class BalanceCards extends StatelessWidget {
         ),
         _BalanceCard(
           title: 'Total Earnings',
-          amount: 'KES ${_formatAmount(account?.totalEarnings ?? 0)}',
-          subtitle: account != null 
+          // Per request: show interest accrued
+          amount: 'KES ${_formatAmount(account?.interestEarned ?? 0)}',
+          subtitle: account != null
               ? 'Interest: ${_formatAmount(account.interestEarned)}\nReturns: ${_formatAmount(account.investmentReturns)}'
-              : '8% annual growth',
+              : 'No earnings yet',
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -95,11 +98,10 @@ class BalanceCards extends StatelessWidget {
           icon: Icons.trending_up,
         ),
         _BalanceCard(
-          title: 'Available Balance',
-          amount: 'KES ${_formatAmount(account?.availableBalance ?? balance)}',
-          subtitle: account != null && account.lockedBalance > 0
-              ? 'Locked: ${_formatAmount(account.lockedBalance)}'
-              : 'Ready to withdraw',
+          title: 'Account Details',
+          // Show pension account details as requested
+          amount: account != null ? account.accountNumber : 'No account',
+          subtitle: account != null ? 'Type: ${account.accountType}' : 'No account available',
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

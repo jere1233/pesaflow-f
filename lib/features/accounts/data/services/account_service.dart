@@ -158,6 +158,108 @@ class AccountService {
     }
   }
 
+  // ==========================================================================
+  // BANK DETAILS
+  // ==========================================================================
+
+  /// Get bank details for an account
+  /// GET /api/accounts/:id/bank-details
+  Future<Map<String, dynamic>?> getBankDetails(int accountId) async {
+    try {
+      final response = await _apiClient.get(
+        ApiConstants.getAccountBankDetailsUrl(accountId.toString()),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        // Accept either {"bankDetails": {...}} or {"data": {...}}
+        if (data is Map<String, dynamic>) {
+          return data['bankDetails'] ?? data['data'] ?? {};
+        }
+        return {};
+      } else if (response.statusCode == 404) {
+        return null;
+      } else {
+        throw Exception(response.data['error'] ?? 'Failed to fetch bank details');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch bank details: $e');
+    }
+  }
+
+  /// Create or update bank details for an account
+  /// POST /api/accounts/:id/bank-details
+  Future<Map<String, dynamic>> createOrUpdateBankDetails({
+    required int accountId,
+    required String bankAccountName,
+    required String bankAccountNumber,
+    String? bankBranchName,
+    String? bankBranchCode,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.getAccountBankDetailsUrl(accountId.toString()),
+        data: {
+          'bankAccountName': bankAccountName,
+          'bankAccountNumber': bankAccountNumber,
+          if (bankBranchName != null) 'bankBranchName': bankBranchName,
+          if (bankBranchCode != null) 'bankBranchCode': bankBranchCode,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return data['bankDetails'] ?? data['data'] ?? {};
+      } else {
+        throw Exception(response.data['error'] ?? 'Failed to save bank details');
+      }
+    } catch (e) {
+      throw Exception('Failed to save bank details: $e');
+    }
+  }
+
+  /// Update bank details for an account (PUT)
+  Future<Map<String, dynamic>> updateBankDetails({
+    required int accountId,
+    required String bankAccountName,
+    required String bankAccountNumber,
+    String? bankBranchName,
+    String? bankBranchCode,
+  }) async {
+    try {
+      final response = await _apiClient.put(
+        ApiConstants.getAccountBankDetailsUrl(accountId.toString()),
+        data: {
+          'bankAccountName': bankAccountName,
+          'bankAccountNumber': bankAccountNumber,
+          if (bankBranchName != null) 'bankBranchName': bankBranchName,
+          if (bankBranchCode != null) 'bankBranchCode': bankBranchCode,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return data['bankDetails'] ?? data['data'] ?? {};
+      } else {
+        throw Exception(response.data['error'] ?? 'Failed to update bank details');
+      }
+    } catch (e) {
+      throw Exception('Failed to update bank details: $e');
+    }
+  }
+
+  /// Delete bank details for an account
+  Future<bool> deleteBankDetails(int accountId) async {
+    try {
+      final response = await _apiClient.delete(
+        ApiConstants.getAccountBankDetailsUrl(accountId.toString()),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Failed to delete bank details: $e');
+    }
+  }
+
   // ============================================================================
   // WITHDRAWALS (🆕 NEW)
   // ============================================================================

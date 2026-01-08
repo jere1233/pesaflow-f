@@ -27,6 +27,8 @@ import '../../features/accounts/presentation/screens/accounts_list_screen.dart';
 import '../../features/accounts/presentation/screens/account_detail_screen.dart';
 import '../../features/accounts/presentation/screens/contribution_screen.dart';
 import '../../features/accounts/presentation/screens/deposit_screen.dart';
+import '../../features/accounts/presentation/screens/bank_details_screen.dart';
+import '../../features/transactions/presentation/screens/recent_deposits_screen.dart';
 import '../../features/accounts/presentation/screens/portfolio_screen.dart';
 import '../../features/reports/presentation/screens/reports_list_screen.dart';
 import '../../features/reports/presentation/screens/report_detail_screen.dart';
@@ -173,6 +175,19 @@ class AppRouter {
           final id = int.parse(state.pathParameters['id']!);
           return ContributionScreen(accountId: id);
         },
+      ),
+      GoRoute(
+        path: '${RouteNames.bankDetails}/:id',
+        name: RouteNames.bankDetails,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return BankDetailsScreen(accountId: id);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.recentDeposits,
+        name: RouteNames.recentDeposits,
+        builder: (context, state) => const RecentDepositsScreen(),
       ),
       GoRoute(
         path: '${RouteNames.depositFunds}/:id',

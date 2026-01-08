@@ -98,12 +98,24 @@ class ApiConstants {
   // ============================================================================
   static const String notifications = '/api/notifications';
    
+    // ============================================================================
+    // BANK DETAILS
+    // ============================================================================
+    static String getAccountBankDetailsUrl(String accountId) => '$accounts/$accountId/bank-details';
+  
+    // ============================================================================
+    // TRANSACTIONS - USER RECENT DEPOSITS
+    // ============================================================================
+    static const String userRecentDeposits = '/api/transactions/user/recent-deposits';
   // ============================================================================
   // HELPER METHODS - ACCOUNTS
   // ============================================================================
   
   /// Get account by ID: GET /api/accounts/:id
   static String getAccountUrl(String accountId) => '$accounts/$accountId';
+
+    /// Get transactions for account: GET /api/accounts/:id/transactions
+    static String getAccountTransactionsUrl(String accountId) => '$accounts/$accountId/transactions';
   
   /// Add contribution: POST /api/accounts/:id/contribution
   static String getAccountContributionUrl(String accountId) => 

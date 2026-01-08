@@ -36,7 +36,10 @@ class DashboardProvider extends ChangeNotifier {
 
   // Recent transactions (limit to 3)
   List<DashboardTransaction> get recentTransactions {
-    return _transactions.take(3).toList();
+    // Return latest 5 transactions sorted by createdAt desc
+    final sorted = List<DashboardTransaction>.from(_transactions);
+    sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return sorted.take(5).toList();
   }
 
   // Load all dashboard data

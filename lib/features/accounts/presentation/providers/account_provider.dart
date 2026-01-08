@@ -23,6 +23,7 @@ class AccountProvider extends ChangeNotifier {
   List<Account> _accounts = [];
   Account? _selectedAccount;
   Map<String, dynamic>? _accountSummary;
+  final Map<int, Map<String, dynamic>?> _bankDetailsCache = {};
   String? _errorMessage;
 
   // Getters
@@ -30,6 +31,7 @@ class AccountProvider extends ChangeNotifier {
   List<Account> get accounts => _accounts;
   Account? get selectedAccount => _selectedAccount;
   Map<String, dynamic>? get accountSummary => _accountSummary;
+  Map<int, Map<String, dynamic>?> get bankDetailsCache => _bankDetailsCache;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _status == AccountStatus.loading;
   bool get hasAccounts => _accounts.isNotEmpty;
@@ -110,6 +112,116 @@ class AccountProvider extends ChangeNotifier {
       _status = AccountStatus.error;
       _errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
+    }
+  }
+
+  /// Fetch bank details for an account
+  Future<Map<String, dynamic>?> fetchBankDetails(int accountId) async {
+    try {
+      _status = AccountStatus.loading;
+      _errorMessage = null;
+      notifyListeners();
+
+      final details = await _accountService.getBankDetails(accountId);
+      _bankDetailsCache[accountId] = details;
+
+      _status = AccountStatus.loaded;
+      notifyListeners();
+      return details;
+    } catch (e) {
+      _status = AccountStatus.error;
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return null;
+    }
+  }
+
+  /// Create or update bank details
+  Future<bool> saveBankDetails({
+    required int accountId,
+    required String bankAccountName,
+    required String bankAccountNumber,
+    String? bankBranchName,
+    String? bankBranchCode,
+  }) async {
+    try {
+      _status = AccountStatus.loading;
+      _errorMessage = null;
+      notifyListeners();
+
+      final details = await _accountService.createOrUpdateBankDetails(
+        accountId: accountId,
+        bankAccountName: bankAccountName,
+        bankAccountNumber: bankAccountNumber,
+        bankBranchName: bankBranchName,
+        bankBranchCode: bankBranchCode,
+      );
+
+      _bankDetailsCache[accountId] = details;
+      _status = AccountStatus.loaded;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _status = AccountStatus.error;
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Update bank details (PUT)
+  Future<bool> updateBankDetails({
+    required int accountId,
+    required String bankAccountName,
+    required String bankAccountNumber,
+    String? bankBranchName,
+    String? bankBranchCode,
+  }) async {
+    try {
+      _status = AccountStatus.loading;
+      _errorMessage = null;
+      notifyListeners();
+
+      final details = await _accountService.updateBankDetails(
+        accountId: accountId,
+        bankAccountName: bankAccountName,
+        bankAccountNumber: bankAccountNumber,
+        bankBranchName: bankBranchName,
+        bankBranchCode: bankBranchCode,
+      );
+
+      _bankDetailsCache[accountId] = details;
+      _status = AccountStatus.loaded;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _status = AccountStatus.error;
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Delete bank details
+  Future<bool> deleteBankDetails(int accountId) async {
+    try {
+      _status = AccountStatus.loading;
+      _errorMessage = null;
+      notifyListeners();
+
+      final success = await _accountService.deleteBankDetails(accountId);
+      if (success) {
+        _bankDetailsCache.remove(accountId);
+      }
+
+      _status = AccountStatus.loaded;
+      notifyListeners();
+      return success;
+    } catch (e) {
+      _status = AccountStatus.error;
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return false;
     }
   }
 

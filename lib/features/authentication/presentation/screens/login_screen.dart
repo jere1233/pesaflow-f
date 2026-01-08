@@ -1,9 +1,11 @@
 // lib/features/authentication/presentation/screens/login_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'dart:ui';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/routes/route_names.dart';
 import '../widgets/custom_text_field.dart';
@@ -34,6 +36,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
+    
+    // Hide system UI overlays for cleaner look
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     
     // Fade animation
     _fadeController = AnimationController(
@@ -107,48 +112,97 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: Colors.white,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(Icons.error_outline, color: Colors.red.shade700, size: 24),
+      barrierColor: Colors.black.withOpacity(0.7), // Dark backdrop
+      builder: (context) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2C2C2E), // Dark background
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            const Text(
-              'Login Failed',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          message,
-          style: const TextStyle(fontSize: 15, height: 1.4),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: const Text(
-              'OK',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Error Icon
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade400.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.red.shade400,
+                    size: 40,
+                  ),
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Title
+                const Text(
+                  'Login Failed',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: 12),
+                
+                // Message
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 1.5,
+                    color: Colors.grey.shade300,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // OK Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE8744F),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'OK',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -160,54 +214,62 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     final keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
     
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFF667eea), // Instagram-like purple
-              const Color(0xFF764ba2), // Deep purple
-              const Color(0xFFF093FB), // Pink accent
-            ],
-            stops: const [0.0, 0.5, 1.0],
-          ),
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarIconBrightness: Brightness.light,
         ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth > 600 ? 40 : 24,
-                vertical: keyboardVisible ? 20 : 40,
-              ),
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Logo and Title
-                          _buildHeader(keyboardVisible),
-                          
-                          SizedBox(height: keyboardVisible ? 20 : 40),
-                          
-                          // Main Card
-                          _buildMainCard(),
-                          
-                          const SizedBox(height: 32),
-                          
-                          // Sign Up Link
-                          _buildSignUpLink(),
-                          
-                          const SizedBox(height: 20),
-                        ],
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFE8744F), // Warm Coral/Orange
+                Color(0xFFD85B42), // Deep Coral
+                Color(0xFFC94A37), // Rich Terra Cotta
+              ],
+              stops: [0.0, 0.5, 1.0],
+            ),
+          ),
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth > 600 ? 40 : 24,
+                  vertical: keyboardVisible ? 20 : 40,
+                ),
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 420),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Logo and Title
+                            _buildHeader(keyboardVisible),
+                            
+                            SizedBox(height: keyboardVisible ? 20 : 40),
+                            
+                            // Main Card
+                            _buildMainCard(),
+                            
+                            const SizedBox(height: 32),
+                            
+                            // Sign Up Link
+                            _buildSignUpLink(),
+                            
+                            const SizedBox(height: 20),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -243,7 +305,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 ),
               ],
             ),
-            child: Icon(
+            child: const Icon(
               Icons.account_balance_wallet_rounded,
               size: 60,
               color: Colors.white,
@@ -278,7 +340,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           'Sign in to continue',
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withOpacity(0.95),
             fontWeight: FontWeight.w500,
             letterSpacing: 0.2,
           ),
@@ -301,7 +363,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             offset: const Offset(0, 15),
           ),
           BoxShadow(
-            color: const Color(0xFF667eea).withOpacity(0.3),
+            color: const Color(0xFFE8744F).withOpacity(0.3),
             blurRadius: 40,
             offset: const Offset(0, 20),
           ),
@@ -365,7 +427,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           borderRadius: BorderRadius.circular(6),
                           gradient: _rememberMe
                               ? const LinearGradient(
-                                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                                  colors: [Color(0xFFE8744F), Color(0xFFD85B42)],
                                 )
                               : null,
                           border: Border.all(
@@ -401,14 +463,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               InkWell(
                 onTap: () => context.push(RouteNames.forgotPassword),
                 borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
+                child: const Padding(
+                  padding: EdgeInsets.all(4),
                   child: Text(
                     'Forgot Password?',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF667eea),
+                      color: Color(0xFFE8744F),
                     ),
                   ),
                 ),
@@ -418,7 +480,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           
           const SizedBox(height: 32),
           
-          // Login Button
+          // Login Button with Orange Gradient
           Consumer<AuthProvider>(
             builder: (context, authProvider, _) {
               return Container(
@@ -427,13 +489,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   borderRadius: BorderRadius.circular(16),
                   gradient: const LinearGradient(
                     colors: [
-                      Color(0xFF667eea),
-                      Color(0xFF764ba2),
+                      Color(0xFFE8744F), // Warm Coral
+                      Color(0xFFD85B42), // Deep Coral
                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF667eea).withOpacity(0.5),
+                      color: const Color(0xFFE8744F).withOpacity(0.5),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),

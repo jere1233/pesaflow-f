@@ -67,4 +67,10 @@ class RouteNames {
   static const String accountStatement = '/account-statement';
   static const String support = '/support';
   static const String faq = '/faq';
+  
+  // Bank details
+  static const String bankDetails = '/bank-details';
+  
+  // Recent deposits
+  static const String recentDeposits = '/recent-deposits';
 }

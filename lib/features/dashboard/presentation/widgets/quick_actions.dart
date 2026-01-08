@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/routes/route_names.dart';
+import '../../../accounts/presentation/widgets/deposit_modal.dart';
 
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
@@ -52,6 +53,22 @@ class QuickActions extends StatelessWidget {
           ),
           onTap: () {
             context.push(RouteNames.payments);
+          },
+        ),
+        _QuickActionCard(
+          icon: Icons.payment,
+          title: 'Deposit',
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF0EA5A9), Color(0xFF06B6D4)],
+          ),
+          onTap: () {
+            // Show deposit modal
+            showDialog(
+              context: context,
+              builder: (_) => const DepositModal(),
+            );
           },
         ),
         _QuickActionCard(
