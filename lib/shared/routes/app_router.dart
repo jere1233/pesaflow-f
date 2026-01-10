@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../../features/authentication/presentation/screens/login_screen.dart';
 import '../../features/authentication/presentation/screens/register_screen.dart';
 import '../../features/authentication/presentation/screens/forgot_password_screen.dart';
-import '../../features/authentication/presentation/screens/otp_verification_screen.dart';
 import '../../features/authentication/presentation/screens/login_otp_verification_screen.dart';
 import '../../features/authentication/presentation/screens/payment_status_screen.dart';
 import '../../features/authentication/presentation/screens/terms_and_conditions_screen.dart';
@@ -102,10 +101,10 @@ class AppRouter {
       ),
       
       // ============================================================================
-      // OTP VERIFICATION SCREENS
+      // OTP VERIFICATION - UNIFIED SCREEN
       // ============================================================================
       
-      // Login OTP Verification (with optional password setting)
+      // Primary OTP route (for login with optional password setting)
       GoRoute(
         path: RouteNames.loginOtpVerification,
         name: RouteNames.loginOtpVerification,
@@ -118,16 +117,13 @@ class AppRouter {
         },
       ),
       
-      // OTP Verification (for registration, forgot password, etc.)
+      // Legacy OTP route - redirects to loginOtpVerification
       GoRoute(
         path: RouteNames.otpVerification,
         name: RouteNames.otpVerification,
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          return OtpVerificationScreen(
-            identifier: extra?['identifier'] ?? '',
-            verificationType: extra?['verificationType'] ?? 'register',
-          );
+        redirect: (context, state) {
+          // Redirect to the new unified OTP screen
+          return RouteNames.loginOtpVerification;
         },
       ),
       
@@ -204,7 +200,7 @@ class AppRouter {
       ),
       
       // ============================================================================
-      // 🆕 REPORTS ROUTES (NEW)
+      // REPORTS ROUTES
       // ============================================================================
       GoRoute(
         path: RouteNames.reports,

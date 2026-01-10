@@ -63,7 +63,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
   final _bankAccountNumberController = TextEditingController();
   final _bankBranchNameController = TextEditingController();
   final _bankBranchCodeController = TextEditingController();
-  String? _selectedBankName; // 🆕 NEW FIELD
+  String? _selectedBankName;
   
   // Pension settings
   String _accountType = 'MANDATORY';
@@ -193,23 +193,19 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
   Future<void> _handleRegister() async {
     final authProvider = context.read<AuthProvider>();
     
-    // 🔥 PIN IS NOW OPTIONAL - only include if filled
     final pinText = _pinController.text.trim();
     
     final request = RegisterRequestModel(
-      // Account credentials (REQUIRED)
       email: _emailController.text.trim(),
       phone: _phoneController.text.trim(),
-      pin: pinText.isNotEmpty ? pinText : null, // 🔥 OPTIONAL NOW
+      pin: pinText.isNotEmpty ? pinText : null,
       
-      // Bank account details (REQUIRED)
       bankAccountName: _bankAccountNameController.text.trim(),
       bankAccountNumber: _bankAccountNumberController.text.trim(),
       bankBranchName: _bankBranchNameController.text.trim(),
       bankBranchCode: _bankBranchCodeController.text.trim(),
-      bankName: _selectedBankName ?? '', // 🆕 NEW FIELD
+      bankName: _selectedBankName ?? '',
       
-      // Personal Details
       firstName: _firstNameController.text.isNotEmpty 
           ? _firstNameController.text.trim() 
           : null,
@@ -225,7 +221,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           ? _nationalIdController.text.trim() 
           : null,
       
-      // Family Info
       spouseName: _spouseNameController.text.isNotEmpty 
           ? _spouseNameController.text.trim() 
           : null,
@@ -234,7 +229,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           : null,
       children: _children.isNotEmpty ? _children : null,
       
-      // Address & Employment
       address: _addressController.text.isNotEmpty 
           ? _addressController.text.trim() 
           : null,
@@ -249,7 +243,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           ? _employerController.text.trim() 
           : null,
       
-      // Financial Info
       salary: _salaryController.text.isNotEmpty 
           ? num.tryParse(_salaryController.text) 
           : null,
@@ -260,7 +253,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           ? int.tryParse(_retirementAgeController.text) 
           : null,
       
-      // Account Configuration
       accountType: _accountType,
       riskProfile: _riskProfile,
       currency: 'KES',
@@ -297,33 +289,37 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF2C2C2E),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.red.shade50,
+                color: Colors.red.shade400.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.error_outline, color: Colors.red.shade700, size: 24),
+              child: Icon(Icons.error_outline, color: Colors.red.shade400, size: 24),
             ),
             const SizedBox(width: 12),
             const Text(
               'Registration Failed',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ],
         ),
-        content: Text(message, style: const TextStyle(fontSize: 15, height: 1.4)),
+        content: Text(
+          message, 
+          style: TextStyle(fontSize: 15, height: 1.4, color: Colors.grey.shade300)
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             style: TextButton.styleFrom(
+              backgroundColor: const Color(0xFFE8744F),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('OK', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            child: const Text('OK', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
           ),
         ],
       ),
@@ -337,16 +333,16 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color(0xFF667eea),
-              const Color(0xFF764ba2),
-              const Color(0xFFF093FB),
+              Color(0xFF0f1624),
+              Color(0xFF1a2332),
+              Color(0xFF0a0e1a),
             ],
-            stops: const [0.0, 0.5, 1.0],
+            stops: [0.0, 0.5, 1.0],
           ),
         ),
         child: SafeArea(
@@ -369,13 +365,22 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                           Container(
                             padding: const EdgeInsets.all(28),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: const Color(0xFF1a2332),
                               borderRadius: BorderRadius.circular(30),
+                              border: Border.all(
+                                color: const Color(0xFFE8744F).withOpacity(0.2),
+                                width: 1,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.15),
+                                  color: Colors.black.withOpacity(0.3),
                                   blurRadius: 30,
                                   offset: const Offset(0, 15),
+                                ),
+                                BoxShadow(
+                                  color: const Color(0xFFE8744F).withOpacity(0.1),
+                                  blurRadius: 40,
+                                  offset: const Offset(0, 20),
                                 ),
                               ],
                             ),
@@ -410,7 +415,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.black.withOpacity(0.1),
+            Colors.black.withOpacity(0.2),
             Colors.transparent,
           ],
           begin: Alignment.topCenter,
@@ -423,15 +428,15 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
+                  color: const Color(0xFFE8744F).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.4),
+                    color: const Color(0xFFE8744F).withOpacity(0.4),
                     width: 1.5,
                   ),
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                  icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFFE8744F), size: 20),
                   onPressed: _previousStep,
                 ),
               ),
@@ -439,17 +444,17 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
+                  color: const Color(0xFFE8744F).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.4),
+                    color: const Color(0xFFE8744F).withOpacity(0.4),
                     width: 1.5,
                   ),
                 ),
                 child: Text(
                   'Step ${_currentStep + 1} of 6',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFFE8744F),
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
@@ -470,7 +475,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     return Container(
       height: 6,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(3),
       ),
       child: LayoutBuilder(
@@ -484,12 +489,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                 height: 6,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Colors.white, Color(0xFFF093FB)],
+                    colors: [Color(0xFFE8744F), Color(0xFFD85B42)],
                   ),
                   borderRadius: BorderRadius.circular(3),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.white.withOpacity(0.5),
+                      color: const Color(0xFFE8744F).withOpacity(0.5),
                       blurRadius: 8,
                     ),
                   ],
@@ -521,7 +526,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     }
   }
 
-  // STEP 1: Account Credentials - 🔥 PIN NOW OPTIONAL
   Widget _buildStep1AccountCredentials() {
     return Form(
       key: _formKeys[0],
@@ -532,12 +536,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                colors: [Color(0xFFE8744F), Color(0xFFD85B42)],
               ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF667eea).withOpacity(0.4),
+                  color: const Color(0xFFE8744F).withOpacity(0.4),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -553,7 +557,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF2D3748),
+              color: Colors.white,
               letterSpacing: -0.5,
             ),
             textAlign: TextAlign.center,
@@ -565,7 +569,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             'Set up your account credentials',
             style: TextStyle(
               fontSize: 15,
-              color: Colors.grey.shade600,
+              color: Colors.grey.shade400,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
@@ -611,14 +615,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           
           const SizedBox(height: 20),
           
-          // 🔥 PIN IS NOW OPTIONAL
           PinTextField(
             controller: _pinController,
             labelText: '4-Digit PIN (Optional)',
             hintText: '••••',
             textInputAction: TextInputAction.done,
             validator: (value) {
-              // 🔥 Only validate if PIN is provided
               if (value != null && value.isNotEmpty && value.length != 4) {
                 return 'PIN must be exactly 4 digits';
               }
@@ -633,13 +635,13 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF667eea).withOpacity(0.1),
-                  const Color(0xFFF093FB).withOpacity(0.1),
+                  const Color(0xFFE8744F).withOpacity(0.1),
+                  const Color(0xFFD85B42).withOpacity(0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFF667eea).withOpacity(0.3),
+                color: const Color(0xFFE8744F).withOpacity(0.3),
                 width: 1.5,
               ),
             ),
@@ -648,12 +650,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF667eea).withOpacity(0.2),
+                    color: const Color(0xFFE8744F).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.info_outline_rounded,
-                    color: const Color(0xFF667eea),
+                    color: Color(0xFFE8744F),
                     size: 20,
                   ),
                 ),
@@ -663,7 +665,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                     'PIN is optional. A temporary password will be sent to your email and phone after payment',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.grey.shade700,
+                      color: Colors.grey.shade400,
                       height: 1.5,
                       fontWeight: FontWeight.w500,
                     ),
@@ -677,7 +679,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     );
   }
 
-  // STEP 2: Personal Details
   Widget _buildStep2PersonalDetails() {
     return Form(
       key: _formKeys[1],
@@ -688,12 +689,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                colors: [Color(0xFFE8744F), Color(0xFFD85B42)],
               ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF667eea).withOpacity(0.4),
+                  color: const Color(0xFFE8744F).withOpacity(0.4),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -709,7 +710,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF2D3748),
+              color: Colors.white,
               letterSpacing: -0.5,
             ),
             textAlign: TextAlign.center,
@@ -721,7 +722,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             'Tell us more about yourself',
             style: TextStyle(
               fontSize: 15,
-              color: Colors.grey.shade600,
+              color: Colors.grey.shade400,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
@@ -797,7 +798,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     );
   }
 
-  // STEP 3: Family Info
   Widget _buildStep3FamilyInfo() {
     return Form(
       key: _formKeys[2],
@@ -808,12 +808,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                colors: [Color(0xFFE8744F), Color(0xFFD85B42)],
               ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF667eea).withOpacity(0.4),
+                  color: const Color(0xFFE8744F).withOpacity(0.4),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -829,7 +829,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF2D3748),
+              color: Colors.white,
               letterSpacing: -0.5,
             ),
             textAlign: TextAlign.center,
@@ -841,7 +841,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             'Add your family details (optional)',
             style: TextStyle(
               fontSize: 15,
-              color: Colors.grey.shade600,
+              color: Colors.grey.shade400,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
@@ -883,7 +883,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     );
   }
 
-  // STEP 4: Address & Employment
   Widget _buildStep4AddressEmployment() {
     return Form(
       key: _formKeys[3],
@@ -894,12 +893,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                colors: [Color(0xFFE8744F), Color(0xFFD85B42)],
               ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF667eea).withOpacity(0.4),
+                  color: const Color(0xFFE8744F).withOpacity(0.4),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -915,7 +914,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF2D3748),
+              color: Colors.white,
               letterSpacing: -0.5,
             ),
             textAlign: TextAlign.center,
@@ -927,7 +926,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             'Where do you live and work?',
             style: TextStyle(
               fontSize: 15,
-              color: Colors.grey.shade600,
+              color: Colors.grey.shade400,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
@@ -992,7 +991,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     );
   }
 
-  // STEP 5: Financial Info
   Widget _buildStep5FinancialInfo() {
     return Form(
       key: _formKeys[4],
@@ -1003,12 +1001,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                colors: [Color(0xFFE8744F), Color(0xFFD85B42)],
               ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF667eea).withOpacity(0.4),
+                  color: const Color(0xFFE8744F).withOpacity(0.4),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -1024,7 +1022,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF2D3748),
+              color: Colors.white,
               letterSpacing: -0.5,
             ),
             textAlign: TextAlign.center,
@@ -1036,7 +1034,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             'Tell us about your finances',
             style: TextStyle(
               fontSize: 15,
-              color: Colors.grey.shade600,
+              color: Colors.grey.shade400,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
@@ -1109,7 +1107,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     );
   }
 
-  // STEP 6: Bank & Terms - 🆕 WITH BANK NAME
   Widget _buildStep6BankAndTerms() {
     return Form(
       key: _formKeys[5],
@@ -1120,12 +1117,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                colors: [Color(0xFFE8744F), Color(0xFFD85B42)],
               ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF667eea).withOpacity(0.4),
+                  color: const Color(0xFFE8744F).withOpacity(0.4),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -1141,7 +1138,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF2D3748),
+              color: Colors.white,
               letterSpacing: -0.5,
             ),
             textAlign: TextAlign.center,
@@ -1153,7 +1150,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             'Final step - bank details and acceptance',
             style: TextStyle(
               fontSize: 15,
-              color: Colors.grey.shade600,
+              color: Colors.grey.shade400,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
@@ -1161,14 +1158,13 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           
           const SizedBox(height: 32),
           
-          // 🆕 UPDATED BANK DETAILS WIDGET WITH BANK NAME
           BankDetailsWidget(
             accountNameController: _bankAccountNameController,
             accountNumberController: _bankAccountNumberController,
             branchNameController: _bankBranchNameController,
             branchCodeController: _bankBranchCodeController,
-            selectedBankName: _selectedBankName, // 🆕 NEW
-            onBankNameChanged: (value) { // 🆕 NEW
+            selectedBankName: _selectedBankName,
+            onBankNameChanged: (value) {
               setState(() => _selectedBankName = value);
             },
           ),
@@ -1196,13 +1192,13 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF667eea).withOpacity(0.1),
-                  const Color(0xFFF093FB).withOpacity(0.1),
+                  const Color(0xFFE8744F).withOpacity(0.1),
+                  const Color(0xFFD85B42).withOpacity(0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFF667eea).withOpacity(0.3),
+                color: const Color(0xFFE8744F).withOpacity(0.3),
                 width: 1.5,
               ),
             ),
@@ -1211,12 +1207,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF667eea).withOpacity(0.2),
+                    color: const Color(0xFFE8744F).withOpacity(0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.info_outline_rounded,
-                    color: const Color(0xFF667eea),
+                    color: Color(0xFFE8744F),
                     size: 28,
                   ),
                 ),
@@ -1225,7 +1221,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                   'Upon registration, you\'ll receive an M-Pesa prompt to pay 1 KES. After successful payment, a temporary password will be sent to your email and phone.',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey.shade700,
+                    color: Colors.grey.shade400,
                     height: 1.6,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1251,14 +1247,14 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.6),
+                      color: const Color(0xFFE8744F).withOpacity(0.4),
                       width: 2,
                     ),
                   ),
                   child: ElevatedButton(
                     onPressed: authProvider.isLoading ? null : _previousStep,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.2),
+                      backgroundColor: const Color(0xFFE8744F).withOpacity(0.1),
                       shadowColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -1269,7 +1265,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: Color(0xFFE8744F),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -1284,11 +1280,11 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   gradient: const LinearGradient(
-                    colors: [Colors.white, Color(0xFFF8F9FA)],
+                    colors: [Color(0xFFE8744F), Color(0xFFD85B42)],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.white.withOpacity(0.5),
+                      color: const Color(0xFFE8744F).withOpacity(0.5),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -1304,14 +1300,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                     ),
                   ),
                   child: authProvider.isLoading
-                      ? SizedBox(
+                      ? const SizedBox(
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              const Color(0xFF667eea),
-                            ),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : Text(
@@ -1319,7 +1313,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF667eea),
+                            color: Colors.white,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -1340,27 +1334,21 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           'Already have an account? ',
           style: TextStyle(
             fontSize: 15,
-            color: Colors.white.withOpacity(0.95),
+            color: Colors.grey.shade400,
             fontWeight: FontWeight.w500,
           ),
         ),
         InkWell(
           onTap: () => context.pop(),
           borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
             child: Text(
               'Login',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 4,
-                  ),
-                ],
+                color: Color(0xFFE8744F),
               ),
             ),
           ),

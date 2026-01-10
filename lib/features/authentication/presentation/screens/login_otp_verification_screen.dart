@@ -1,4 +1,3 @@
-///home/hp/JERE/AutoNest-frontend/lib/features/authentication/presentation/screens/login_otp_verification_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -43,7 +42,6 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
     super.initState();
     _startResendTimer();
     
-    // Configure system UI overlays - Make status bar transparent
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.edgeToEdge,
       overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
@@ -110,13 +108,11 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
         textColor: Colors.white,
       );
       
-      // Clear OTP fields
       for (var controller in _otpControllers) {
         controller.clear();
       }
       _focusNodes[0].requestFocus();
       
-      // Restart timer
       _startResendTimer();
     } else if (mounted) {
       Fluttertoast.showToast(
@@ -145,7 +141,6 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
 
     final authProvider = context.read<AuthProvider>();
     
-    // If password field is shown, include new password
     final newPassword = _showPasswordField ? _newPasswordController.text : null;
     
     if (_showPasswordField && (newPassword == null || newPassword.length < 8)) {
@@ -171,7 +166,6 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
       );
       context.go(RouteNames.home);
     } else if (mounted) {
-      // Check if we need to show password field
       if (authProvider.status == AuthStatus.tempPasswordRequired && !_showPasswordField) {
         setState(() {
           _showPasswordField = true;
@@ -192,7 +186,7 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.7), // Dark backdrop
+      barrierColor: Colors.black.withOpacity(0.7),
       builder: (context) => BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Dialog(
@@ -201,7 +195,7 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF2C2C2E), // Dark background
+              color: const Color(0xFF2C2C2E),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
@@ -214,7 +208,6 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Error Icon
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -230,7 +223,6 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                 
                 const SizedBox(height: 20),
                 
-                // Title
                 const Text(
                   'Verification Failed',
                   style: TextStyle(
@@ -243,7 +235,6 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                 
                 const SizedBox(height: 12),
                 
-                // Message
                 Text(
                   message,
                   style: TextStyle(
@@ -256,7 +247,6 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                 
                 const SizedBox(height: 24),
                 
-                // OK Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -307,9 +297,9 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFFE8744F), // Warm Coral/Orange
-                Color(0xFFD85B42), // Deep Coral
-                Color(0xFFC94A37), // Rich Terra Cotta
+                Color(0xFF0f1624),
+                Color(0xFF1a2332),
+                Color(0xFF0a0e1a),
               ],
               stops: [0.0, 0.5, 1.0],
             ),
@@ -328,12 +318,10 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Header Section
                       _buildHeader(keyboardVisible),
                       
                       SizedBox(height: keyboardVisible ? 20 : 40),
                       
-                      // Main Card
                       _buildMainCard(),
                       
                       const SizedBox(height: 20),
@@ -352,20 +340,19 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
     return Column(
       children: [
         if (!keyboardVisible) ...[
-          // Icon with Glass Effect
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 colors: [
-                  Colors.white.withOpacity(0.3),
-                  Colors.white.withOpacity(0.1),
+                  const Color(0xFFE8744F).withOpacity(0.3),
+                  const Color(0xFFE8744F).withOpacity(0.1),
                 ],
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: const Color(0xFFE8744F).withOpacity(0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -374,13 +361,12 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
             child: const Icon(
               Icons.email_outlined,
               size: 60,
-              color: Colors.white,
+              color: Color(0xFFE8744F),
             ),
           ),
           const SizedBox(height: 24),
         ],
         
-        // Title
         Text(
           _showPasswordField ? 'Set Your Password' : 'Verify Your Email',
           style: TextStyle(
@@ -390,7 +376,7 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
             letterSpacing: -0.5,
             shadows: [
               Shadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withOpacity(0.3),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -401,14 +387,13 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
         
         const SizedBox(height: 8),
         
-        // Subtitle
         Text(
           _showPasswordField
               ? 'Enter OTP and create a secure password'
               : 'Enter the 6-digit code sent to\n${widget.identifier}',
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white.withOpacity(0.95),
+            color: Colors.grey.shade400,
             fontWeight: FontWeight.w500,
             letterSpacing: 0.2,
             height: 1.4,
@@ -423,16 +408,20 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF1a2332),
         borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: const Color(0xFFE8744F).withOpacity(0.2),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 30,
             offset: const Offset(0, 15),
           ),
           BoxShadow(
-            color: const Color(0xFFE8744F).withOpacity(0.3),
+            color: const Color(0xFFE8744F).withOpacity(0.1),
             blurRadius: 40,
             offset: const Offset(0, 20),
           ),
@@ -441,7 +430,6 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // OTP Input Fields
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(6, (index) {
@@ -457,7 +445,7 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2C3E50),
+                    color: Colors.white,
                   ),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
@@ -465,14 +453,14 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                   decoration: InputDecoration(
                     counterText: '',
                     filled: true,
-                    fillColor: Colors.grey[50],
+                    fillColor: const Color(0xFF0f1624),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                      borderSide: BorderSide(color: Colors.grey.shade700, width: 1.5),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -495,7 +483,6 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
             }),
           ),
           
-          // Show password field if needed
           if (_showPasswordField) ...[
             const SizedBox(height: 24),
             PasswordTextField(
@@ -517,7 +504,6 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
           
           const SizedBox(height: 32),
           
-          // Verify Button with Orange Gradient
           Consumer<AuthProvider>(
             builder: (context, authProvider, _) {
               return Container(
@@ -526,8 +512,8 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                   borderRadius: BorderRadius.circular(16),
                   gradient: const LinearGradient(
                     colors: [
-                      Color(0xFFE8744F), // Warm Coral
-                      Color(0xFFD85B42), // Deep Coral
+                      Color(0xFFE8744F),
+                      Color(0xFFD85B42),
                     ],
                   ),
                   boxShadow: [
@@ -572,11 +558,10 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
           
           const SizedBox(height: 24),
           
-          // Divider
           Row(
             children: [
               Expanded(
-                child: Divider(color: Colors.grey.shade300, thickness: 1),
+                child: Divider(color: Colors.grey.shade700, thickness: 1),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -584,20 +569,19 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                   'Resend Code',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: Colors.grey.shade500,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               Expanded(
-                child: Divider(color: Colors.grey.shade300, thickness: 1),
+                child: Divider(color: Colors.grey.shade700, thickness: 1),
               ),
             ],
           ),
           
           const SizedBox(height: 24),
           
-          // Resend OTP Button
           Consumer<AuthProvider>(
             builder: (context, authProvider, _) {
               final canResendNow = _canResend && !authProvider.isLoading;
@@ -609,10 +593,11 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: canResendNow ? const Color(0xFFE8744F) : Colors.grey.shade300,
+                      color: canResendNow ? const Color(0xFFE8744F) : Colors.grey.shade700,
                       width: 1.5,
                     ),
                     borderRadius: BorderRadius.circular(14),
+                    color: const Color(0xFF0f1624),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -620,7 +605,7 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                       Icon(
                         Icons.refresh_rounded,
                         size: 22,
-                        color: canResendNow ? const Color(0xFFE8744F) : Colors.grey.shade400,
+                        color: canResendNow ? const Color(0xFFE8744F) : Colors.grey.shade600,
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -630,7 +615,7 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: canResendNow ? const Color(0xFFE8744F) : Colors.grey.shade400,
+                          color: canResendNow ? const Color(0xFFE8744F) : Colors.grey.shade600,
                         ),
                       ),
                     ],

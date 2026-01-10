@@ -1,5 +1,3 @@
-// lib/features/authentication/presentation/screens/login_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -112,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.7), // Dark backdrop
+      barrierColor: Colors.black.withOpacity(0.7),
       builder: (context) => BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Dialog(
@@ -121,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF2C2C2E), // Dark background
+              color: const Color(0xFF2C2C2E),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
@@ -134,7 +132,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Error Icon
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -150,7 +147,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 
                 const SizedBox(height: 20),
                 
-                // Title
                 const Text(
                   'Login Failed',
                   style: TextStyle(
@@ -163,7 +159,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 
                 const SizedBox(height: 12),
                 
-                // Message
                 Text(
                   message,
                   style: TextStyle(
@@ -176,7 +171,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 
                 const SizedBox(height: 24),
                 
-                // OK Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -209,7 +203,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     final keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
     
@@ -227,9 +220,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFFE8744F), // Warm Coral/Orange
-                Color(0xFFD85B42), // Deep Coral
-                Color(0xFFC94A37), // Rich Terra Cotta
+                Color(0xFF0f1624),
+                Color(0xFF1a2332),
+                Color(0xFF0a0e1a),
               ],
               stops: [0.0, 0.5, 1.0],
             ),
@@ -254,17 +247,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Logo and Title
                             _buildHeader(keyboardVisible),
                             
                             SizedBox(height: keyboardVisible ? 20 : 40),
                             
-                            // Main Card
                             _buildMainCard(),
                             
                             const SizedBox(height: 32),
                             
-                            // Sign Up Link
                             _buildSignUpLink(),
                             
                             const SizedBox(height: 20),
@@ -286,20 +276,19 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return Column(
       children: [
         if (!keyboardVisible) ...[
-          // App Logo
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 colors: [
-                  Colors.white.withOpacity(0.3),
-                  Colors.white.withOpacity(0.1),
+                  const Color(0xFFE8744F).withOpacity(0.3),
+                  const Color(0xFFE8744F).withOpacity(0.1),
                 ],
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: const Color(0xFFE8744F).withOpacity(0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -308,13 +297,12 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             child: const Icon(
               Icons.account_balance_wallet_rounded,
               size: 60,
-              color: Colors.white,
+              color: Color(0xFFE8744F),
             ),
           ),
           const SizedBox(height: 24),
         ],
         
-        // Title
         Text(
           'Welcome Back',
           style: TextStyle(
@@ -324,7 +312,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             letterSpacing: -0.5,
             shadows: [
               Shadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withOpacity(0.3),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -335,12 +323,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         
         const SizedBox(height: 8),
         
-        // Subtitle
         Text(
           'Sign in to continue',
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white.withOpacity(0.95),
+            color: Colors.grey.shade400,
             fontWeight: FontWeight.w500,
             letterSpacing: 0.2,
           ),
@@ -354,16 +341,20 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF1a2332),
         borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: const Color(0xFFE8744F).withOpacity(0.2),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 30,
             offset: const Offset(0, 15),
           ),
           BoxShadow(
-            color: const Color(0xFFE8744F).withOpacity(0.3),
+            color: const Color(0xFFE8744F).withOpacity(0.1),
             blurRadius: 40,
             offset: const Offset(0, 20),
           ),
@@ -372,7 +363,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Email/Username/Phone Field
           CustomTextField(
             controller: _identifierController,
             labelText: 'Email, Username, or Phone',
@@ -390,7 +380,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           
           const SizedBox(height: 20),
           
-          // Password Field
           PasswordTextField(
             controller: _passwordController,
             textInputAction: TextInputAction.done,
@@ -408,11 +397,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           
           const SizedBox(height: 20),
           
-          // Remember Me & Forgot Password
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Remember Me
               InkWell(
                 onTap: () => setState(() => _rememberMe = !_rememberMe),
                 borderRadius: BorderRadius.circular(8),
@@ -433,7 +420,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           border: Border.all(
                             color: _rememberMe 
                                 ? Colors.transparent 
-                                : Colors.grey.shade400,
+                                : Colors.grey.shade600,
                             width: 2,
                           ),
                         ),
@@ -450,7 +437,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         'Remember me',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey.shade700,
+                          color: Colors.grey.shade400,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -459,7 +446,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 ),
               ),
               
-              // Forgot Password
               InkWell(
                 onTap: () => context.push(RouteNames.forgotPassword),
                 borderRadius: BorderRadius.circular(8),
@@ -480,7 +466,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           
           const SizedBox(height: 32),
           
-          // Login Button with Orange Gradient
           Consumer<AuthProvider>(
             builder: (context, authProvider, _) {
               return Container(
@@ -489,8 +474,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   borderRadius: BorderRadius.circular(16),
                   gradient: const LinearGradient(
                     colors: [
-                      Color(0xFFE8744F), // Warm Coral
-                      Color(0xFFD85B42), // Deep Coral
+                      Color(0xFFE8744F),
+                      Color(0xFFD85B42),
                     ],
                   ),
                   boxShadow: [
@@ -535,11 +520,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           
           const SizedBox(height: 24),
           
-          // Divider
           Row(
             children: [
               Expanded(
-                child: Divider(color: Colors.grey.shade300, thickness: 1),
+                child: Divider(color: Colors.grey.shade700, thickness: 1),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -547,20 +531,19 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   'OR',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: Colors.grey.shade500,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               Expanded(
-                child: Divider(color: Colors.grey.shade300, thickness: 1),
+                child: Divider(color: Colors.grey.shade700, thickness: 1),
               ),
             ],
           ),
           
           const SizedBox(height: 24),
           
-          // Social Login Buttons
           Row(
             children: [
               Expanded(
@@ -596,20 +579,21 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300, width: 1.5),
+          border: Border.all(color: Colors.grey.shade700, width: 1.5),
           borderRadius: BorderRadius.circular(14),
+          color: const Color(0xFF0f1624),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 22, color: Colors.grey.shade700),
+            Icon(icon, size: 22, color: Colors.grey.shade400),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade700,
+                color: Colors.grey.shade400,
               ),
             ),
           ],
@@ -626,7 +610,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           "Don't have an account? ",
           style: TextStyle(
             fontSize: 15,
-            color: Colors.white.withOpacity(0.95),
+            color: Colors.grey.shade400,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -640,7 +624,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: const Color(0xFFE8744F),
                 shadows: [
                   Shadow(
                     color: Colors.black.withOpacity(0.3),
