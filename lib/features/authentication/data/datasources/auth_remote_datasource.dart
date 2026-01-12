@@ -22,6 +22,7 @@ class AuthRemoteDataSource {
 
   /// Step 1: Send password, get OTP sent to email/SMS
   /// POST /api/auth/login
+  /// Returns success on 200/201 (normal flow) or 403 (too many failed attempts - OTP forced by backend)
   Future<Map<String, dynamic>> initiateLogin(LoginRequestModel request) async {
     try {
       final response = await apiClient.post(
@@ -29,7 +30,8 @@ class AuthRemoteDataSource {
         data: request.toJson(),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      // 200/201 = normal flow; 403 = too many failed attempts, OTP forced by backend (both valid)
+      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 403) {
         return {
           'success': response.data['success'] ?? true,
           'message': response.data['message'] ?? 'OTP sent to your email',
