@@ -43,9 +43,18 @@ class AppColors {
   
   // Status Colors
   static const Color success = Color(0xFF2F5233); // Deep Green
+  static const Color successLight = Color(0xFF10B981); // Light Success
   static const Color error = Color(0xFF8B2E2E); // Deep Red
+  static const Color errorLight = Color(0xFFEF4444); // Light Error
   static const Color warning = Color(0xFFB8860B); // Dark Goldenrod
+  static const Color warningLight = Color(0xFFFBBF24); // Light Warning
   static const Color info = Color(0xFF2D5F7E); // Deep Blue
+  static const Color infoLight = Color(0xFF3B82F6); // Light Info
+  
+  // Accent Colors for Buttons & UI
+  static const Color accentOrange = Color(0xFFE8744F); // Warm Orange
+  static const Color accentCoral = Color(0xFFFF6B6B); // Coral
+  static const Color accentBlue = Color(0xFF3B82F6); // Modern Blue
   
   // Border Colors
   static const Color border = Color(0xFFE0E0E0);

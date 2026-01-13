@@ -71,7 +71,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final transactions = dashboardProvider?.recentTransactions ?? [];
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _onRefresh,
@@ -82,7 +82,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 floating: true,
                 snap: true,
                 elevation: 0,
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.cardBackground,
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

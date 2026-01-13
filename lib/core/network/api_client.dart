@@ -32,10 +32,29 @@ class ApiClient {
   InterceptorsWrapper _getAuthInterceptor() {
     return InterceptorsWrapper(
       onRequest: (options, handler) async {
-        // Add token to headers if available
-        final token = await SecureStorageHelper.read('auth_token');
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
+        // Skip auth header for unauthenticated endpoints
+        final unauthEndpoints = [
+          '/api/auth/login',
+          '/api/auth/login/otp',
+          '/api/auth/register',
+          '/api/auth/forgot-password',
+          '/api/auth/forgot-password/verify',
+          '/api/auth/resend-otp',
+          '/api/auth/reset-pin',
+          '/api/auth/reset-pin/verify',
+          '/api/health',
+          '/api/users/user-names-by-phone',
+          '/api/auth/ussd-login',
+        ];
+
+        final isUnauthEndpoint = unauthEndpoints.any((endpoint) => options.path.contains(endpoint));
+        
+        // Add token to headers if available and not an unauth endpoint
+        if (!isUnauthEndpoint) {
+          final token = await SecureStorageHelper.read('auth_token');
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
         }
         return handler.next(options);
       },

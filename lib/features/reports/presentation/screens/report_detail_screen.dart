@@ -80,7 +80,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error viewing PDF: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorLight,
           ),
         );
       }
@@ -248,7 +248,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.background,
       body: Consumer<ReportProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading && provider.selectedReport == null) {

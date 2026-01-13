@@ -119,7 +119,7 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
         msg: authProvider.errorMessage ?? "Failed to resend OTP",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.errorLight,
         textColor: Colors.white,
       );
     }
@@ -128,12 +128,12 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
   Future<void> _handleVerifyOtp() async {
     final otp = _otpControllers.map((c) => c.text).join();
     
-    if (otp.length != 6) {
+      if (otp.length != 6) {
       Fluttertoast.showToast(
         msg: "Please enter the complete OTP",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.orange,
+        backgroundColor: AppColors.warningLight,
         textColor: Colors.white,
       );
       return;
@@ -148,7 +148,7 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
         msg: "Password must be at least 8 characters",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.orange,
+        backgroundColor: AppColors.warningLight,
         textColor: Colors.white,
       );
       return;
@@ -195,7 +195,7 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBackground,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
@@ -252,7 +252,7 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE8744F),
+                      backgroundColor: AppColors.accentOrange,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -293,7 +293,7 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
         ),
         child: Container(
           decoration: const BoxDecoration(
-            color: Color(0xFFFDF6F0),
+            color: AppColors.cardBackground,
           ),
           child: SafeArea(
             child: Center(
@@ -335,10 +335,10 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFFFFE5D9),
+              color: AppColors.accentOrange.withOpacity(0.1),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFE8744F).withOpacity(0.2),
+                  color: AppColors.accentOrange.withOpacity(0.2),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -400,7 +400,7 @@ class _LoginOtpVerificationScreenState extends State<LoginOtpVerificationScreen>
             offset: const Offset(0, 15),
           ),
           BoxShadow(
-            color: const Color(0xFFE8744F).withOpacity(0.08),
+            color: AppColors.accentOrange.withOpacity(0.08),
             blurRadius: 40,
             offset: const Offset(0, 20),
           ),
