@@ -22,7 +22,12 @@ class AuthRemoteDataSource {
 
   /// Step 1: Send password, get OTP sent to email/SMS
   /// POST /api/auth/login
-  /// Returns success on 200/201 (normal flow) or 403 (too many failed attempts - OTP forced by backend)
+  /// Swagger-compliant responses:
+  /// - 200/201: OTP sent successfully
+  /// - 401: Invalid credentials (email/phone not found OR password incorrect)
+  /// - 403: Too many failed attempts (OTP forced by backend)
+  /// - 429: Rate limited
+  /// - 500: Server error
   Future<Map<String, dynamic>> initiateLogin(LoginRequestModel request) async {
     try {
       final response = await apiClient.post(
@@ -30,22 +35,42 @@ class AuthRemoteDataSource {
         data: request.toJson(),
       );
 
-      // 200/201 = normal flow; 403 = too many failed attempts, OTP forced by backend (both valid)
+      // Handle successful responses: 200/201 = normal flow; 403 = too many failed attempts (OTP forced by backend)
       if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 403) {
         return {
           'success': response.data['success'] ?? true,
           'message': response.data['message'] ?? 'OTP sent to your email',
+          'statusCode': response.statusCode,
         };
+      }
+      // Handle error responses per Swagger spec
+      else if (response.statusCode == 401) {
+        // 401 Unauthorized: Invalid credentials
+        throw Exception(response.data['message'] ?? response.data['error'] ?? 'Invalid credentials');
+      } else if (response.statusCode == 429) {
+        // 429 Too Many Requests: Rate limited
+        throw Exception(response.data['message'] ?? 'Too many login attempts. Please try again later.');
+      } else if (response.statusCode == 500) {
+        // 500 Server Error
+        throw Exception('Server error. Please try again later.');
       } else {
+        // Other errors
         throw Exception(response.data['message'] ?? response.data['error'] ?? 'Login failed');
       }
     } catch (e) {
-      throw Exception('Failed to initiate login: ${e.toString()}');
+      final errorString = e.toString().replaceAll('Exception: ', '');
+      throw Exception(errorString);
     }
   }
 
   /// Step 2: Verify OTP (and optionally set permanent password for first-time users)
   /// POST /api/auth/login/otp
+  /// Swagger-compliant responses:
+  /// - 200/201: OTP verified, login successful
+  /// - 400: Invalid OTP or expired
+  /// - 401: Unauthorized (invalid identifier)
+  /// - 429: Rate limited (too many OTP attempts)
+  /// - 500: Server error
   Future<AuthResponseModel> loginWithOtp(
     String identifier,
     String otp, {
@@ -75,6 +100,18 @@ class AuthRemoteDataSource {
         }
         
         return AuthResponseModel.fromJson(responseData);
+      } else if (response.statusCode == 400) {
+        // 400 Bad Request: Invalid or expired OTP
+        throw Exception(response.data['message'] ?? 'Invalid or expired OTP. Please request a new one.');
+      } else if (response.statusCode == 401) {
+        // 401 Unauthorized: Invalid identifier
+        throw Exception(response.data['message'] ?? 'Invalid credentials. Please login again.');
+      } else if (response.statusCode == 429) {
+        // 429 Too Many Requests: Rate limited
+        throw Exception(response.data['message'] ?? 'Too many OTP verification attempts. Please try again later.');
+      } else if (response.statusCode == 500) {
+        // 500 Server Error
+        throw Exception('Server error. Please try again later.');
       } else {
         throw Exception(response.data['message'] ?? 'OTP verification failed');
       }

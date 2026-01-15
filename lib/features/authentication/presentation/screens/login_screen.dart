@@ -169,6 +169,31 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   ),
                   textAlign: TextAlign.center,
                 ),
+
+                // Add helpful message for invalid credentials
+                if (message.contains('Invalid email/phone or password'))
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8744F).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFFE8744F).withOpacity(0.5),
+                        ),
+                      ),
+                      child: const Text(
+                        '💡 Ensure you\'re using the same password you set when creating this account.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.white70,
+                          height: 1.4,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
                 
                 const SizedBox(height: 24),
                 
