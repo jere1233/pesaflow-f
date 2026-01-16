@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../providers/transaction_provider.dart';
 import '../widgets/transaction_list_item.dart';
 import '../widgets/transaction_filter.dart';
@@ -63,213 +64,244 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Transactions'),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: _showFilterBottomSheet,
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Search Bar
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Theme.of(context).primaryColor.withOpacity(0.05),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search transactions...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          context
-                              .read<TransactionProvider>()
-                              .setSearchQuery('');
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              expandedHeight: 120,
+              floating: false,
+              pinned: true,
+              backgroundColor: AppColors.primary,
+              elevation: 0,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.filter_list),
+                  onPressed: _showFilterBottomSheet,
                 ),
-                filled: true,
-                fillColor: Colors.white,
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                title: const Text(
+                  'Transactions',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                  ),
+                ),
+                centerTitle: true,
+                background: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.primary,
+                        AppColors.primary.withOpacity(0.8),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              onChanged: (value) {
-                context.read<TransactionProvider>().setSearchQuery(value);
+            ),
+          ];
+        },
+        body: Column(
+          children: [
+            // Search Bar
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: AppColors.primary.withOpacity(0.05),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search transactions...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            context
+                                .read<TransactionProvider>()
+                                .setSearchQuery('');
+                          },
+                        )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                onChanged: (value) {
+                  context.read<TransactionProvider>().setSearchQuery(value);
+                },
+              ),
+            ),
+
+            // Statistics Summary
+            Consumer<TransactionProvider>(
+              builder: (context, provider, child) {
+                if (provider.status == TransactionStatus.loaded) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _StatCard(
+                            title: 'Income',
+                            amount: provider.totalIncome,
+                            color: Colors.green,
+                            icon: Icons.arrow_downward,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _StatCard(
+                            title: 'Expense',
+                            amount: provider.totalExpense,
+                            color: Colors.red,
+                            icon: Icons.arrow_upward,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
               },
             ),
-          ),
 
-          // Statistics Summary
-          Consumer<TransactionProvider>(
-            builder: (context, provider, child) {
-              if (provider.status == TransactionStatus.loaded) {
+            // Active Filters Display
+            Consumer<TransactionProvider>(
+              builder: (context, provider, child) {
+                final hasFilters = provider.selectedType != null ||
+                    provider.selectedStatus != null ||
+                    provider.startDate != null;
+
+                if (!hasFilters) return const SizedBox.shrink();
+
                 return Container(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Wrap(
+                    spacing: 8,
                     children: [
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Income',
-                          amount: provider.totalIncome,
-                          color: Colors.green,
-                          icon: Icons.arrow_downward,
+                      if (provider.selectedType != null)
+                        Chip(
+                          label: Text(provider.selectedType!),
+                          onDeleted: () =>
+                              provider.setTypeFilter(null),
+                          deleteIcon: const Icon(Icons.close, size: 18),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Expense',
-                          amount: provider.totalExpense,
-                          color: Colors.red,
-                          icon: Icons.arrow_upward,
+                      if (provider.selectedStatus != null)
+                        Chip(
+                          label: Text(provider.selectedStatus!),
+                          onDeleted: () =>
+                              provider.setStatusFilter(null),
+                          deleteIcon: const Icon(Icons.close, size: 18),
                         ),
+                      if (provider.startDate != null)
+                        Chip(
+                          label: const Text('Date Range'),
+                          onDeleted: () =>
+                              provider.setDateRange(null, null),
+                          deleteIcon: const Icon(Icons.close, size: 18),
+                        ),
+                      TextButton.icon(
+                        icon: const Icon(Icons.clear_all, size: 18),
+                        label: const Text('Clear All'),
+                        onPressed: provider.clearFilters,
                       ),
                     ],
                   ),
                 );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-
-          // Active Filters Display
-          Consumer<TransactionProvider>(
-            builder: (context, provider, child) {
-              final hasFilters = provider.selectedType != null ||
-                  provider.selectedStatus != null ||
-                  provider.startDate != null;
-
-              if (!hasFilters) return const SizedBox.shrink();
-
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Wrap(
-                  spacing: 8,
-                  children: [
-                    if (provider.selectedType != null)
-                      Chip(
-                        label: Text(provider.selectedType!),
-                        onDeleted: () =>
-                            provider.setTypeFilter(null),
-                        deleteIcon: const Icon(Icons.close, size: 18),
-                      ),
-                    if (provider.selectedStatus != null)
-                      Chip(
-                        label: Text(provider.selectedStatus!),
-                        onDeleted: () =>
-                            provider.setStatusFilter(null),
-                        deleteIcon: const Icon(Icons.close, size: 18),
-                      ),
-                    if (provider.startDate != null)
-                      Chip(
-                        label: const Text('Date Range'),
-                        onDeleted: () =>
-                            provider.setDateRange(null, null),
-                        deleteIcon: const Icon(Icons.close, size: 18),
-                      ),
-                    TextButton.icon(
-                      icon: const Icon(Icons.clear_all, size: 18),
-                      label: const Text('Clear All'),
-                      onPressed: provider.clearFilters,
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-
-          // Transaction List
-          Expanded(
-            child: Consumer<TransactionProvider>(
-              builder: (context, provider, child) {
-                if (provider.status == TransactionStatus.loading &&
-                    provider.transactions.isEmpty) {
-                  return const Center(child: CustomLoadingIndicator());
-                }
-
-                if (provider.status == TransactionStatus.error) {
-                  return CustomErrorWidget(
-                    message: provider.errorMessage ?? 'An error occurred',
-                    onRetry: () =>
-                        provider.loadTransactions(refresh: true),
-                  );
-                }
-
-                if (provider.filteredTransactions.isEmpty) {
-                  return const EmptyStateWidget(
-                    icon: Icons.receipt_long,
-                    title: 'No Transactions',
-                    message: 'You don\'t have any transactions yet',
-                  );
-                }
-
-                final groupedTransactions = provider.groupedTransactions;
-
-                return RefreshIndicator(
-                  onRefresh: () =>
-                      provider.loadTransactions(refresh: true),
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.only(bottom: 16),
-                    itemCount: groupedTransactions.length +
-                        (provider.isLoadingMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == groupedTransactions.length) {
-                        return const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-
-                      final date = groupedTransactions.keys.elementAt(index);
-                      final transactions = groupedTransactions[date]!;
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                            child: Text(
-                              date,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey[700],
-                                  ),
-                            ),
-                          ),
-                          ...transactions.map(
-                            (transaction) => TransactionListItem(
-                              transaction: transaction,
-                              onTap: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/transaction-detail',
-                                  arguments: transaction.id,
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                );
               },
             ),
-          ),
-        ],
+
+            // Transaction List
+            Expanded(
+              child: Consumer<TransactionProvider>(
+                builder: (context, provider, child) {
+                  if (provider.status == TransactionStatus.loading &&
+                      provider.transactions.isEmpty) {
+                    return const Center(child: CustomLoadingIndicator());
+                  }
+
+                  if (provider.status == TransactionStatus.error) {
+                    return CustomErrorWidget(
+                      message: provider.errorMessage ?? 'An error occurred',
+                      onRetry: () =>
+                          provider.loadTransactions(refresh: true),
+                    );
+                  }
+
+                  if (provider.filteredTransactions.isEmpty) {
+                    return const EmptyStateWidget(
+                      icon: Icons.receipt_long,
+                      title: 'No Transactions',
+                      message: 'You don\'t have any transactions yet',
+                    );
+                  }
+
+                  final groupedTransactions = provider.groupedTransactions;
+
+                  return RefreshIndicator(
+                    onRefresh: () =>
+                        provider.loadTransactions(refresh: true),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.only(bottom: 16),
+                      itemCount: groupedTransactions.length +
+                          (provider.isLoadingMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == groupedTransactions.length) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+
+                        final date = groupedTransactions.keys.elementAt(index);
+                        final transactions = groupedTransactions[date]!;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                              child: Text(
+                                date,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[700],
+                                    ),
+                              ),
+                            ),
+                            ...transactions.map(
+                              (transaction) => TransactionListItem(
+                                transaction: transaction,
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/transaction-detail',
+                                    arguments: transaction.id,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

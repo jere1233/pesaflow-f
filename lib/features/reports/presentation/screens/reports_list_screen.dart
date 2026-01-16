@@ -578,26 +578,14 @@ class _ReportsListScreenState extends State<ReportsListScreen>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
-            ElevatedButton.icon(
-              onPressed: _showGenerateReportDialog,
-              icon: const Icon(Icons.add, size: 24),
-              label: const Text(
-                'Generate Report',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+            Text(
+              'Tap the + button below to generate',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[500],
+                fontStyle: FontStyle.italic,
               ),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 18,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 2,
-              ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

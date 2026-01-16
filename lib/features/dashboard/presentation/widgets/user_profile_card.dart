@@ -163,7 +163,7 @@ class UserProfileCard extends StatelessWidget {
             ],
           ),
           
-          // 🆕 BANK DETAILS SECTION
+          // BANK DETAILS SECTION
           if (hasBankDetails) ...[
             const SizedBox(height: 20),
             Container(
@@ -186,7 +186,7 @@ class UserProfileCard extends StatelessWidget {
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.account_balance_rounded,
                           color: Colors.white,
                           size: 18,
@@ -257,38 +257,68 @@ class UserProfileCard extends StatelessWidget {
                 // Navigate to bank details setup
                 context.push(RouteNames.profile);
               },
+              borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.2),
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFFFF6B35),
+                      const Color(0xFFFF8C42),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.orange.withOpacity(0.4),
-                    width: 1,
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1.5,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF6B35).withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      color: Colors.orange.shade200,
-                      size: 18,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
+                    const SizedBox(width: 12),
+                    const Expanded(
                       child: Text(
                         'Please add your bank details',
                         style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.white.withOpacity(0.95),
-                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.2,
                         ),
                       ),
                     ),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Colors.white.withOpacity(0.7),
-                      size: 14,
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: Colors.white,
+                        size: 14,
+                      ),
                     ),
                   ],
                 ),

@@ -81,8 +81,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     if (_formKey.currentState!.validate()) {
       final authProvider = context.read<AuthProvider>();
       
+      // Get the identifier and normalize if it looks like a phone number
+      String identifier = _identifierController.text.trim();
+      if (_looksLikePhoneNumber(identifier)) {
+        identifier = _normalizePhoneNumber(identifier);
+      }
+      
       final success = await authProvider.initiateLogin(
-        _identifierController.text.trim(),
+        identifier,
         _passwordController.text,
       );
 
@@ -98,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         context.go(
           RouteNames.loginOtpVerification,
           extra: {
-            'identifier': _identifierController.text.trim(),
+            'identifier': identifier,
             'verificationType': 'login',
           },
         );
@@ -106,6 +112,45 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         _showErrorDialog(authProvider.errorMessage ?? 'Login failed');
       }
     }
+  }
+
+  /// Convert phone number to international format (+254XXXXXXXXXX)
+  /// Handles various input formats:
+  /// - 0712345678 -> +254712345678
+  /// - 712345678 -> +254712345678
+  /// - +254712345678 -> +254712345678 (unchanged)
+  String _normalizePhoneNumber(String phone) {
+    // Remove all non-digit characters except leading +
+    String cleaned = phone.replaceAll(RegExp(r'[^\d+]'), '');
+    
+    // If it starts with +, it's already in international format
+    if (cleaned.startsWith('+')) {
+      return cleaned;
+    }
+    
+    // If it starts with 0, replace with +254
+    if (cleaned.startsWith('0')) {
+      return '+254${cleaned.substring(1)}';
+    }
+    
+    // If it's just digits and not starting with 0, assume +254 prefix
+    return '+254$cleaned';
+  }
+
+  /// Check if input looks like a phone number
+  bool _looksLikePhoneNumber(String input) {
+    // Remove non-digit characters except +
+    String cleaned = input.replaceAll(RegExp(r'[^\d+]'), '');
+    
+    // If starts with +254 or 0 or is 9-10 digits, likely a phone number
+    if (cleaned.startsWith('+254')) return true;
+    if (cleaned.startsWith('254')) return true;
+    if (cleaned.startsWith('0') && cleaned.length == 10) return true;
+    
+    // If it's 9-10 digits without country code, likely a phone
+    if (RegExp(r'^\d{9,10}$').hasMatch(cleaned)) return true;
+    
+    return false;
   }
 
   void _showErrorDialog(String message) {
@@ -120,11 +165,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF2C2C2E),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withOpacity(0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -136,12 +181,12 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade400.withOpacity(0.2),
+                    color: const Color(0xFFFEE2E2),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.error_outline_rounded,
-                    color: Colors.red.shade400,
+                    color: Color(0xFFDC2626),
                     size: 40,
                   ),
                 ),
@@ -153,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Color(0xFF1F2937),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -162,10 +207,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 
                 Text(
                   message,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 15,
                     height: 1.5,
-                    color: Colors.grey.shade300,
+                    color: Color(0xFF6B7280),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -177,7 +222,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE8744F).withOpacity(0.2),
+                        color: const Color(0xFFE8744F).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: const Color(0xFFE8744F).withOpacity(0.5),
@@ -187,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         '💡 Ensure you\'re using the same password you set when creating this account.',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white70,
+                          color: Color(0xFF6B7280),
                           height: 1.4,
                         ),
                         textAlign: TextAlign.center,
@@ -236,9 +281,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
+          statusBarIconBrightness: Brightness.dark,
           systemNavigationBarColor: Colors.transparent,
-          systemNavigationBarIconBrightness: Brightness.light,
+          systemNavigationBarIconBrightness: Brightness.dark,
         ),
         child: Container(
           decoration: const BoxDecoration(
@@ -246,9 +291,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFF0f1624),
-                Color(0xFF1a2332),
-                Color(0xFF0a0e1a),
+                Color(0xFFFFFFFF),
+                Color(0xFFFAFAFA),
+                Color(0xFFF3F4F6),
               ],
               stops: [0.0, 0.5, 1.0],
             ),
@@ -334,15 +379,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           style: TextStyle(
             fontSize: keyboardVisible ? 28 : 36,
             fontWeight: FontWeight.w800,
-            color: Colors.white,
+            color: const Color(0xFF1F2937),
             letterSpacing: -0.5,
-            shadows: [
-              Shadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           textAlign: TextAlign.center,
         ),
@@ -353,7 +391,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           'Sign in to continue',
           style: TextStyle(
             fontSize: 16,
-            color: Colors.grey.shade400,
+            color: const Color(0xFF6B7280),
             fontWeight: FontWeight.w500,
             letterSpacing: 0.2,
           ),
@@ -367,20 +405,20 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: const Color(0xFF1a2332),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(30),
         border: Border.all(
-          color: const Color(0xFFE8744F).withOpacity(0.2),
+          color: const Color(0xFFE5E7EB),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 30,
             offset: const Offset(0, 15),
           ),
           BoxShadow(
-            color: const Color(0xFFE8744F).withOpacity(0.1),
+            color: const Color(0xFFE8744F).withOpacity(0.05),
             blurRadius: 40,
             offset: const Offset(0, 20),
           ),
@@ -446,7 +484,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           border: Border.all(
                             color: _rememberMe 
                                 ? Colors.transparent 
-                                : Colors.grey.shade600,
+                                : const Color(0xFFD1D5DB),
                             width: 2,
                           ),
                         ),
@@ -459,11 +497,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             : null,
                       ),
                       const SizedBox(width: 10),
-                      Text(
+                      const Text(
                         'Remember me',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey.shade400,
+                          color: Color(0xFF6B7280),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -605,21 +643,21 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade700, width: 1.5),
+          border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
           borderRadius: BorderRadius.circular(14),
-          color: const Color(0xFF0f1624),
+          color: Colors.white,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 22, color: Colors.grey.shade400),
+            Icon(icon, size: 22, color: const Color(0xFF6B7280)),
             const SizedBox(width: 8),
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade400,
+                color: Color(0xFF6B7280),
               ),
             ),
           ],
@@ -636,27 +674,21 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           "Don't have an account? ",
           style: TextStyle(
             fontSize: 15,
-            color: Colors.grey.shade400,
+            color: const Color(0xFF6B7280),
             fontWeight: FontWeight.w500,
           ),
         ),
         InkWell(
           onTap: () => context.push(RouteNames.register),
           borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
             child: Text(
               'Sign Up',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFFE8744F),
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 4,
-                  ),
-                ],
+                color: Color(0xFFE8744F),
               ),
             ),
           ),

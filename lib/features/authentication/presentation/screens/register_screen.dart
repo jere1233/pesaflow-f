@@ -194,11 +194,19 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
   Future<void> _handleRegister() async {
     final authProvider = context.read<AuthProvider>();
     
+    // Convert phone number format: 0700580577 → 254700580577
+    String phoneNumber = _phoneController.text.trim();
+    if (phoneNumber.startsWith('0')) {
+      phoneNumber = '254' + phoneNumber.substring(1);
+    } else if (phoneNumber.startsWith('+254')) {
+      phoneNumber = phoneNumber.replaceFirst('+', '');
+    }
+    
     final pinText = _pinController.text.trim();
     
     final request = RegisterRequestModel(
       email: _emailController.text.trim(),
-      phone: _phoneController.text.trim(),
+      phone: phoneNumber,
       pin: pinText.isNotEmpty ? pinText : null,
       
       bankAccountName: _bankAccountNameController.text.trim(),
@@ -290,27 +298,27 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: const Color(0xFF2C2C2E),
+        backgroundColor: Colors.white,
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red.shade400.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFEE2E2),
+                borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
-              child: Icon(Icons.error_outline, color: Colors.red.shade400, size: 24),
+              child: const Icon(Icons.error_outline, color: Color(0xFFDC2626), size: 24),
             ),
             const SizedBox(width: 12),
             const Text(
               'Registration Failed',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
             ),
           ],
         ),
         content: Text(
           message, 
-          style: TextStyle(fontSize: 15, height: 1.4, color: Colors.grey.shade300)
+          style: const TextStyle(fontSize: 15, height: 1.4, color: Color(0xFF6B7280))
         ),
         actions: [
           TextButton(
@@ -339,9 +347,9 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF0f1624),
-              Color(0xFF1a2332),
-              Color(0xFF0a0e1a),
+              Color(0xFFFFFFFF),
+              Color(0xFFFAFAFA),
+              Color(0xFFF3F4F6),
             ],
             stops: [0.0, 0.5, 1.0],
           ),
@@ -366,20 +374,20 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                           Container(
                             padding: const EdgeInsets.all(28),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1a2332),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(30),
                               border: Border.all(
-                                color: const Color(0xFFE8744F).withOpacity(0.2),
+                                color: const Color(0xFFE5E7EB),
                                 width: 1,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
+                                  color: Colors.black.withOpacity(0.08),
                                   blurRadius: 30,
                                   offset: const Offset(0, 15),
                                 ),
                                 BoxShadow(
-                                  color: const Color(0xFFE8744F).withOpacity(0.1),
+                                  color: const Color(0xFFE8744F).withOpacity(0.05),
                                   blurRadius: 40,
                                   offset: const Offset(0, 20),
                                 ),
@@ -416,7 +424,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.black.withOpacity(0.2),
+            Colors.black.withOpacity(0.03),
             Colors.transparent,
           ],
           begin: Alignment.topCenter,
@@ -429,10 +437,10 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE8744F).withOpacity(0.2),
+                  color: const Color(0xFFE8744F).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFFE8744F).withOpacity(0.4),
+                    color: const Color(0xFFE8744F).withOpacity(0.3),
                     width: 1.5,
                   ),
                 ),
@@ -445,10 +453,10 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE8744F).withOpacity(0.2),
+                  color: const Color(0xFFE8744F).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: const Color(0xFFE8744F).withOpacity(0.4),
+                    color: const Color(0xFFE8744F).withOpacity(0.3),
                     width: 1.5,
                   ),
                 ),
@@ -476,7 +484,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     return Container(
       height: 6,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: const Color(0xFFE5E7EB),
         borderRadius: BorderRadius.circular(3),
       ),
       child: LayoutBuilder(

@@ -82,7 +82,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 floating: true,
                 snap: true,
                 elevation: 0,
-                backgroundColor: AppColors.cardBackground,
+                backgroundColor: AppColors.primary,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.primary,
+                          AppColors.primary.withOpacity(0.8),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -91,14 +105,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: Colors.white,
                       ),
                     ),
                     Text(
                       'Welcome, ${user?.firstName ?? 'User'}',
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey[600],
+                        color: Colors.white.withOpacity(0.8),
                         fontWeight: FontWeight.normal,
                       ),
                     ),
@@ -106,7 +120,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 actions: [
                   IconButton(
-                    icon: const Icon(Icons.notifications_outlined),
+                    icon: const Icon(Icons.notifications_outlined, color: Colors.white),
                     onPressed: () {
                       context.push(RouteNames.notifications);
                     },

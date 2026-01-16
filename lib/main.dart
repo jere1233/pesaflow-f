@@ -47,10 +47,10 @@ void main() async {
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
       systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.light,
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
   
@@ -148,8 +148,8 @@ class AutoNest extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             title: 'AutoNest',
             theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: ThemeMode.system,
+            darkTheme: AppTheme.lightTheme,
+            themeMode: ThemeMode.light,
             routerConfig: AppRouter.router,
           );
         },
