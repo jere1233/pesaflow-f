@@ -309,8 +309,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       
                       SizedBox(height: keyboardVisible ? 20 : 40),
                       
-                      // Main Card
-                      _buildMainCard(),
+                      // Main Card with responsive width
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth < 380 ? 8 : 0,
+                        ),
+                        child: _buildMainCard(screenWidth),
+                      ),
                       
                       const SizedBox(height: 20),
                     ],
@@ -393,9 +398,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     );
   }
 
-  Widget _buildMainCard() {
+  Widget _buildMainCard(double screenWidth) {
+    // Calculate responsive field size based on screen width
+    final fieldSize = screenWidth < 380 ? 45.0 : 50.0;
+    final fieldHeight = screenWidth < 380 ? 55.0 : 60.0;
+    
     return Container(
-      padding: const EdgeInsets.all(28),
+      padding: EdgeInsets.all(screenWidth < 380 ? 20 : 28),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
@@ -415,65 +424,70 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // OTP Input Fields
+          // OTP Input Fields with responsive spacing
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(6, (index) {
-              return SizedBox(
-                width: 50,
-                height: 60,
-                child: TextFormField(
-                  controller: _otpControllers[index],
-                  focusNode: _focusNodes[index],
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  maxLength: 1,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2C3E50),
-                  ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
-                  decoration: InputDecoration(
-                    counterText: '',
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth < 380 ? 4 : 6,
+                ),
+                child: SizedBox(
+                  width: fieldSize,
+                  height: fieldHeight,
+                  child: TextFormField(
+                    controller: _otpControllers[index],
+                    focusNode: _focusNodes[index],
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    maxLength: 1,
+                    style: TextStyle(
+                      fontSize: screenWidth < 380 ? 20 : 24,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF2C3E50),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color(0xFFE8744F),
-                        width: 2,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    decoration: InputDecoration(
+                      counterText: '',
+                      filled: true,
+                      fillColor: Colors.grey[50],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
                       ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE8744F),
+                          width: 2,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.all(0),
                     ),
-                    contentPadding: const EdgeInsets.all(0),
+                    onChanged: (value) {
+                      if (value.isNotEmpty && index < 5) {
+                        _focusNodes[index + 1].requestFocus();
+                      } else if (value.isEmpty && index > 0) {
+                        _focusNodes[index - 1].requestFocus();
+                      }
+                      
+                      if (index == 5 && value.isNotEmpty) {
+                        _handleVerifyOtp();
+                      }
+                    },
                   ),
-                  onChanged: (value) {
-                    if (value.isNotEmpty && index < 5) {
-                      _focusNodes[index + 1].requestFocus();
-                    } else if (value.isEmpty && index > 0) {
-                      _focusNodes[index - 1].requestFocus();
-                    }
-                    
-                    if (index == 5 && value.isNotEmpty) {
-                      _handleVerifyOtp();
-                    }
-                  },
                 ),
               );
             }),
           ),
           
-          const SizedBox(height: 32),
+          SizedBox(height: screenWidth < 380 ? 24 : 32),
           
           // Verify Button with Orange Gradient
           Consumer<AuthProvider>(

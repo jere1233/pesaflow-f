@@ -216,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 ),
 
                 // Add helpful message for invalid credentials
-                if (message.contains('Invalid email/phone or password'))
+                if (message.toLowerCase().contains('invalid') || message.toLowerCase().contains('credentials'))
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
                     child: Container(
@@ -228,35 +228,116 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           color: const Color(0xFFE8744F).withOpacity(0.5),
                         ),
                       ),
-                      child: const Text(
-                        '💡 Ensure you\'re using the same password you set when creating this account.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF6B7280),
-                          height: 1.4,
-                        ),
-                        textAlign: TextAlign.center,
+                      child: const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '💡 Troubleshooting:',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            '• Make sure you\'re using the email or phone number from registration',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF6B7280),
+                              height: 1.4,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '• Use the password sent to your email after payment (not your PIN)',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF6B7280),
+                              height: 1.4,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '• Check if your account registration payment was completed',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF6B7280),
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 
                 const SizedBox(height: 24),
                 
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE8744F),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                if (message.toLowerCase().contains('invalid') || message.toLowerCase().contains('credentials'))
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            context.push(RouteNames.forgotPassword);
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            side: const BorderSide(
+                              color: Color(0xFFE8744F),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: const Text(
+                            'Reset Password',
+                            style: TextStyle(
+                              color: Color(0xFFE8744F),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
                       ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'OK',
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFE8744F),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'Retry',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE8744F),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'OK',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,

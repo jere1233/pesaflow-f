@@ -154,26 +154,36 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
       );
 
       logger.info('DataSource: Reports response - ${response.statusCode}');
+      logger.info('DataSource: Reports data - ${response.data}');
 
       if (response.statusCode == 200) {
         final data = response.data;
 
-        if (data['success'] == true && data['data'] != null) {
-          final List<dynamic> reportsJson = data['data'];
-          return reportsJson
-              .map((json) => ReportModel.fromJson(json))
-              .toList();
-        } else {
-          throw ServerException(data['message'] ?? 'Failed to fetch reports');
+        if (data is Map) {
+          if (data['success'] == true && data['data'] != null) {
+            final List<dynamic> reportsJson = data['data'];
+            return reportsJson
+                .map((json) => ReportModel.fromJson(json as Map<String, dynamic>))
+                .toList();
+          } else if (data['success'] == false) {
+            throw ServerException(data['error'] ?? data['message'] ?? 'Failed to fetch reports');
+          }
         }
+        
+        throw ServerException('Invalid response format from server');
       } else {
         throw ServerException('Server returned status code: ${response.statusCode}');
       }
     } on DioException catch (e) {
       logger.error('DataSource: DioException - ${e.message}');
+      logger.error('DataSource: DioException response - ${e.response?.data}');
 
       if (e.response?.statusCode == 401) {
         throw UnauthorizedException('Session expired. Please login again.');
+      }
+
+      if (e.response?.statusCode == 403) {
+        throw UnauthorizedException('Access denied. Please login again.');
       }
 
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -186,7 +196,7 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
       }
 
       throw ServerException(
-        e.response?.data?['error'] ?? 'Failed to fetch reports',
+        e.response?.data?['error'] ?? e.message ?? 'Failed to fetch reports',
       );
     } catch (e) {
       logger.error('DataSource: Unexpected error - $e');
