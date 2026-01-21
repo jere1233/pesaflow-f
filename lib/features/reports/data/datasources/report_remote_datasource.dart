@@ -214,17 +214,42 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
       );
 
       logger.info('DataSource: Report response - ${response.statusCode}');
+      logger.info('DataSource: Report data - ${response.data}');
 
       if (response.statusCode == 200) {
-        return ReportModel.fromJson(response.data);
+        final data = response.data;
+        
+        // Handle both wrapped and unwrapped response formats
+        if (data is Map) {
+          // If response has success field, it's wrapped
+          if (data.containsKey('success') && data['success'] == true && data.containsKey('report')) {
+            return ReportModel.fromJson(data['report'] as Map<String, dynamic>);
+          }
+          // If response is the report directly (unwrapped)
+          if (data.containsKey('id') && data.containsKey('title')) {
+            return ReportModel.fromJson(data as Map<String, dynamic>);
+          }
+          // If response has error
+          if (data['success'] == false || data.containsKey('error')) {
+            throw ServerException(data['error'] ?? data['message'] ?? 'Failed to fetch report');
+          }
+        }
+        
+        // Try parsing directly as report model
+        return ReportModel.fromJson(data as Map<String, dynamic>);
       } else {
         throw ServerException('Server returned status code: ${response.statusCode}');
       }
     } on DioException catch (e) {
       logger.error('DataSource: DioException - ${e.message}');
+      logger.error('DataSource: DioException response - ${e.response?.data}');
 
       if (e.response?.statusCode == 401) {
         throw UnauthorizedException('Session expired. Please login again.');
+      }
+
+      if (e.response?.statusCode == 403) {
+        throw UnauthorizedException('Access denied. Please login again.');
       }
 
       if (e.response?.statusCode == 404) {
@@ -241,7 +266,7 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
       }
 
       throw ServerException(
-        e.response?.data?['error'] ?? 'Failed to fetch report',
+        e.response?.data?['error'] ?? e.message ?? 'Failed to fetch report',
       );
     } catch (e) {
       logger.error('DataSource: Unexpected error - $e');
@@ -259,21 +284,39 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
       );
 
       logger.info('DataSource: Delete report response - ${response.statusCode}');
+      logger.info('DataSource: Delete report data - ${response.data}');
 
       if (response.statusCode == 200) {
         final data = response.data;
 
-        if (data['success'] != true) {
-          throw ServerException(data['message'] ?? 'Failed to delete report');
+        // Handle both wrapped and unwrapped response formats
+        if (data is Map) {
+          // If response has success field
+          if (data.containsKey('success')) {
+            if (data['success'] == true) {
+              return; // Successful deletion
+            } else {
+              throw ServerException(data['error'] ?? data['message'] ?? 'Failed to delete report');
+            }
+          }
+          // If no success field but we got 200, assume success
+          return;
         }
+      } else if (response.statusCode == 404) {
+        throw ServerException('Report not found');
       } else {
         throw ServerException('Server returned status code: ${response.statusCode}');
       }
     } on DioException catch (e) {
       logger.error('DataSource: DioException - ${e.message}');
+      logger.error('DataSource: DioException response - ${e.response?.data}');
 
       if (e.response?.statusCode == 401) {
         throw UnauthorizedException('Session expired. Please login again.');
+      }
+
+      if (e.response?.statusCode == 403) {
+        throw UnauthorizedException('Access denied. Please login again.');
       }
 
       if (e.response?.statusCode == 404) {
@@ -290,7 +333,7 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
       }
 
       throw ServerException(
-        e.response?.data?['error'] ?? 'Failed to delete report',
+        e.response?.data?['error'] ?? e.message ?? 'Failed to delete report',
       );
     } catch (e) {
       logger.error('DataSource: Unexpected error - $e');
