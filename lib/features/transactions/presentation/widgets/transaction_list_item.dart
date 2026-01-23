@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/transaction_detail.dart';
+import '../../../../core/constants/app_colors.dart';
 
 class TransactionListItem extends StatelessWidget {
   final TransactionDetail transaction;
@@ -69,20 +70,20 @@ class TransactionListItem extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'completed':
-        return Colors.green;
+        return AppColors.success;
       case 'pending':
-        return Colors.orange;
+        return AppColors.pending;
       case 'failed':
-        return Colors.red;
+        return AppColors.error;
       default:
-        return Colors.grey;
+        return AppColors.secondary;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isCredit = transaction.isCredit;
-    final amountColor = isCredit ? Colors.green : Colors.red;
+    final amountColor = isCredit ? AppColors.success : AppColors.error;
     final amountPrefix = isCredit ? '+' : '-';
     final categoryColor = _getCategoryColor(transaction.category);
 

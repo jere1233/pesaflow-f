@@ -74,7 +74,7 @@ class ThemeConstants {
   static const double paddingXXL = 32;
   
   // ============================================================================
-  // CARD DECORATIONS
+  // CARD DECORATIONS (Updated with Orange Gradients)
   // ============================================================================
   
   /// Standard card decoration with subtle shadow
@@ -86,10 +86,37 @@ class ThemeConstants {
     );
   }
   
-  /// Standard card decoration for dark mode
-  static BoxDecoration get cardDecorationDark {
+  /// Gradient card decoration with orange base - Purple accent
+  static BoxDecoration get cardDecorationGradient1 {
     return BoxDecoration(
-      color: AppColors.cardBackgroundDark,
+      gradient: AppColors.cardGradient1,
+      borderRadius: borderRadiusMedium,
+      boxShadow: shadowMedium,
+    );
+  }
+  
+  /// Gradient card decoration with orange base - Teal accent
+  static BoxDecoration get cardDecorationGradient2 {
+    return BoxDecoration(
+      gradient: AppColors.cardGradient2,
+      borderRadius: borderRadiusMedium,
+      boxShadow: shadowMedium,
+    );
+  }
+  
+  /// Gradient card decoration with orange base - Indigo accent
+  static BoxDecoration get cardDecorationGradient3 {
+    return BoxDecoration(
+      gradient: AppColors.cardGradient3,
+      borderRadius: borderRadiusMedium,
+      boxShadow: shadowMedium,
+    );
+  }
+  
+  /// Gradient card decoration with orange base - Pink accent
+  static BoxDecoration get cardDecorationGradient4 {
+    return BoxDecoration(
+      gradient: AppColors.cardGradient4,
       borderRadius: borderRadiusMedium,
       boxShadow: shadowMedium,
     );
@@ -104,7 +131,16 @@ class ThemeConstants {
     );
   }
   
-  /// Gradient card decoration
+  /// Dark mode card decoration
+  static BoxDecoration get cardDecorationDark {
+    return BoxDecoration(
+      color: AppColors.cardBackgroundDark,
+      borderRadius: borderRadiusMedium,
+      boxShadow: shadowMedium,
+    );
+  }
+  
+  /// Generic gradient card decoration
   static BoxDecoration cardDecorationGradient(LinearGradient gradient) {
     return BoxDecoration(
       gradient: gradient,
@@ -114,7 +150,7 @@ class ThemeConstants {
   }
   
   // ============================================================================
-  // BUTTON DECORATIONS
+  // BUTTON DECORATIONS & STYLES
   // ============================================================================
   
   /// Primary button shape
@@ -125,6 +161,61 @@ class ThemeConstants {
   /// Large button shape
   static RoundedRectangleBorder get buttonShapeLarge {
     return RoundedRectangleBorder(borderRadius: borderRadiusLarge);
+  }
+  
+  /// Primary button style - Solid orange with white text
+  static ButtonStyle get primaryButtonStyle {
+    return ElevatedButton.styleFrom(
+      backgroundColor: AppColors.primary,
+      foregroundColor: AppColors.white,
+      disabledBackgroundColor: Colors.grey.shade300,
+      disabledForegroundColor: Colors.grey.shade600,
+      padding: const EdgeInsets.symmetric(horizontal: paddingLarge, vertical: paddingMedium),
+      shape: buttonShapeLarge,
+      elevation: 2,
+      shadowColor: AppColors.shadowOrange,
+    );
+  }
+  
+  /// Secondary button style - Orange outline with orange text
+  static ButtonStyle get secondaryButtonStyle {
+    return OutlinedButton.styleFrom(
+      foregroundColor: AppColors.primary,
+      side: const BorderSide(color: AppColors.primary, width: 1.5),
+      padding: const EdgeInsets.symmetric(horizontal: paddingLarge, vertical: paddingMedium),
+      shape: buttonShapeLarge,
+    );
+  }
+  
+  /// Text button style - Orange text with no background
+  static ButtonStyle get textButtonStyle {
+    return TextButton.styleFrom(
+      foregroundColor: AppColors.primary,
+      padding: const EdgeInsets.symmetric(horizontal: paddingMedium, vertical: paddingSmall),
+      shape: buttonShape,
+    );
+  }
+  
+  /// Danger button style - Red background with white text
+  static ButtonStyle get dangerButtonStyle {
+    return ElevatedButton.styleFrom(
+      backgroundColor: AppColors.error,
+      foregroundColor: AppColors.white,
+      padding: const EdgeInsets.symmetric(horizontal: paddingLarge, vertical: paddingMedium),
+      shape: buttonShapeLarge,
+      elevation: 2,
+    );
+  }
+  
+  /// Success button style - Emerald background with white text
+  static ButtonStyle get successButtonStyle {
+    return ElevatedButton.styleFrom(
+      backgroundColor: AppColors.success,
+      foregroundColor: AppColors.white,
+      padding: const EdgeInsets.symmetric(horizontal: paddingLarge, vertical: paddingMedium),
+      shape: buttonShapeLarge,
+      elevation: 2,
+    );
   }
   
   // ============================================================================

@@ -151,7 +151,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                           child: _StatCard(
                             title: 'Income',
                             amount: provider.totalIncome,
-                            color: Colors.green,
+                            color: AppColors.success,
                             icon: Icons.arrow_downward,
                           ),
                         ),
@@ -160,7 +160,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                           child: _StatCard(
                             title: 'Expense',
                             amount: provider.totalExpense,
-                            color: Colors.red,
+                            color: AppColors.error,
                             icon: Icons.arrow_upward,
                           ),
                         ),

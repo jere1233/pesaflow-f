@@ -110,44 +110,75 @@ class _PensionPlansScreenState extends State<PensionPlansScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text('Pension Plans'),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          // TODO: Implement refresh logic
-          await Future.delayed(const Duration(seconds: 1));
+      backgroundColor: AppColors.background,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              expandedHeight: 120,
+              floating: false,
+              pinned: true,
+              backgroundColor: AppColors.primary,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded),
+                onPressed: () => context.pop(),
+              ),
+              flexibleSpace: FlexibleSpaceBar(
+                title: const Text(
+                  'Pension Plans',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                    color: Colors.white,
+                  ),
+                ),
+                centerTitle: true,
+                background: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.primary,
+                        AppColors.primary.withOpacity(0.8),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ];
         },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              const Text(
-                'Manage your active plans and explore new investment opportunities.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
+        body: RefreshIndicator(
+          onRefresh: () async {
+            // TODO: Implement refresh logic
+            await Future.delayed(const Duration(seconds: 1));
+          },
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                const Text(
+                  'Manage your active plans and explore new investment opportunities.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // My Active Plans Section
-              const Text(
-                'Your Active Plans',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                // My Active Plans Section
+                const Text(
+                  'Your Active Plans',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
               const SizedBox(height: 16),
 
               ..._myPlans.map((plan) => _MyPlanCard(
@@ -178,7 +209,8 @@ class _PensionPlansScreenState extends State<PensionPlansScreen> {
                   )),
               
               const SizedBox(height: 24),
-            ],
+              ],
+            ),
           ),
         ),
       ),

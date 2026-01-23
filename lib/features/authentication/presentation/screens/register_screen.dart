@@ -7,12 +7,10 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/routes/route_names.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/phone_text_field.dart';
-import '../widgets/pin_text_field.dart';
 import '../widgets/date_picker_field.dart';
 import '../widgets/dropdown_field.dart';
 import '../widgets/numeric_text_field.dart';
-import '../widgets/children_input_widget.dart';
-import '../widgets/bank_details_widget.dart';
+
 import '../widgets/terms_acceptance_checkbox.dart';
 import '../widgets/country_dropdown_field.dart';
 import '../providers/auth_provider.dart';
@@ -26,50 +24,33 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStateMixin {
-  final _formKeys = List.generate(6, (_) => GlobalKey<FormState>());
+  late final List<GlobalKey<FormState>> _formKeys;
   int _currentStep = 0;
   
   // Step 1: Account Credentials
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _pinController = TextEditingController();
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
   
   // Step 2: Personal Details
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _dateOfBirthController = TextEditingController();
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
+  late TextEditingController _dateOfBirthController;
   String? _gender;
   String? _maritalStatus;
-  final _nationalIdController = TextEditingController();
+  late TextEditingController _nationalIdController;
   
-  // Step 3: Family Info
-  final _spouseNameController = TextEditingController();
-  final _spouseDobController = TextEditingController();
-  List<ChildModel> _children = [];
-  
-  // Step 4: Address & Employment
-  final _addressController = TextEditingController();
-  final _cityController = TextEditingController();
+  // Step 3: Address
+  late TextEditingController _addressController;
+  late TextEditingController _cityController;
   String? _country = 'Kenya';
-  final _occupationController = TextEditingController();
-  final _employerController = TextEditingController();
   
-  // Step 5: Financial Info
-  final _salaryController = TextEditingController();
+  // Step 4: Financial & Pension Info
+  late TextEditingController _salaryController;
   String? _contributionRate;
-  final _retirementAgeController = TextEditingController();
-  
-  // Bank account details
-  final _bankAccountNameController = TextEditingController();
-  final _bankAccountNumberController = TextEditingController();
-  final _bankBranchNameController = TextEditingController();
-  final _bankBranchCodeController = TextEditingController();
-  String? _selectedBankName;
-  
-  // Pension settings
+  late TextEditingController _retirementAgeController;
   String _accountType = 'MANDATORY';
   String _riskProfile = 'MEDIUM';
-
+  
   // Terms and Conditions acceptance
   bool _acceptedTerms = false;
   String? _termsError;
@@ -77,10 +58,8 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
   final List<String> _stepLabels = [
     'Account',
     'Personal',
-    'Family',
-    'Employment',
+    'Address',
     'Financial',
-    'Bank & Terms',
   ];
   
   late AnimationController _fadeController;
@@ -89,6 +68,20 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
   @override
   void initState() {
     super.initState();
+    
+    _formKeys = List.generate(4, (_) => GlobalKey<FormState>());
+    
+    // Initialize all text controllers
+    _emailController = TextEditingController();
+    _phoneController = TextEditingController();
+    _firstNameController = TextEditingController();
+    _lastNameController = TextEditingController();
+    _dateOfBirthController = TextEditingController();
+    _nationalIdController = TextEditingController();
+    _addressController = TextEditingController();
+    _cityController = TextEditingController();
+    _salaryController = TextEditingController();
+    _retirementAgeController = TextEditingController();
     
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 600),
@@ -109,30 +102,22 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
   void dispose() {
     _emailController.dispose();
     _phoneController.dispose();
-    _pinController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _dateOfBirthController.dispose();
     _nationalIdController.dispose();
-    _spouseNameController.dispose();
-    _spouseDobController.dispose();
     _addressController.dispose();
     _cityController.dispose();
-    _occupationController.dispose();
-    _employerController.dispose();
     _salaryController.dispose();
     _retirementAgeController.dispose();
-    _bankAccountNameController.dispose();
-    _bankAccountNumberController.dispose();
-    _bankBranchNameController.dispose();
-    _bankBranchCodeController.dispose();
+
     _fadeController.dispose();
     super.dispose();
   }
 
   void _nextStep() {
     if (_formKeys[_currentStep].currentState!.validate()) {
-      if (_currentStep < 5) {
+      if (_currentStep < 3) {
         setState(() {
           _currentStep++;
           _fadeController.reset();
@@ -202,18 +187,9 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       phoneNumber = phoneNumber.replaceFirst('+', '');
     }
     
-    final pinText = _pinController.text.trim();
-    
     final request = RegisterRequestModel(
       email: _emailController.text.trim(),
       phone: phoneNumber,
-      pin: pinText.isNotEmpty ? pinText : null,
-      
-      bankAccountName: _bankAccountNameController.text.trim(),
-      bankAccountNumber: _bankAccountNumberController.text.trim(),
-      bankBranchName: _bankBranchNameController.text.trim(),
-      bankBranchCode: _bankBranchCodeController.text.trim(),
-      bankName: _selectedBankName ?? '',
       
       firstName: _firstNameController.text.isNotEmpty 
           ? _firstNameController.text.trim() 
@@ -230,14 +206,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           ? _nationalIdController.text.trim() 
           : null,
       
-      spouseName: _spouseNameController.text.isNotEmpty 
-          ? _spouseNameController.text.trim() 
-          : null,
-      spouseDob: _spouseDobController.text.isNotEmpty 
-          ? _spouseDobController.text 
-          : null,
-      children: _children.isNotEmpty ? _children : null,
-      
       address: _addressController.text.isNotEmpty 
           ? _addressController.text.trim() 
           : null,
@@ -245,12 +213,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           ? _cityController.text.trim() 
           : null,
       country: _country,
-      occupation: _occupationController.text.isNotEmpty 
-          ? _occupationController.text.trim() 
-          : null,
-      employer: _employerController.text.isNotEmpty 
-          ? _employerController.text.trim() 
-          : null,
       
       salary: _salaryController.text.isNotEmpty 
           ? num.tryParse(_salaryController.text) 
@@ -261,7 +223,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       retirementAge: _retirementAgeController.text.isNotEmpty 
           ? int.tryParse(_retirementAgeController.text) 
           : null,
-      
       accountType: _accountType,
       riskProfile: _riskProfile,
       currency: 'KES',
@@ -461,7 +422,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                   ),
                 ),
                 child: Text(
-                  'Step ${_currentStep + 1} of 6',
+                  'Step ${_currentStep + 1} of 4',
                   style: const TextStyle(
                     color: Color(0xFFE8744F),
                     fontSize: 13,
@@ -494,7 +455,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                width: constraints.maxWidth * ((_currentStep + 1) / 6),
+                width: constraints.maxWidth * ((_currentStep + 1) / 5),
                 height: 6,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
@@ -523,13 +484,9 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       case 1:
         return _buildStep2PersonalDetails();
       case 2:
-        return _buildStep3FamilyInfo();
+        return _buildStep3Address();
       case 3:
-        return _buildStep4AddressEmployment();
-      case 4:
-        return _buildStep5FinancialInfo();
-      case 5:
-        return _buildStep6BankAndTerms();
+        return _buildStep4FinancialInfo();
       default:
         return const SizedBox();
     }
@@ -617,21 +574,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
               }
               if (!RegExp(r'^\+254[17]\d{8}$').hasMatch(value)) {
                 return 'Enter valid Kenyan number (+254...)';
-              }
-              return null;
-            },
-          ),
-          
-          const SizedBox(height: 20),
-          
-          PinTextField(
-            controller: _pinController,
-            labelText: '4-Digit PIN (Optional)',
-            hintText: '••••',
-            textInputAction: TextInputAction.done,
-            validator: (value) {
-              if (value != null && value.isNotEmpty && value.length != 4) {
-                return 'PIN must be exactly 4 digits';
               }
               return null;
             },
@@ -807,7 +749,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildStep3FamilyInfo() {
+  Widget _buildStep3Address() {
     return Form(
       key: _formKeys[2],
       child: Column(
@@ -828,13 +770,13 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                 ),
               ],
             ),
-            child: const Icon(Icons.family_restroom_rounded, color: Colors.white, size: 32),
+            child: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
           ),
           
           const SizedBox(height: 24),
           
           const Text(
-            'Family Information',
+            'Your Address',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
@@ -847,92 +789,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           const SizedBox(height: 8),
           
           Text(
-            'Add your family details (optional)',
-            style: TextStyle(
-              fontSize: 15,
-              color: Colors.grey.shade400,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          
-          const SizedBox(height: 32),
-          
-          if (_maritalStatus == 'Married') ...[
-            CustomTextField(
-              controller: _spouseNameController,
-              labelText: 'Spouse Name',
-              hintText: 'Enter spouse name',
-              prefixIcon: Icons.person_outline_rounded,
-              textCapitalization: TextCapitalization.words,
-              textInputAction: TextInputAction.next,
-            ),
-            
-            const SizedBox(height: 20),
-            
-            DatePickerField(
-              controller: _spouseDobController,
-              labelText: 'Spouse Date of Birth',
-              hintText: 'Select date',
-              prefixIcon: Icons.cake_rounded,
-              lastDate: DateTime.now(),
-            ),
-            
-            const SizedBox(height: 24),
-          ],
-          
-          ChildrenInputWidget(
-            children: _children,
-            onChildrenChanged: (children) {
-              setState(() => _children = children);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStep4AddressEmployment() {
-    return Form(
-      key: _formKeys[3],
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFE8744F), Color(0xFFD85B42)],
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFE8744F).withOpacity(0.4),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.work_rounded, color: Colors.white, size: 32),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          const Text(
-            'Address & Employment',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              letterSpacing: -0.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          
-          const SizedBox(height: 8),
-          
-          Text(
-            'Where do you live and work?',
+            'Where do you live?',
             style: TextStyle(
               fontSize: 15,
               color: Colors.grey.shade400,
@@ -973,36 +830,14 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             prefixIcon: Icons.flag_rounded,
             onChanged: (value) => setState(() => _country = value),
           ),
-          
-          const SizedBox(height: 20),
-          
-          CustomTextField(
-            controller: _occupationController,
-            labelText: 'Occupation',
-            hintText: 'Software Engineer',
-            prefixIcon: Icons.work_outline_rounded,
-            textCapitalization: TextCapitalization.words,
-            textInputAction: TextInputAction.next,
-          ),
-          
-          const SizedBox(height: 20),
-          
-          CustomTextField(
-            controller: _employerController,
-            labelText: 'Employer',
-            hintText: 'Company Name',
-            prefixIcon: Icons.business_rounded,
-            textCapitalization: TextCapitalization.words,
-            textInputAction: TextInputAction.done,
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildStep5FinancialInfo() {
+  Widget _buildStep4FinancialInfo() {
     return Form(
-      key: _formKeys[4],
+      key: _formKeys[3],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1027,7 +862,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           const SizedBox(height: 24),
           
           const Text(
-            'Financial Details',
+            'Financial & Pension',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
@@ -1040,7 +875,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           const SizedBox(height: 8),
           
           Text(
-            'Tell us about your finances',
+            'Set up your pension preferences',
             style: TextStyle(
               fontSize: 15,
               color: Colors.grey.shade400,
@@ -1058,6 +893,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             prefixIcon: Icons.attach_money_rounded,
             prefixText: 'KES ',
             textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your monthly salary';
+              }
+              return null;
+            },
           ),
           
           const SizedBox(height: 20),
@@ -1088,6 +929,12 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             suffixText: 'years',
             allowDecimal: false,
             textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your retirement age';
+              }
+              return null;
+            },
           ),
           
           const SizedBox(height: 20),
@@ -1111,74 +958,8 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             items: const ['LOW', 'MEDIUM', 'HIGH'],
             onChanged: (value) => setState(() => _riskProfile = value!),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStep6BankAndTerms() {
-    return Form(
-      key: _formKeys[5],
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFE8744F), Color(0xFFD85B42)],
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFE8744F).withOpacity(0.4),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.account_balance_rounded, color: Colors.white, size: 32),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          const Text(
-            'Bank & Terms',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              letterSpacing: -0.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          
-          const SizedBox(height: 8),
-          
-          Text(
-            'Final step - bank details and acceptance',
-            style: TextStyle(
-              fontSize: 15,
-              color: Colors.grey.shade400,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
           
           const SizedBox(height: 32),
-          
-          BankDetailsWidget(
-            accountNameController: _bankAccountNameController,
-            accountNumberController: _bankAccountNumberController,
-            branchNameController: _bankBranchNameController,
-            branchCodeController: _bankBranchCodeController,
-            selectedBankName: _selectedBankName,
-            onBankNameChanged: (value) {
-              setState(() => _selectedBankName = value);
-            },
-          ),
-          
-          const SizedBox(height: 24),
           
           TermsAcceptanceCheckbox(
             value: _acceptedTerms,

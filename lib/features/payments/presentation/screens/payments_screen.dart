@@ -25,7 +25,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.background,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -98,13 +98,13 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.red.shade50,
+                          color: AppColors.errorLight,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.error_outline_rounded,
                           size: 48,
-                          color: Colors.red.shade400,
+                          color: AppColors.error,
                         ),
                       ),
                       const SizedBox(height: 16),

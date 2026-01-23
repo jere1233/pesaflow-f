@@ -229,15 +229,15 @@ class AccountCard extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status.toUpperCase()) {
       case 'ACTIVE':
-        return Colors.green;
+        return AppColors.success;
       case 'INACTIVE':
-        return Colors.grey;
+        return AppColors.secondary;
       case 'SUSPENDED':
-        return Colors.red;
+        return AppColors.error;
       case 'FROZEN':
-        return Colors.blue;
+        return AppColors.info;
       default:
-        return Colors.grey;
+        return AppColors.secondary;
     }
   }
 }

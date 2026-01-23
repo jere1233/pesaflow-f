@@ -6,6 +6,7 @@ import '../../../authentication/domain/entities/user.dart';
 import '../../../accounts/presentation/providers/account_provider.dart'; 
 import '../../../accounts/domain/entities/account.dart'; 
 import '../../domain/entities/dashboard_stats.dart';
+import '../../../../core/constants/app_colors.dart';
 
 class BalanceCards extends StatelessWidget {
   final DashboardStats? stats;
@@ -62,11 +63,7 @@ class BalanceCards extends StatelessWidget {
           // Per request: show number of logins here — use completedTransactions as fallback
           amount: '${stats?.completedTransactions ?? 0}',
           subtitle: 'Number of logins',
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF2563EB), Color(0xFF4F46E5)],
-          ),
+          gradient: AppColors.cardGradient1,
           icon: Icons.account_balance_wallet,
         ),
         _BalanceCard(
@@ -76,11 +73,7 @@ class BalanceCards extends StatelessWidget {
           subtitle: account != null
               ? 'Account: ${account.accountNumber}'
               : 'Across all plans',
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF059669), Color(0xFF10B981)],
-          ),
+          gradient: AppColors.cardGradient2,
           icon: Icons.arrow_downward,
         ),
         _BalanceCard(
@@ -90,11 +83,7 @@ class BalanceCards extends StatelessWidget {
           subtitle: account != null
               ? 'Interest: ${_formatAmount(account.interestEarned)}\nReturns: ${_formatAmount(account.investmentReturns)}'
               : 'No earnings yet',
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF9333EA), Color(0xFFEC4899)],
-          ),
+          gradient: AppColors.cardGradient3,
           icon: Icons.trending_up,
         ),
         _BalanceCard(
@@ -102,11 +91,7 @@ class BalanceCards extends StatelessWidget {
           // Show pension account details as requested
           amount: account != null ? account.accountNumber : 'No account',
           subtitle: account != null ? 'Type: ${account.accountType}' : 'No account available',
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFEA580C), Color(0xFFDC2626)],
-          ),
+          gradient: AppColors.cardGradient4,
           icon: Icons.access_time,
         ),
       ],

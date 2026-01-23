@@ -120,28 +120,28 @@ class _AccountCard extends StatelessWidget {
   Color _getTypeColor() {
     switch (account.accountType.toUpperCase()) {
       case 'MANDATORY':
-        return Colors.blue;
+        return AppColors.brandIndigo;
       case 'VOLUNTARY':
-        return Colors.green;
+        return AppColors.success;
       case 'EMPLOYER':
-        return Colors.purple;
+        return AppColors.brandPurple;
       default:
-        return Colors.grey;
+        return AppColors.secondary;
     }
   }
 
   Color _getStatusColor() {
     switch (account.accountStatus.toUpperCase()) {
       case 'ACTIVE':
-        return Colors.green;
+        return AppColors.success;
       case 'SUSPENDED':
-        return Colors.orange;
+        return AppColors.pending;
       case 'CLOSED':
-        return Colors.red;
+        return AppColors.error;
       case 'FROZEN':
-        return Colors.blue;
+        return AppColors.info;
       default:
-        return Colors.grey;
+        return AppColors.secondary;
     }
   }
 

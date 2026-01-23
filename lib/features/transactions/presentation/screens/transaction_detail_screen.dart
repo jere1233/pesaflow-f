@@ -42,13 +42,13 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'completed':
-        return Colors.green;
+        return AppColors.success;
       case 'pending':
-        return Colors.orange;
+        return AppColors.pending;
       case 'failed':
-        return Colors.red;
+        return AppColors.error;
       default:
-        return Colors.grey;
+        return AppColors.secondary;
     }
   }
 
@@ -122,7 +122,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           }
 
           final isCredit = transaction.isCredit;
-          final amountColor = isCredit ? Colors.green : Colors.red;
+          final amountColor = isCredit ? AppColors.success : AppColors.error;
           final amountPrefix = isCredit ? '+' : '-';
 
           return SingleChildScrollView(

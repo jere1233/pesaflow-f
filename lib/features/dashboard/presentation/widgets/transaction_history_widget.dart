@@ -145,13 +145,13 @@ class _TransactionItem extends StatelessWidget {
   Color _getStatusColor() {
     switch (transaction.status.toLowerCase()) {
       case 'completed':
-        return Colors.blue;
+        return AppColors.success;
       case 'pending':
-        return Colors.orange;
+        return AppColors.pending;
       case 'failed':
-        return Colors.red;
+        return AppColors.error;
       default:
-        return Colors.grey;
+        return AppColors.secondary;
     }
   }
 

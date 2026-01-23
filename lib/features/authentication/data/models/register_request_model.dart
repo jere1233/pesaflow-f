@@ -4,12 +4,12 @@ class RegisterRequestModel {
   final String phone;
   final String? pin; // NOW OPTIONAL
   
-  // Bank account details (REQUIRED)
-  final String bankAccountName;
-  final String bankAccountNumber;
-  final String bankBranchName;
-  final String bankBranchCode;
-  final String bankName; 
+  // Bank account details (OPTIONAL)
+  final String? bankAccountName;
+  final String? bankAccountNumber;
+  final String? bankBranchName;
+  final String? bankBranchCode;
+  final String? bankName; 
   
   // Personal information
   final String? firstName;
@@ -46,11 +46,11 @@ class RegisterRequestModel {
     required this.email,
     required this.phone,
     this.pin, // NOW OPTIONAL
-    required this.bankAccountName,
-    required this.bankAccountNumber,
-    required this.bankBranchName,
-    required this.bankBranchCode,
-    required this.bankName, // 🆕 NEW FIELD
+    this.bankAccountName,
+    this.bankAccountNumber,
+    this.bankBranchName,
+    this.bankBranchCode,
+    this.bankName,
     this.firstName,
     this.lastName,
     this.dateOfBirth,
@@ -88,11 +88,11 @@ class RegisterRequestModel {
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
       pin: json['pin']?.toString(), // NOW OPTIONAL
-      bankAccountName: json['bankAccountName']?.toString() ?? '',
-      bankAccountNumber: json['bankAccountNumber']?.toString() ?? '',
-      bankBranchName: json['bankBranchName']?.toString() ?? '',
-      bankBranchCode: json['bankBranchCode']?.toString() ?? '',
-      bankName: json['bankName']?.toString() ?? '', // 🆕 NEW FIELD
+      bankAccountName: json['bankAccountName']?.toString(),
+      bankAccountNumber: json['bankAccountNumber']?.toString(),
+      bankBranchName: json['bankBranchName']?.toString(),
+      bankBranchCode: json['bankBranchCode']?.toString(),
+      bankName: json['bankName']?.toString(), // 🆕 NEW FIELD
       firstName: json['firstName']?.toString(),
       lastName: json['lastName']?.toString(),
       dateOfBirth: json['dateOfBirth']?.toString(),
@@ -124,11 +124,11 @@ class RegisterRequestModel {
       'email': email,
       'phone': phone,
       if (pin != null && pin!.isNotEmpty) 'pin': pin, // ONLY SEND IF PROVIDED
-      'bankAccountName': bankAccountName,
-      'bankAccountNumber': bankAccountNumber,
-      'bankBranchName': bankBranchName,
-      'bankBranchCode': bankBranchCode,
-      'bankName': bankName, // 🆕 NEW FIELD
+      if (bankAccountName != null) 'bankAccountName': bankAccountName,
+      if (bankAccountNumber != null) 'bankAccountNumber': bankAccountNumber,
+      if (bankBranchName != null) 'bankBranchName': bankBranchName,
+      if (bankBranchCode != null) 'bankBranchCode': bankBranchCode,
+      if (bankName != null) 'bankName': bankName,
       if (firstName != null) 'firstName': firstName,
       if (lastName != null) 'lastName': lastName,
       if (dateOfBirth != null) 'dateOfBirth': dateOfBirth,

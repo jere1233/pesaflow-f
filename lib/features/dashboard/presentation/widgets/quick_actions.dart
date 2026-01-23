@@ -22,11 +22,7 @@ class QuickActions extends StatelessWidget {
         _QuickActionCard(
           icon: Icons.credit_card,
           title: 'Add Plan',
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF4F46E5), Color(0xFF2563EB)],
-          ),
+          gradient: AppColors.cardGradient1,
           onTap: () {
             context.push(RouteNames.pensionPlans);
           },
@@ -34,11 +30,7 @@ class QuickActions extends StatelessWidget {
         _QuickActionCard(
           icon: Icons.file_download,
           title: 'Statement',
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF059669), Color(0xFF10B981)],
-          ),
+          gradient: AppColors.cardGradient2,
           onTap: () {
             context.push(RouteNames.downloadStatement);
           },
@@ -46,11 +38,7 @@ class QuickActions extends StatelessWidget {
         _QuickActionCard(
           icon: Icons.savings,
           title: 'Contribute',
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFEA580C), Color(0xFFF59E0B)],
-          ),
+          gradient: AppColors.cardGradient3,
           onTap: () {
             context.push(RouteNames.payments);
           },
@@ -58,11 +46,7 @@ class QuickActions extends StatelessWidget {
         _QuickActionCard(
           icon: Icons.payment,
           title: 'Deposit',
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF0EA5A9), Color(0xFF06B6D4)],
-          ),
+          gradient: AppColors.cardGradient4,
           onTap: () {
             // Show deposit modal
             showDialog(
@@ -74,11 +58,7 @@ class QuickActions extends StatelessWidget {
         _QuickActionCard(
           icon: Icons.history,
           title: 'History',
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF9333EA), Color(0xFFA855F7)],
-          ),
+          gradient: AppColors.cardGradient1,
           onTap: () {
             context.push(RouteNames.transactions);
           },
@@ -86,11 +66,7 @@ class QuickActions extends StatelessWidget {
         _QuickActionCard(
           icon: Icons.trending_up,
           title: 'Goals',
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF0891B2), Color(0xFF06B6D4)],
-          ),
+          gradient: AppColors.cardGradient2,
           onTap: () {
             context.push(RouteNames.retirementGoals);
           },
@@ -99,11 +75,7 @@ class QuickActions extends StatelessWidget {
         _QuickActionCard(
           icon: Icons.description,
           title: 'Reports',
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF7C3AED), Color(0xFF8B5CF6)],
-          ),
+          gradient: AppColors.cardGradient3,
           onTap: () {
             context.push(RouteNames.reports);
           },
